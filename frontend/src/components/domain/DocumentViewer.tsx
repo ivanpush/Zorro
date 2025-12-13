@@ -1,4 +1,4 @@
-import { useMemo, useRef, useEffect } from 'react';
+import { useMemo, useRef, useEffect, useState } from 'react';
 import { ChevronDown, ChevronRight, Image } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { DocObj, Finding, Severity } from '@/types';
@@ -78,7 +78,7 @@ export function DocumentViewer({
       return startA - startB;
     });
 
-    const segments: JSX.Element[] = [];
+    const segments: React.ReactElement[] = [];
     let lastIndex = 0;
 
     sortedHighlights.forEach((highlight, idx) => {
@@ -333,6 +333,3 @@ export function DocumentViewer({
     </div>
   );
 }
-
-// Add missing import
-import { useState } from 'react';

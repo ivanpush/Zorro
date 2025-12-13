@@ -19,7 +19,9 @@
       "Bash(git push)",
       "Bash(python test_parser.py:*)",
       "Bash(pip install:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(cat:*)",
+      "Bash(python3:*)"
     ],
     "deny": [],
     "ask": []

@@ -60,6 +60,7 @@ export function SetupScreen() {
   const [reviewDepth, setReviewDepth] = useState<ReviewMode | null>('single-reviewer');
   const [showClassDropdown, setShowClassDropdown] = useState(false);
   const [isDemo, setIsDemo] = useState(true);
+  const [isLoadingFindings, setIsLoadingFindings] = useState(false);
 
   // Clear selected pills when document class changes
   useEffect(() => {
@@ -74,10 +75,8 @@ export function SetupScreen() {
       return;
     }
 
-    // Auto-detect document class
-    if (currentDocument.metadata?.documentType === 'grant') {
-      setDocumentClass('grant');
-    }
+    // Auto-detect document class (can be enhanced in future)
+    // For now, default is already set to 'research-article'
   }, [currentDocument, navigate]);
 
   // Close dropdown when clicking outside
@@ -128,18 +127,27 @@ export function SetupScreen() {
     if (isDemo) {
       // In demo mode, ensure findings are loaded before navigating
       if (findings.length === 0) {
-        // Load demo findings - determine which demo document we're using
-        // Based on the document, load the appropriate findings
+        setIsLoadingFindings(true);
         try {
           // Default to manuscript_pdf demo
+          console.log('Loading demo findings...');
           const demoFindings = await loadDemoFindings('manuscript_pdf');
+          console.log(`Loaded ${demoFindings.length} demo findings`);
           setFindings(demoFindings);
+          // Small delay to ensure state update
+          await new Promise(resolve => setTimeout(resolve, 100));
+          navigate('/review');
         } catch (error) {
           console.error('Failed to load demo findings:', error);
-          // Still navigate even if loading fails - the ReviewScreen will handle it
+          // Still navigate but ReviewScreen will show error
+          navigate('/review');
+        } finally {
+          setIsLoadingFindings(false);
         }
+      } else {
+        // Findings already loaded
+        navigate('/review');
       }
-      navigate('/review');
     } else {
       navigate('/process');
     }
@@ -402,31 +410,31 @@ export function SetupScreen() {
 
           <button
             onClick={handleInitiateReview}
-            disabled={!reviewDepth}
+            disabled={!reviewDepth || isLoadingFindings}
             className={`group flex items-center gap-2 px-5 py-2 rounded-xl font-medium
                       transition-all duration-200 ${
-              reviewDepth
+              reviewDepth && !isLoadingFindings
                 ? 'hover:scale-[1.01]'
                 : 'bg-muted/20 text-muted-foreground cursor-not-allowed opacity-40'
             }`}
-            style={reviewDepth ? {
+            style={reviewDepth && !isLoadingFindings ? {
               backgroundColor: 'rgba(232, 152, 85, 0.12)',
               color: '#E89855'
             } : {}}
             onMouseEnter={(e) => {
-              if (reviewDepth) {
+              if (reviewDepth && !isLoadingFindings) {
                 e.currentTarget.style.backgroundColor = 'rgba(232, 152, 85, 0.18)';
               }
             }}
             onMouseLeave={(e) => {
-              if (reviewDepth) {
+              if (reviewDepth && !isLoadingFindings) {
                 e.currentTarget.style.backgroundColor = 'rgba(232, 152, 85, 0.12)';
               }
             }}
           >
-            Run Review
+            {isLoadingFindings ? 'Loading...' : 'Run Review'}
             <ArrowRight className={`w-4 h-4 transition-transform duration-200 ${
-              reviewDepth ? 'group-hover:translate-x-1' : ''
+              reviewDepth && !isLoadingFindings ? 'group-hover:translate-x-1' : ''
             }`} />
           </button>
         </section>

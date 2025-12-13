@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle, Circle, AlertCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, Circle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -26,7 +26,7 @@ const agents: AgentId[] = [
 
 export function ProcessScreen() {
   const navigate = useNavigate();
-  const { reviewMode, findings, addFinding } = useAppStore();
+  const { reviewMode, findings } = useAppStore();
   const [currentPhase, setCurrentPhase] = useState(0);
   const [agentStatuses, setAgentStatuses] = useState<
     Record<AgentId, 'pending' | 'running' | 'completed'>

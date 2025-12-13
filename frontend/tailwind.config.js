@@ -15,6 +15,11 @@ export default {
     },
     extend: {
       colors: {
+        coral: {
+          400: "#FF7F50",
+          500: "#FF6347",
+          600: "#FF5333",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

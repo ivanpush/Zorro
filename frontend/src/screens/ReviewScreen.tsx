@@ -1,480 +1,303 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Download, Filter, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { DocumentViewer } from '@/components/domain/DocumentViewer';
-import { FindingCard } from '@/components/domain/FindingCard';
+import { Download } from 'lucide-react';
 import { useAppStore } from '@/store';
-import type {
-  Finding,
-  Decision,
-  Severity,
-  FindingCategory,
-  FilterState,
-} from '@/types';
-import { SEVERITY_LEVELS, CATEGORY_GROUPS } from '@/types';
+import { ManuscriptView } from '@/components/domain/ManuscriptView';
+import { IssuesPanel } from '@/components/domain/IssuesPanel';
+import type { DocObj, Finding } from '@/types';
 
 export function ReviewScreen() {
   const navigate = useNavigate();
-  const {
-    currentDocument,
-    findings,
-    decisions,
-    addDecision,
-    selectedFindingId,
-    setSelectedFindingId,
-    reviewMode,
-  } = useAppStore();
+  const { currentDocument, setCurrentDocument, findings, setFindings, reviewMode } = useAppStore();
 
-  const [filters, setFilters] = useState<FilterState>({
-    severity: 'all',
-    category: 'all',
-    status: 'all',
-  });
+  // Local state for issue management
+  const [selectedIssueId, setSelectedIssueId] = useState<string | null>(null);
+  const [acceptedIssueIds, setAcceptedIssueIds] = useState<Set<string>>(new Set());
+  const [dismissedIssueIds, setDismissedIssueIds] = useState<Set<string>>(new Set());
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [showExportDialog, setShowExportDialog] = useState(false);
-  const [exportOptions, setExportOptions] = useState({
-    includeUnresolved: true,
-    author: 'ZORRO Review',
-  });
+  // Refs for scrolling
+  const manuscriptRef = useRef<HTMLDivElement>(null);
+  const issuesPanelRef = useRef<HTMLDivElement>(null);
 
+  // Load data on mount
   useEffect(() => {
-    // Only redirect if we're missing document or if we're not in demo mode with no findings
-    // In demo mode, findings might be loading
-    if (!currentDocument) {
-      navigate('/upload');
-    } else if (reviewMode !== 'demo' && findings.length === 0) {
-      // In dynamic mode, if there are no findings, something went wrong
-      navigate('/upload');
+    const loadData = async () => {
+      setIsLoading(true);
+
+      // Check how we got here
+      const mode = sessionStorage.getItem('reviewMode') || reviewMode || 'static';
+      const demoFile = sessionStorage.getItem('demoFile') || 'manuscript_pdf';
+
+      if (mode === 'static' || !currentDocument || findings.length === 0) {
+        // Load from fixtures
+        try {
+          // Load the review JSON which contains both document structure and issues
+          const response = await fetch(`/reviews/${demoFile}_fullreview.json`);
+          if (!response.ok) throw new Error('Failed to load review data');
+
+          const data = await response.json();
+
+          // Extract and set document structure
+          const doc: DocObj = {
+            document_id: data.document_id || 'demo_doc',
+            filename: `${demoFile}.pdf`,
+            type: 'pdf',
+            title: data.document_type || 'Research Manuscript',
+            sections: [],
+            paragraphs: [],
+            figures: [],
+            references: [],
+            metadata: {
+              wordCount: 0,
+              characterCount: 0
+            },
+            createdAt: new Date().toISOString()
+          };
+
+          // Build document structure from issues
+          const sectionMap = new Map<string, any>();
+          const paragraphMap = new Map<string, any>();
+
+          data.issues.forEach((issue: any) => {
+            if (issue.section_id && !sectionMap.has(issue.section_id)) {
+              sectionMap.set(issue.section_id, {
+                section_id: issue.section_id,
+                section_index: sectionMap.size,
+                section_title: issue.section_id.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
+                level: 1,
+                paragraph_ids: []
+              });
+            }
+
+            if (issue.paragraph_id && !paragraphMap.has(issue.paragraph_id)) {
+              const section = sectionMap.get(issue.section_id);
+              if (section) {
+                section.paragraph_ids.push(issue.paragraph_id);
+              }
+
+              paragraphMap.set(issue.paragraph_id, {
+                paragraph_id: issue.paragraph_id,
+                paragraph_index: paragraphMap.size,
+                section_id: issue.section_id || '',
+                text: issue.original_text || `Paragraph ${issue.paragraph_id}`,
+                sentences: []
+              });
+            }
+          });
+
+          doc.sections = Array.from(sectionMap.values());
+          doc.paragraphs = Array.from(paragraphMap.values());
+
+          // Convert issues to findings
+          const mappedFindings: Finding[] = data.issues.map((issue: any) => ({
+            id: issue.id,
+            agentId: issue.persona || 'reviewer',
+            category: issue.issue_type || 'general',
+            severity: issue.severity || 'minor',
+            confidence: 0.8,
+            title: issue.title,
+            description: issue.message,
+            anchors: issue.paragraph_id ? [{
+              paragraph_id: issue.paragraph_id,
+              sentence_id: issue.sentence_ids?.[0],
+              quoted_text: issue.original_text || ''
+            }] : [],
+            proposedEdit: issue.suggested_rewrite ? {
+              type: 'replace',
+              anchor: {
+                paragraph_id: issue.paragraph_id,
+                quoted_text: issue.original_text || ''
+              },
+              newText: issue.suggested_rewrite,
+              rationale: issue.rationale || ''
+            } : undefined,
+            createdAt: new Date().toISOString()
+          }));
+
+          setCurrentDocument(doc);
+          setFindings(mappedFindings);
+        } catch (error) {
+          console.error('Failed to load review data:', error);
+          // Create minimal fallback data
+          setCurrentDocument({
+            document_id: 'fallback',
+            filename: 'document.pdf',
+            type: 'pdf',
+            title: 'Document',
+            sections: [],
+            paragraphs: [],
+            figures: [],
+            references: [],
+            metadata: { wordCount: 0, characterCount: 0 },
+            createdAt: new Date().toISOString()
+          });
+          setFindings([]);
+        }
+      }
+
+      setIsLoading(false);
+    };
+
+    loadData();
+  }, []);
+
+  // Handle issue selection
+  const handleIssueSelect = useCallback((issueId: string) => {
+    setSelectedIssueId(issueId);
+
+    // Find the issue and scroll to its paragraph
+    const issue = findings.find(f => f.id === issueId);
+    if (issue && issue.anchors.length > 0) {
+      const paragraphId = issue.anchors[0].paragraph_id;
+      const element = document.getElementById(paragraphId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
     }
-  }, [currentDocument, findings, navigate, reviewMode]);
+  }, [findings]);
 
-  // Filter findings
-  const filteredFindings = useMemo(() => {
-    return findings.filter((finding) => {
-      // Filter by severity
-      if (filters.severity !== 'all' && finding.severity !== filters.severity) {
-        return false;
-      }
-
-      // Filter by category
-      if (filters.category !== 'all' && finding.category !== filters.category) {
-        return false;
-      }
-
-      // Filter by status
-      const decision = decisions.get(finding.id);
-      if (filters.status !== 'all') {
-        if (filters.status === 'pending' && decision) return false;
-        if (
-          filters.status === 'accepted' &&
-          (!decision ||
-            (decision.action !== 'accept' &&
-              decision.action !== 'accept_edit'))
-        )
-          return false;
-        if (filters.status === 'dismissed' && decision?.action !== 'dismiss')
-          return false;
-      }
-
-      return true;
-    });
-  }, [findings, decisions, filters]);
-
-  // Calculate stats
-  const stats = useMemo(() => {
-    const total = findings.length;
-    let pending = 0;
-    let accepted = 0;
-    let dismissed = 0;
-
-    findings.forEach((finding) => {
-      const decision = decisions.get(finding.id);
-      if (!decision) {
-        pending++;
-      } else if (
-        decision.action === 'accept' ||
-        decision.action === 'accept_edit'
-      ) {
-        accepted++;
-      } else if (decision.action === 'dismiss') {
-        dismissed++;
-      }
-    });
-
-    return { total, pending, accepted, dismissed };
-  }, [findings, decisions]);
-
-  const handleAccept = useCallback(
-    (finding: Finding) => {
-      const decision: Decision = {
-        id: `decision_${Date.now()}`,
-        finding_id: finding.id,
-        action: 'accept',
-        timestamp: new Date().toISOString(),
-      };
-      addDecision(decision);
-    },
-    [addDecision]
-  );
-
-  const handleDismiss = useCallback(
-    (finding: Finding) => {
-      const decision: Decision = {
-        id: `decision_${Date.now()}`,
-        finding_id: finding.id,
-        action: 'dismiss',
-        timestamp: new Date().toISOString(),
-      };
-      addDecision(decision);
-    },
-    [addDecision]
-  );
-
-  const handleAcceptEdit = useCallback(
-    (finding: Finding, finalText: string) => {
-      const decision: Decision = {
-        id: `decision_${Date.now()}`,
-        finding_id: finding.id,
-        action: 'accept_edit',
-        finalText,
-        timestamp: new Date().toISOString(),
-      };
-      addDecision(decision);
-    },
-    [addDecision]
-  );
-
-  const handleExport = () => {
-    // Check for critical pending findings
-    const hasCriticalPending = findings.some(
-      (f) => f.severity === 'critical' && !decisions.has(f.id)
+  // Handle paragraph click
+  const handleParagraphClick = useCallback((paragraphId: string) => {
+    // Find first issue for this paragraph
+    const issue = findings.find(f =>
+      f.anchors.some(a => a.paragraph_id === paragraphId)
     );
 
-    if (hasCriticalPending) {
-      if (
-        !confirm(
-          'You have unreviewed critical findings. Are you sure you want to export?'
-        )
-      ) {
-        return;
+    if (issue) {
+      setSelectedIssueId(issue.id);
+
+      // Scroll issues panel to this issue
+      const issueElement = document.getElementById(`issue-${issue.id}`);
+      if (issueElement) {
+        issueElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }
+  }, [findings]);
 
-    // In demo mode, just download a mock file
+  // Handle issue actions
+  const handleAcceptIssue = useCallback((issueId: string) => {
+    setAcceptedIssueIds(prev => new Set([...prev, issueId]));
+    setDismissedIssueIds(prev => {
+      const next = new Set(prev);
+      next.delete(issueId);
+      return next;
+    });
+  }, []);
+
+  const handleDismissIssue = useCallback((issueId: string) => {
+    setDismissedIssueIds(prev => new Set([...prev, issueId]));
+    setAcceptedIssueIds(prev => {
+      const next = new Set(prev);
+      next.delete(issueId);
+      return next;
+    });
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading review data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentDocument) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <p className="text-muted-foreground mb-4">No document loaded</p>
+          <button
+            onClick={() => navigate('/upload')}
+            className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90"
+          >
+            Upload Document
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const handleExport = () => {
+    // For now, just export as JSON
     const exportData = {
       document: currentDocument,
-      decisions: Array.from(decisions.values()),
-      exportOptions,
-      timestamp: new Date().toISOString(),
+      findings: findings,
+      acceptedIssues: Array.from(acceptedIssueIds),
+      dismissedIssues: Array.from(dismissedIssueIds),
+      timestamp: new Date().toISOString()
     };
 
     const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-      type: 'application/json',
+      type: 'application/json'
     });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${currentDocument?.title}_ZORRO_${new Date()
-      .toISOString()
-      .slice(0, 10)}.json`;
+    a.download = `${currentDocument.title}_review_${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
-
-    setShowExportDialog(false);
   };
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      // Only handle if no input is focused
-      if (
-        document.activeElement?.tagName === 'INPUT' ||
-        document.activeElement?.tagName === 'TEXTAREA'
-      ) {
-        return;
-      }
-
-      const currentIndex = filteredFindings.findIndex(
-        (f) => f.id === selectedFindingId
-      );
-
-      switch (e.key) {
-        case 'j':
-        case 'ArrowDown':
-          if (currentIndex < filteredFindings.length - 1) {
-            setSelectedFindingId(filteredFindings[currentIndex + 1].id);
-          }
-          break;
-        case 'k':
-        case 'ArrowUp':
-          if (currentIndex > 0) {
-            setSelectedFindingId(filteredFindings[currentIndex - 1].id);
-          }
-          break;
-        case 'a':
-          if (selectedFindingId) {
-            const finding = findings.find((f) => f.id === selectedFindingId);
-            if (finding && !decisions.has(finding.id)) {
-              handleAccept(finding);
-            }
-          }
-          break;
-        case 'd':
-          if (selectedFindingId) {
-            const finding = findings.find((f) => f.id === selectedFindingId);
-            if (finding && !decisions.has(finding.id)) {
-              handleDismiss(finding);
-            }
-          }
-          break;
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [
-    filteredFindings,
-    selectedFindingId,
-    setSelectedFindingId,
-    findings,
-    decisions,
-    handleAccept,
-    handleDismiss,
-  ]);
-
-  if (!currentDocument) {
-    return null;
-  }
-
-  // In demo mode, if we have no findings yet, show a loading state
-  if (reviewMode === 'demo' && findings.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-[calc(100vh-180px)]">
-        <div className="text-center">
-          <div className="animate-pulse mb-4">
-            <div className="w-16 h-16 bg-primary/20 rounded-full mx-auto"></div>
-          </div>
-          <p className="text-muted-foreground">Loading demo findings...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="h-[calc(100vh-180px)] flex gap-6">
-      {/* Left: Document Viewer (70%) */}
-      <div className="flex-1" style={{ flex: '0 0 70%' }}>
-        <DocumentViewer
-          document={currentDocument}
-          findings={findings}
-          selectedFindingId={selectedFindingId}
-          onParagraphClick={(paragraphId) => {
-            // Filter to show only findings for this paragraph
-            const paragraphFinding = findings.find((f) =>
-              f.anchors.some((a) => a.paragraph_id === paragraphId)
-            );
-            if (paragraphFinding) {
-              setSelectedFindingId(paragraphFinding.id);
-            }
-          }}
-        />
+    <div className="h-screen flex flex-col">
+      {/* Export button */}
+      <div className="absolute top-8 right-10 z-10">
+        <button
+          onClick={handleExport}
+          className="group flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
+                     bg-coral-500/10 text-coral-500 hover:bg-coral-500/20 border border-coral-500/30"
+        >
+          <Download className="w-4 h-4 group-hover:animate-bounce" />
+          Export Review
+        </button>
       </div>
 
-      {/* Right: Findings Panel (30%) */}
-      <div className="flex-1" style={{ flex: '0 0 30%' }}>
-        <div className="bg-white rounded-lg border h-full flex flex-col">
-          {/* Stats Bar */}
-          <div className="p-4 border-b">
-            <div className="text-sm font-medium text-center">
-              {stats.total} findings • {stats.accepted} accepted •{' '}
-              {stats.dismissed} dismissed • {stats.pending} pending
-            </div>
+      {/* Main content area */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Manuscript View - 70% */}
+        <div
+          ref={manuscriptRef}
+          className="flex-1 overflow-y-auto border-r bg-background relative"
+          style={{ flexBasis: '70%' }}
+        >
+          {/* ZORRO branding - centered over manuscript */}
+          <div className="sticky top-8 z-10 flex justify-center pointer-events-none">
+            <h1 className="text-2xl font-serif tracking-wide opacity-25"
+                style={{ color: '#E89855' }}>
+              ZORRO
+            </h1>
           </div>
-
-          {/* Filter Bar */}
-          <div className="p-4 border-b space-y-2">
-            <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Filters</span>
-            </div>
-
-            <div className="grid grid-cols-3 gap-2">
-              {/* Severity Filter */}
-              <select
-                className="text-xs px-2 py-1 border rounded"
-                value={filters.severity}
-                onChange={(e) =>
-                  setFilters({ ...filters, severity: e.target.value as any })
-                }
-              >
-                <option value="all">All Severities</option>
-                {SEVERITY_LEVELS.map((severity) => (
-                  <option key={severity} value={severity}>
-                    {severity}
-                  </option>
-                ))}
-              </select>
-
-              {/* Category Filter */}
-              <select
-                className="text-xs px-2 py-1 border rounded"
-                value={filters.category}
-                onChange={(e) =>
-                  setFilters({ ...filters, category: e.target.value as any })
-                }
-              >
-                <option value="all">All Categories</option>
-                {Object.entries(CATEGORY_GROUPS).map(([group, categories]) => (
-                  <optgroup key={group} label={group}>
-                    {categories.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat.replace(/_/g, ' ')}
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
-
-              {/* Status Filter */}
-              <select
-                className="text-xs px-2 py-1 border rounded"
-                value={filters.status}
-                onChange={(e) =>
-                  setFilters({ ...filters, status: e.target.value as any })
-                }
-              >
-                <option value="all">All Status</option>
-                <option value="pending">Pending</option>
-                <option value="accepted">Accepted</option>
-                <option value="dismissed">Dismissed</option>
-              </select>
-            </div>
+          <div className="relative" style={{ marginTop: '-3rem' }}>
+            <ManuscriptView
+              document={currentDocument}
+              selectedIssueId={selectedIssueId}
+              findings={findings}
+              onParagraphClick={handleParagraphClick}
+            />
           </div>
+        </div>
 
-          {/* Findings List */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
-            {filteredFindings.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <p>No findings match your filters</p>
-              </div>
-            ) : (
-              filteredFindings.map((finding) => (
-                <FindingCard
-                  key={finding.id}
-                  finding={finding}
-                  decision={decisions.get(finding.id) || null}
-                  isSelected={selectedFindingId === finding.id}
-                  onSelect={() => setSelectedFindingId(finding.id)}
-                  onAccept={() => handleAccept(finding)}
-                  onDismiss={() => handleDismiss(finding)}
-                  onAcceptEdit={(text) => handleAcceptEdit(finding, text)}
-                />
-              ))
-            )}
-          </div>
-
-          {/* Export Button */}
-          <div className="p-4 border-t">
-            {stats.pending > 0 && (
-              <div className="flex items-start gap-2 mb-3 p-2 bg-yellow-50 rounded text-yellow-800">
-                <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                <p className="text-xs">
-                  {stats.pending} findings still pending review
-                </p>
-              </div>
-            )}
-            <Button
-              className="w-full"
-              onClick={() => setShowExportDialog(true)}
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Export Document
-            </Button>
-          </div>
+        {/* Issues Panel - 30% */}
+        <div
+          ref={issuesPanelRef}
+          className="overflow-y-auto bg-background"
+          style={{ flexBasis: '30%' }}
+        >
+          <IssuesPanel
+            issues={findings}
+            selectedIssueId={selectedIssueId}
+            acceptedIssueIds={acceptedIssueIds}
+            dismissedIssueIds={dismissedIssueIds}
+            onSelectIssue={handleIssueSelect}
+            onAcceptIssue={handleAcceptIssue}
+            onDismissIssue={handleDismissIssue}
+          />
         </div>
       </div>
-
-      {/* Export Dialog */}
-      {showExportDialog && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h2 className="text-lg font-semibold mb-4">Export Options</h2>
-
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium">Format</label>
-                <div className="mt-1 space-y-2">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="format"
-                      value="docx"
-                      defaultChecked
-                    />
-                    <span>DOCX (with track changes)</span>
-                  </label>
-                  <label className="flex items-center gap-2 opacity-50">
-                    <input
-                      type="radio"
-                      name="format"
-                      value="pdf"
-                      disabled
-                    />
-                    <span>PDF (coming soon)</span>
-                  </label>
-                </div>
-              </div>
-
-              <div>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={exportOptions.includeUnresolved}
-                    onChange={(e) =>
-                      setExportOptions({
-                        ...exportOptions,
-                        includeUnresolved: e.target.checked,
-                      })
-                    }
-                  />
-                  <span className="text-sm">
-                    Include unresolved findings as comments
-                  </span>
-                </label>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium">
-                  Track Changes Author
-                </label>
-                <input
-                  type="text"
-                  className="mt-1 w-full px-3 py-2 border rounded-md text-sm"
-                  value={exportOptions.author}
-                  onChange={(e) =>
-                    setExportOptions({
-                      ...exportOptions,
-                      author: e.target.value,
-                    })
-                  }
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-2 mt-6">
-              <Button
-                variant="outline"
-                onClick={() => setShowExportDialog(false)}
-              >
-                Cancel
-              </Button>
-              <Button onClick={handleExport}>Download</Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -14,7 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import type { Finding, Decision, AgentId, Severity } from '@/types';
+import type { Finding, Decision, AgentId } from '@/types';
 import { AGENT_NAMES } from '@/types';
 
 interface FindingCardProps {
@@ -171,9 +171,11 @@ export function FindingCard({
         </div>
 
         {/* Quoted Text */}
-        <div className="mt-3 p-2 bg-muted/50 rounded text-xs italic line-clamp-2">
-          "{finding.anchors[0].quoted_text}"
-        </div>
+        {finding.anchors && finding.anchors.length > 0 && finding.anchors[0].quoted_text && (
+          <div className="mt-3 p-2 bg-muted/50 rounded text-xs italic line-clamp-2">
+            "{finding.anchors[0].quoted_text}"
+          </div>
+        )}
 
         {/* Expanded Content */}
         {isExpanded && (
@@ -184,16 +186,18 @@ export function FindingCard({
             </div>
 
             {/* All Anchors */}
-            {finding.anchors.length > 1 && (
+            {finding.anchors && finding.anchors.length > 1 && (
               <div className="space-y-1">
                 <p className="text-xs font-medium">All referenced text:</p>
                 {finding.anchors.map((anchor, idx) => (
-                  <div
-                    key={idx}
-                    className="p-2 bg-muted/30 rounded text-xs italic"
-                  >
-                    "{anchor.quoted_text}"
-                  </div>
+                  anchor.quoted_text ? (
+                    <div
+                      key={idx}
+                      className="p-2 bg-muted/30 rounded text-xs italic"
+                    >
+                      "{anchor.quoted_text}"
+                    </div>
+                  ) : null
                 ))}
               </div>
             )}

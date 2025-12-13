@@ -1,4 +1,4 @@
-import type { DocObj, Finding } from '@/types';
+import type { DocObj, Finding, AgentId, FindingCategory } from '@/types';
 
 // Demo document options
 export const DEMO_DOCUMENTS = [
@@ -53,27 +53,57 @@ export async function loadDemoFindings(id: DemoDocumentId): Promise<Finding[]> {
     }
     const data = await response.json();
 
-    // The review file has a structure with tracks, we need to flatten findings
+    // The review file has "issues" array, convert to Finding format
     const findings: Finding[] = [];
 
-    // Extract findings from all tracks
-    if (data.tracks) {
-      Object.values(data.tracks).forEach((track: any) => {
-        if (track.scopes) {
-          Object.values(track.scopes).forEach((scope: any) => {
-            if (scope.findings) {
-              findings.push(...scope.findings);
-            }
-          });
+    // Convert issues to findings
+    if (data.issues && Array.isArray(data.issues)) {
+      data.issues.forEach((issue: any) => {
+        // Skip issues without proper paragraph anchoring
+        if (!issue.paragraph_id) {
+          console.warn('Skipping issue without paragraph_id:', issue);
+          return;
         }
+
+        // Map issue to Finding format
+        const finding: Finding = {
+          id: issue.id || `finding_${Date.now()}_${Math.random()}`,
+          agentId: mapScopeToAgent(issue.scope),
+          category: mapIssueTypeToCategory(issue.issue_type, issue.scope),
+          severity: issue.severity || 'minor',
+          confidence: issue.confidence || 0.8,
+          title: issue.title || 'Untitled Issue',
+          description: issue.message || '',
+          anchors: [
+            {
+              paragraph_id: issue.paragraph_id,
+              sentence_id: issue.sentence_ids?.[0],
+              quoted_text: issue.original_text || issue.quoted_text || issue.message || '',
+            }
+          ],
+          createdAt: new Date().toISOString(),
+        };
+
+        // Add proposed edit if available
+        if (issue.suggested_rewrite || issue.proposed_rewrite) {
+          finding.proposedEdit = {
+            type: 'replace',
+            anchor: finding.anchors[0],
+            newText: issue.suggested_rewrite || issue.proposed_rewrite,
+            rationale: issue.rationale || '',
+          };
+        }
+
+        findings.push(finding);
       });
     }
 
-    // If the structure is different, try direct findings array
+    // If still no findings, try other possible structures
     if (findings.length === 0 && data.findings) {
       findings.push(...data.findings);
     }
 
+    console.log(`Loaded ${findings.length} demo findings for ${id}`);
     return findings;
   }
 
@@ -89,6 +119,65 @@ export async function loadDemoFindings(id: DemoDocumentId): Promise<Finding[]> {
  */
 export function getDemoDocuments() {
   return DEMO_DOCUMENTS;
+}
+
+/**
+ * Map scope to agent ID
+ */
+function mapScopeToAgent(scope: string): AgentId {
+  switch (scope?.toLowerCase()) {
+    case 'rigor':
+      return 'rigor_inspector';
+    case 'clarity':
+      return 'clarity_inspector';
+    case 'counterpoint':
+    case 'adversarial':
+      return 'adversarial_critic';
+    case 'domain':
+      return 'domain_validator';
+    case 'context':
+      return 'context_builder';
+    default:
+      return 'rigor_inspector';
+  }
+}
+
+/**
+ * Map issue type and scope to finding category
+ */
+function mapIssueTypeToCategory(issueType: string, scope: string): FindingCategory {
+  const scopeLower = scope?.toLowerCase() || '';
+  const typeLower = issueType?.toLowerCase() || '';
+
+  if (scopeLower === 'clarity') {
+    if (typeLower.includes('sentence')) return 'clarity_sentence';
+    if (typeLower.includes('paragraph')) return 'clarity_paragraph';
+    if (typeLower.includes('section')) return 'clarity_section';
+    return 'clarity_flow';
+  }
+
+  if (scopeLower === 'rigor') {
+    if (typeLower.includes('method')) return 'rigor_methodology';
+    if (typeLower.includes('logic')) return 'rigor_logic';
+    if (typeLower.includes('evidence')) return 'rigor_evidence';
+    if (typeLower.includes('statistic')) return 'rigor_statistics';
+    return 'rigor_methodology';
+  }
+
+  if (scopeLower === 'counterpoint' || scopeLower === 'adversarial') {
+    if (typeLower.includes('weakness')) return 'adversarial_weakness';
+    if (typeLower.includes('gap')) return 'adversarial_gap';
+    return 'adversarial_alternative';
+  }
+
+  if (scopeLower === 'domain') {
+    if (typeLower.includes('convention')) return 'domain_convention';
+    if (typeLower.includes('terminology')) return 'domain_terminology';
+    return 'domain_factual';
+  }
+
+  // Default based on scope
+  return 'rigor_methodology';
 }
 
 /**
@@ -113,28 +202,28 @@ function createSimpleDemoDocument(): DocObj {
     sections: [
       {
         section_id: 'sec_001',
-        paragraph_index: 0,
+        section_index: 0,
         section_title: 'Introduction',
         level: 1,
         paragraph_ids: ['p_001', 'p_002'],
       },
       {
         section_id: 'sec_002',
-        paragraph_index: 1,
+        section_index: 1,
         section_title: 'Methods',
         level: 1,
         paragraph_ids: ['p_003', 'p_004'],
       },
       {
         section_id: 'sec_003',
-        paragraph_index:2,
+        section_index: 2,
         section_title: 'Results',
         level: 1,
         paragraph_ids: ['p_005', 'p_006'],
       },
       {
         section_id: 'sec_004',
-        paragraph_index:3,
+        section_index: 3,
         section_title: 'Conclusion',
         level: 1,
         paragraph_ids: ['p_007'],
@@ -350,7 +439,7 @@ function createSimpleDemoFindings(): Finding[] {
       anchors: [
         {
           paragraph_id: 'p_001',
-          sentenceId: 'p_001_s_001',
+          sentence_id: 'p_001_s_001',
           quoted_text: 'various factors',
         },
       ],
@@ -358,7 +447,7 @@ function createSimpleDemoFindings(): Finding[] {
         type: 'replace',
         anchor: {
           paragraph_id: 'p_001',
-          sentenceId: 'p_001_s_001',
+          sentence_id: 'p_001_s_001',
           quoted_text: 'various factors',
         },
         newText: 'temperature, pressure, and humidity',
@@ -377,7 +466,7 @@ function createSimpleDemoFindings(): Finding[] {
       anchors: [
         {
           paragraph_id: 'p_003',
-          sentenceId: 'p_003_s_002',
+          sentence_id: 'p_003_s_002',
           quoted_text: 'standard methods',
         },
       ],
@@ -385,7 +474,7 @@ function createSimpleDemoFindings(): Finding[] {
         type: 'replace',
         anchor: {
           paragraph_id: 'p_003',
-          sentenceId: 'p_003_s_002',
+          sentence_id: 'p_003_s_002',
           quoted_text: 'using standard methods',
         },
         newText: 'using ANOVA with Bonferroni correction (SPSS v28)',
@@ -404,7 +493,7 @@ function createSimpleDemoFindings(): Finding[] {
       anchors: [
         {
           paragraph_id: 'p_007',
-          sentenceId: 'p_007_s_001',
+          sentence_id: 'p_007_s_001',
           quoted_text: 'strong evidence for the proposed hypothesis',
         },
       ],
@@ -437,7 +526,7 @@ function createSimpleDemoFindings(): Finding[] {
       anchors: [
         {
           paragraph_id: 'p_005',
-          sentenceId: 'p_005_s_002',
+          sentence_id: 'p_005_s_002',
           quoted_text: 'substantial across all conditions',
         },
       ],
@@ -445,7 +534,7 @@ function createSimpleDemoFindings(): Finding[] {
         type: 'replace',
         anchor: {
           paragraph_id: 'p_005',
-          sentenceId: 'p_005_s_002',
+          sentence_id: 'p_005_s_002',
           quoted_text: 'The effect size was substantial across all conditions.',
         },
         newText: "Cohen's d = 0.82 (95% CI: 0.65-0.99) across all conditions.",
@@ -464,7 +553,7 @@ function createSimpleDemoFindings(): Finding[] {
       anchors: [
         {
           paragraph_id: 'p_004',
-          sentenceId: 'p_004_s_001',
+          sentence_id: 'p_004_s_001',
           quoted_text: 'Data was collected',
         },
       ],
@@ -472,7 +561,7 @@ function createSimpleDemoFindings(): Finding[] {
         type: 'replace',
         anchor: {
           paragraph_id: 'p_004',
-          sentenceId: 'p_004_s_001',
+          sentence_id: 'p_004_s_001',
           quoted_text: 'Data was collected',
         },
         newText: 'We collected data',
