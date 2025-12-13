@@ -282,38 +282,38 @@ export function IssuesPanel({
   const activeCount = categorizedIssues.needAttention.length;
 
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="h-full flex flex-col bg-gray-900">
       {/* Header */}
-      <div className="px-4 py-3 border-b">
+      <div className="bg-gray-950 px-6 py-4 border-b border-gray-800">
         <div className="flex items-center justify-between">
-          <h2 className="font-semibold">All Issues</h2>
-          <span className="text-xs text-muted-foreground">
+          <h2 className="text-white font-semibold text-lg">All Issues</h2>
+          <span className="text-sm text-gray-400">
             {issues.length} total
           </span>
         </div>
       </div>
 
       {/* Issues sections */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto bg-gray-900">
         {/* Need Attention Section */}
         {categorizedIssues.needAttention.length > 0 && (
           <div>
             <button
               onClick={() => toggleSection('need-attention')}
-              className="w-full px-4 py-2.5 flex items-center justify-between hover:bg-muted/5 transition-colors sticky top-0 bg-background z-10 border-b"
+              className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-800/50 transition-colors sticky top-0 bg-gray-850 z-10 border-b border-gray-800"
             >
               <div className="flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-coral-500" />
-                <span className="font-medium">Need Attention</span>
+                <span className="text-red-500">⦿</span>
+                <span className="font-medium text-white">Need Attention</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-gray-400">
                   {activeCount}
                 </span>
                 {expandedSections.has('need-attention') ? (
-                  <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                  <ChevronDown className="w-4 h-4 text-gray-400" />
                 ) : (
-                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                  <ChevronRight className="w-4 h-4 text-gray-400" />
                 )}
               </div>
             </button>
@@ -410,20 +410,20 @@ export function IssuesPanel({
           <div>
             <button
               onClick={() => toggleSection('accepted')}
-              className="w-full px-4 py-2.5 flex items-center justify-between hover:bg-muted/5 transition-colors border-b"
+              className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-800/50 transition-colors border-b border-gray-800"
             >
               <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-green-500" />
+                <span className="text-green-500">✓</span>
                 <span className="font-medium text-green-500">Accepted</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-gray-400">
                   {categorizedIssues.accepted.length}
                 </span>
                 {expandedSections.has('accepted') ? (
-                  <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                  <ChevronDown className="w-4 h-4 text-gray-400" />
                 ) : (
-                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                  <ChevronRight className="w-4 h-4 text-gray-400" />
                 )}
               </div>
             </button>
