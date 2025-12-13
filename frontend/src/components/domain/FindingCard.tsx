@@ -172,7 +172,7 @@ export function FindingCard({
 
         {/* Quoted Text */}
         <div className="mt-3 p-2 bg-muted/50 rounded text-xs italic line-clamp-2">
-          "{finding.anchors[0].quotedText}"
+          "{finding.anchors[0].quoted_text}"
         </div>
 
         {/* Expanded Content */}
@@ -192,7 +192,7 @@ export function FindingCard({
                     key={idx}
                     className="p-2 bg-muted/30 rounded text-xs italic"
                   >
-                    "{anchor.quotedText}"
+                    "{anchor.quoted_text}"
                   </div>
                 ))}
               </div>
@@ -206,7 +206,7 @@ export function FindingCard({
                   <div>
                     <p className="text-muted-foreground mb-1">Original:</p>
                     <div className="p-2 bg-red-50 border border-red-200 rounded">
-                      {finding.proposedEdit.anchor.quotedText}
+                      {finding.proposedEdit.anchor.quoted_text}
                     </div>
                   </div>
                   <div>
@@ -296,7 +296,7 @@ export function FindingCard({
                   Original Text:
                 </label>
                 <div className="mt-1 p-3 bg-red-50 border border-red-200 rounded text-sm">
-                  {finding.proposedEdit.anchor.quotedText}
+                  {finding.proposedEdit.anchor.quoted_text}
                 </div>
               </div>
 

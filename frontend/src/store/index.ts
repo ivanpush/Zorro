@@ -76,7 +76,7 @@ export const useAppStore = create<AppState>()(
       addDecision: (decision) =>
         set((state) => {
           const newDecisions = new Map(state.decisions);
-          newDecisions.set(decision.findingId, decision);
+          newDecisions.set(decision.finding_id, decision);
           return { decisions: newDecisions };
         }),
 

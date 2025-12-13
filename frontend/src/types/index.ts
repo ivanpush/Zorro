@@ -9,7 +9,7 @@
 // ============================================================================
 
 export interface DocObj {
-  id: string;                      // UUID v4, generated at parse time
+  document_id: string;             // UUID v4, generated at parse time
   filename: string;                // Original filename
   type: 'pdf' | 'docx';
   title: string;                   // Extracted or user-provided
@@ -25,17 +25,17 @@ export interface DocObj {
 }
 
 export interface Section {
-  id: string;                      // e.g., "sec_001"
-  index: number;                   // 0-based order
-  title: string | null;            // May be null for untitled sections
+  section_id: string;              // e.g., "sec_001"
+  section_index: number;           // 0-based order
+  section_title: string | null;    // May be null for untitled sections
   level: number;                   // Heading level (1-6)
-  paragraphIds: string[];          // References to contained paragraphs
+  paragraph_ids: string[];         // References to contained paragraphs
 }
 
 export interface Paragraph {
-  id: string;                      // e.g., "p_001"
-  sectionId: string | null;        // May be null if no clear section
-  index: number;                   // Global paragraph index
+  paragraph_id: string;            // e.g., "p_001"
+  section_id: string | null;       // May be null if no clear section
+  paragraph_index: number;         // Global paragraph index
   text: string;                    // Full paragraph text
   sentences: Sentence[];
 
@@ -48,33 +48,33 @@ export interface Paragraph {
 }
 
 export interface Sentence {
-  id: string;                      // e.g., "p_001_s_002"
-  paragraphId: string;
-  index: number;                   // Index within paragraph
+  sentence_id: string;             // e.g., "p_001_s_002"
+  paragraph_id: string;
+  sentence_index: number;          // Index within paragraph
   text: string;
-  startChar: number;               // Character offset in paragraph
-  endChar: number;
+  start_char: number;              // Character offset in paragraph
+  end_char: number;
 }
 
 export interface Figure {
-  id: string;                      // e.g., "fig_001"
-  index: number;
+  figure_id: string;               // e.g., "fig_001"
+  figure_index: number;
   caption: string | null;
-  captionParagraphId: string | null;  // If caption is a separate paragraph
+  caption_paragraph_id: string | null;  // If caption is a separate paragraph
 
   // Location info
-  pageNumber?: number;             // PDF
-  afterParagraphId?: string;       // Approximate position
+  page_number?: number;            // PDF
+  after_paragraph_id?: string;     // Approximate position
 
   // Extraction metadata
-  extractionMethod: 'inline' | 'textbox' | 'float' | 'unknown';
-  boundingBox?: BoundingBox;
+  extraction_method: 'inline' | 'textbox' | 'float' | 'unknown';
+  bounding_box?: BoundingBox;
 }
 
 export interface Reference {
-  id: string;                      // e.g., "ref_001"
-  index: number;
-  rawText: string;
+  reference_id: string;            // e.g., "ref_001"
+  reference_index: number;
+  raw_text: string;
   // Future: parsed citation fields
 }
 
@@ -147,11 +147,11 @@ export type FindingCategory =
 export type Severity = 'critical' | 'major' | 'minor' | 'suggestion';
 
 export interface Anchor {
-  paragraphId: string;             // REQUIRED
-  sentenceId?: string;             // More specific if available
-  startChar?: number;              // Character offset in paragraph
-  endChar?: number;
-  quotedText: string;              // REQUIRED: the actual text
+  paragraph_id: string;            // REQUIRED
+  sentence_id?: string;            // More specific if available
+  start_char?: number;             // Character offset in paragraph
+  end_char?: number;
+  quoted_text: string;             // REQUIRED: the actual text
 }
 
 export interface ProposedEdit {
@@ -185,7 +185,7 @@ export type FocusDimension =
 
 export interface ReviewJob {
   id: string;                      // UUID
-  documentId: string;
+  document_id: string;
   config: ReviewConfig;
   status: ReviewStatus;
 
@@ -221,7 +221,7 @@ export interface AgentStatus {
 
 export interface Decision {
   id: string;
-  findingId: string;
+  finding_id: string;
   action: DecisionAction;
 
   // For 'accept_edit' with modifications
@@ -236,7 +236,7 @@ export type DecisionAction =
   | 'dismiss';                     // Reject finding
 
 export interface ReviewSession {
-  documentId: string;
+  document_id: string;
   document: DocObj;
   findings: Finding[];
   decisions: Decision[];
@@ -309,7 +309,7 @@ export interface ErrorEvent {
 // ============================================================================
 
 export interface ExportRequest {
-  documentId: string;
+  document_id: string;
   decisions: Decision[];
   format: 'docx' | 'pdf';
   options: ExportOptions;
@@ -334,7 +334,7 @@ export interface ParseDocumentResponse {
 }
 
 export interface StartReviewRequest {
-  documentId: string;
+  document_id: string;
   config: ReviewConfig;
 }
 

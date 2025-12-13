@@ -18,7 +18,8 @@
       "Bash(gh repo create:*)",
       "Bash(git push)",
       "Bash(python test_parser.py:*)",
-      "Bash(pip install:*)"
+      "Bash(pip install:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

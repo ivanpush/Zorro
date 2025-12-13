@@ -104,7 +104,7 @@ export function ReviewScreen() {
     (finding: Finding) => {
       const decision: Decision = {
         id: `decision_${Date.now()}`,
-        findingId: finding.id,
+        finding_id: finding.id,
         action: 'accept',
         timestamp: new Date().toISOString(),
       };
@@ -117,7 +117,7 @@ export function ReviewScreen() {
     (finding: Finding) => {
       const decision: Decision = {
         id: `decision_${Date.now()}`,
-        findingId: finding.id,
+        finding_id: finding.id,
         action: 'dismiss',
         timestamp: new Date().toISOString(),
       };
@@ -130,7 +130,7 @@ export function ReviewScreen() {
     (finding: Finding, finalText: string) => {
       const decision: Decision = {
         id: `decision_${Date.now()}`,
-        findingId: finding.id,
+        finding_id: finding.id,
         action: 'accept_edit',
         finalText,
         timestamp: new Date().toISOString(),
@@ -253,7 +253,7 @@ export function ReviewScreen() {
           onParagraphClick={(paragraphId) => {
             // Filter to show only findings for this paragraph
             const paragraphFinding = findings.find((f) =>
-              f.anchors.some((a) => a.paragraphId === paragraphId)
+              f.anchors.some((a) => a.paragraph_id === paragraphId)
             );
             if (paragraphFinding) {
               setSelectedFindingId(paragraphFinding.id);

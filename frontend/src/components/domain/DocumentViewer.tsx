@@ -33,14 +33,14 @@ export function DocumentViewer({
 
     findings.forEach((finding) => {
       finding.anchors.forEach((anchor) => {
-        const existing = highlights.get(anchor.paragraphId) || [];
+        const existing = highlights.get(anchor.paragraph_id) || [];
         existing.push({
           finding,
-          startChar: anchor.startChar,
-          endChar: anchor.endChar,
-          sentenceId: anchor.sentenceId,
+          startChar: anchor.start_char,
+          endChar: anchor.end_char,
+          sentenceId: anchor.sentence_id,
         });
-        highlights.set(anchor.paragraphId, existing);
+        highlights.set(anchor.paragraph_id, existing);
       });
     });
 
@@ -59,7 +59,7 @@ export function DocumentViewer({
 
   // Render highlighted text
   const renderHighlightedText = (
-    paragraphId: string,
+    _paragraphId: string,
     text: string,
     paragraphHighlights?: Array<{
       finding: Finding;
@@ -161,15 +161,15 @@ export function DocumentViewer({
       <h1 className="text-2xl font-bold mb-6">{document.title}</h1>
 
       {/* Sections and Paragraphs */}
-      {document.sections.map((section) => {
+      {document.sections.map((section, sectionIdx) => {
         const sectionParagraphs = document.paragraphs.filter((p) =>
-          section.paragraphIds?.includes(p.id) || false
+          section.paragraph_ids?.includes(p.paragraph_id) || false
         );
 
         return (
-          <div key={section.id} className="mb-6">
+          <div key={section.section_id || `section-${sectionIdx}`} className="mb-6">
             {/* Section Title */}
-            {section.title && (
+            {section.section_title && (
               <h2
                 className={cn(
                   'font-semibold mb-3',
@@ -178,35 +178,35 @@ export function DocumentViewer({
                   section.level >= 3 && 'text-base'
                 )}
               >
-                {section.title}
+                {section.section_title}
               </h2>
             )}
 
             {/* Section Paragraphs */}
-            {sectionParagraphs.map((paragraph) => {
-              const highlights = paragraphHighlights.get(paragraph.id);
+            {sectionParagraphs.map((paragraph, paraIdx) => {
+              const highlights = paragraphHighlights.get(paragraph.paragraph_id);
               const hasFindings = highlights && highlights.length > 0;
 
               return (
                 <div
-                  key={paragraph.id}
+                  key={paragraph.paragraph_id || `para-${sectionIdx}-${paraIdx}`}
                   className={cn(
                     'mb-4 flex group',
                     hasFindings && 'cursor-pointer hover:bg-muted/50',
                     'transition-colors rounded-md'
                   )}
-                  onClick={() => onParagraphClick?.(paragraph.id)}
+                  onClick={() => onParagraphClick?.(paragraph.paragraph_id)}
                 >
                   {/* Line Number */}
                   <div className="w-12 flex-shrink-0 text-xs text-muted-foreground mr-4 pt-1">
-                    {paragraph.index + 1}
+                    {typeof paragraph.paragraph_index === 'number' ? paragraph.paragraph_index + 1 : ''}
                   </div>
 
                   {/* Paragraph Text */}
                   <div className="flex-1">
                     <p className="text-sm leading-relaxed">
                       {renderHighlightedText(
-                        paragraph.id,
+                        paragraph.paragraph_id,
                         paragraph.text,
                         highlights
                       )}
@@ -227,6 +227,61 @@ export function DocumentViewer({
         );
       })}
 
+      {/* Orphaned Paragraphs (not in any section) */}
+      {(() => {
+        const allSectionParagraphIds = document.sections.flatMap(s => s.paragraph_ids || []);
+        const orphanedParagraphs = document.paragraphs.filter(p =>
+          p.paragraph_id && !allSectionParagraphIds.includes(p.paragraph_id)
+        );
+
+        if (orphanedParagraphs.length === 0) return null;
+
+        return (
+          <>
+            {orphanedParagraphs.map((paragraph, idx) => {
+              const highlights = paragraphHighlights.get(paragraph.paragraph_id);
+              const hasFindings = highlights && highlights.length > 0;
+
+              return (
+                <div
+                  key={`orphan-${paragraph.paragraph_id || `index-${idx}`}`}
+                  className={cn(
+                    'mb-4 flex group',
+                    hasFindings && 'cursor-pointer hover:bg-muted/50',
+                    'transition-colors rounded-md'
+                  )}
+                  onClick={() => onParagraphClick?.(paragraph.paragraph_id)}
+                >
+                  {/* Line Number */}
+                  <div className="w-12 flex-shrink-0 text-xs text-muted-foreground mr-4 pt-1">
+                    {typeof paragraph.paragraph_index === 'number' ? paragraph.paragraph_index + 1 : ''}
+                  </div>
+
+                  {/* Paragraph Text */}
+                  <div className="flex-1">
+                    <p className="text-sm leading-relaxed">
+                      {renderHighlightedText(
+                        paragraph.paragraph_id,
+                        paragraph.text || '',
+                        highlights
+                      )}
+                    </p>
+
+                    {/* Finding count indicator */}
+                    {hasFindings && (
+                      <div className="mt-1 text-xs text-muted-foreground">
+                        {highlights?.length || 0} finding
+                        {(highlights?.length || 0) > 1 ? 's' : ''}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </>
+        );
+      })()}
+
       {/* Figures Section */}
       {document.figures.length > 0 && (
         <div className="mt-8 border-t pt-4">
@@ -246,13 +301,13 @@ export function DocumentViewer({
             <div className="space-y-3 pl-6">
               {document.figures.map((figure) => (
                 <div
-                  key={figure.id}
+                  key={figure.figure_id}
                   className="flex items-start gap-3 p-3 rounded-lg bg-muted/50"
                 >
                   <Image className="w-5 h-5 text-muted-foreground mt-0.5" />
                   <div>
                     <p className="text-sm font-medium">
-                      Figure {figure.index + 1}
+                      Figure {figure.figure_index + 1}
                     </p>
                     {figure.caption && (
                       <p className="text-sm text-muted-foreground mt-1">
