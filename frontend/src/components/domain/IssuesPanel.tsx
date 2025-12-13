@@ -156,9 +156,9 @@ export function IssuesPanel({
               </div>
 
               {issue.proposedEdit && (
-                <div className="bg-gray-50 p-3 rounded border border-gray-200">
-                  <p className="text-xs font-medium text-gray-600 mb-1">Suggested Rewrite:</p>
-                  <p className="text-sm text-gray-700">
+                <div className="bg-accent/5 p-2 rounded border border-accent/10">
+                  <p className="text-xs font-medium text-accent mb-1">Suggested Rewrite:</p>
+                  <p className="text-sm text-muted-foreground">
                     {issue.proposedEdit.newText}
                   </p>
                 </div>

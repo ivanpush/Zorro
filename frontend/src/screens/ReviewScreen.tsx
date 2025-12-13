@@ -258,11 +258,11 @@ export function ReviewScreen() {
 
       {/* Main content area */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Manuscript View - 70% */}
+        {/* Manuscript View - 60% */}
         <div
           ref={manuscriptRef}
           className="flex-1 overflow-y-auto border-r bg-background relative"
-          style={{ flexBasis: '70%' }}
+          style={{ flexBasis: '60%' }}
         >
           {/* ZORRO branding - centered over manuscript */}
           <div className="sticky top-8 z-20 flex justify-center pointer-events-none">
@@ -281,11 +281,11 @@ export function ReviewScreen() {
           </div>
         </div>
 
-        {/* Issues Panel - 30% */}
+        {/* Issues Panel - 40% */}
         <div
           ref={issuesPanelRef}
           className="overflow-y-auto bg-background"
-          style={{ flexBasis: '30%' }}
+          style={{ flexBasis: '40%' }}
         >
           <IssuesPanel
             issues={findings}
