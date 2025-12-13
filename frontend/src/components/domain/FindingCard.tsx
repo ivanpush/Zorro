@@ -76,6 +76,29 @@ export function FindingCard({
     }
   };
 
+  const getSeverityBadgeColor = (severity: string) => {
+    switch (severity) {
+      case 'critical':
+        return 'bg-red-600 text-white';
+      case 'major':
+        return 'bg-orange-600 text-white';
+      case 'minor':
+        return 'bg-yellow-600 text-white';
+      case 'suggestion':
+        return 'bg-blue-600 text-white';
+      default:
+        return 'bg-gray-600 text-white';
+    }
+  };
+
+  const getCategoryBadgeColor = (category: string) => {
+    // Purple/violet for argument category as shown in screenshot
+    if (category.toLowerCase().includes('argument')) {
+      return 'bg-purple-600 text-white';
+    }
+    return 'bg-gray-600 text-white';
+  };
+
   const isAccepted = decision?.action === 'accept' || decision?.action === 'accept_edit';
   const isDismissed = decision?.action === 'dismiss';
 
@@ -88,204 +111,215 @@ export function FindingCard({
     <>
       <div
         className={cn(
-          'border rounded-lg p-4 transition-all cursor-pointer',
+          'bg-gray-900 border border-gray-700 rounded-lg p-6 transition-all cursor-pointer',
           {
-            'border-primary shadow-md': isSelected,
-            'border-green-500 bg-green-50/50 opacity-75': isAccepted,
-            'border-gray-300 bg-gray-50 opacity-50': isDismissed,
-            'hover:border-primary/50': !isSelected && !isAccepted && !isDismissed,
+            'border-purple-500 shadow-md': isSelected,
+            'border-green-500 bg-green-900/20 opacity-75': isAccepted,
+            'border-gray-600 bg-gray-800/50 opacity-50': isDismissed,
+            'hover:border-gray-600': !isSelected && !isAccepted && !isDismissed,
           }
         )}
         onClick={onSelect}
       >
-        {/* Header */}
-        <div className="flex items-start justify-between mb-2">
-          <div className="flex items-start gap-2 flex-1">
-            {/* Severity Badge */}
-            <Badge variant={finding.severity as any} className="mt-0.5">
-              {finding.severity}
-            </Badge>
+        {/* Header with quick actions */}
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center gap-3">
+            {/* Severity Badge with exclamation */}
+            <span className={cn(
+              'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium',
+              getSeverityBadgeColor(finding.severity)
+            )}>
+              {finding.severity === 'major' && '! '}
+              {finding.severity.charAt(0).toUpperCase() + finding.severity.slice(1)}
+            </span>
 
-            {/* Title */}
-            <div className="flex-1">
-              <h3
-                className={cn(
-                  'font-medium text-sm',
-                  isDismissed && 'line-through'
-                )}
-              >
-                {finding.title}
-              </h3>
+            {/* Divider */}
+            <span className="text-gray-500">|</span>
 
-              {/* Category and Agent */}
-              <div className="flex items-center gap-4 mt-1">
-                <span className="text-xs text-muted-foreground">
-                  {finding.category.replace(/_/g, ' ')}
-                </span>
-                <div
-                  className={cn(
-                    'flex items-center gap-1',
-                    getAgentColor(finding.agentId)
-                  )}
-                  title={AGENT_NAMES[finding.agentId]}
-                >
-                  {getAgentIcon(finding.agentId)}
-                  <span className="text-xs">
-                    {AGENT_NAMES[finding.agentId]}
-                  </span>
-                </div>
-              </div>
-
-              {/* Confidence Bar */}
-              <div className="flex items-center gap-2 mt-2">
-                <span className="text-xs text-muted-foreground">
-                  Confidence:
-                </span>
-                <div className="flex-1 max-w-[100px] h-2 bg-muted rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-primary transition-all"
-                    style={{ width: `${finding.confidence * 100}%` }}
-                  />
-                </div>
-                <span className="text-xs text-muted-foreground">
-                  {Math.round(finding.confidence * 100)}%
-                </span>
-              </div>
-            </div>
+            {/* Category Badge */}
+            <span className={cn(
+              'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium',
+              getCategoryBadgeColor(finding.category)
+            )}>
+              {finding.category.replace(/_/g, ' ').charAt(0).toUpperCase() +
+               finding.category.replace(/_/g, ' ').slice(1)}
+            </span>
           </div>
 
-          {/* Expand/Collapse Button */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsExpanded(!isExpanded);
-            }}
-            className="p-1 hover:bg-muted rounded"
-          >
-            {isExpanded ? (
-              <ChevronUp className="w-4 h-4" />
-            ) : (
-              <ChevronDown className="w-4 h-4" />
-            )}
-          </button>
-        </div>
-
-        {/* Quoted Text */}
-        {finding.anchors && finding.anchors.length > 0 && finding.anchors[0].quoted_text && (
-          <div className="mt-3 p-2 bg-muted/50 rounded text-xs italic line-clamp-2">
-            "{finding.anchors[0].quoted_text}"
-          </div>
-        )}
-
-        {/* Expanded Content */}
-        {isExpanded && (
-          <div className="mt-4 space-y-3 animate-in slide-in-from-top-2">
-            {/* Description */}
-            <div className="text-sm text-muted-foreground">
-              {finding.description}
-            </div>
-
-            {/* All Anchors */}
-            {finding.anchors && finding.anchors.length > 1 && (
-              <div className="space-y-1">
-                <p className="text-xs font-medium">All referenced text:</p>
-                {finding.anchors.map((anchor, idx) => (
-                  anchor.quoted_text ? (
-                    <div
-                      key={idx}
-                      className="p-2 bg-muted/30 rounded text-xs italic"
-                    >
-                      "{anchor.quoted_text}"
-                    </div>
-                  ) : null
-                ))}
-              </div>
-            )}
-
-            {/* Proposed Edit */}
-            {finding.proposedEdit && (
-              <div className="space-y-2">
-                <p className="text-xs font-medium">Suggested Edit:</p>
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div>
-                    <p className="text-muted-foreground mb-1">Original:</p>
-                    <div className="p-2 bg-red-50 border border-red-200 rounded">
-                      {finding.proposedEdit.anchor.quoted_text}
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground mb-1">Suggested:</p>
-                    <div className="p-2 bg-green-50 border border-green-200 rounded">
-                      {finding.proposedEdit.newText}
-                    </div>
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground italic">
-                  {finding.proposedEdit.rationale}
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Actions */}
-        {!isAccepted && !isDismissed && (
-          <div className="flex items-center gap-2 mt-4 pt-3 border-t">
-            <Button
-              size="sm"
-              variant="ghost"
-              className="text-green-600 hover:text-green-700 hover:bg-green-50"
+          {/* Quick Actions */}
+          <div className="flex items-center gap-2">
+            <button
               onClick={(e) => {
                 e.stopPropagation();
                 onAccept();
               }}
+              className="text-green-500 hover:text-green-400 transition-colors"
             >
-              <Check className="w-4 h-4 mr-1" />
-              Accept
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              <Check className="w-5 h-5" />
+            </button>
+            <button
               onClick={(e) => {
                 e.stopPropagation();
                 onDismiss();
               }}
+              className="text-gray-500 hover:text-gray-400 transition-colors"
             >
-              <X className="w-4 h-4 mr-1" />
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Rewrite type if applicable */}
+        {finding.proposedEdit && (
+          <div className="text-gray-400 text-sm mb-2">
+            Paragraph Rewrite
+          </div>
+        )}
+
+        {/* Title */}
+        <h3 className={cn(
+          'text-white font-medium text-lg mb-4',
+          isDismissed && 'line-through'
+        )}>
+          {finding.title}
+        </h3>
+
+        {/* Location badges */}
+        {finding.anchors && finding.anchors.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {finding.anchors.slice(0, 3).map((anchor, idx) => (
+              <span key={idx} className="bg-gray-800 text-gray-400 px-3 py-1 rounded-md text-sm">
+                {anchor.paragraphId || `location_${idx + 1}`}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Quoted Text */}
+        {finding.anchors && finding.anchors.length > 0 && finding.anchors[0].quoted_text && (
+          <blockquote className="border-l-4 border-gray-700 pl-4 mb-4">
+            <p className="text-gray-300 italic">
+              "{finding.anchors[0].quoted_text}"
+            </p>
+          </blockquote>
+        )}
+
+        {/* Description */}
+        <div className="text-gray-400 mb-6">
+          {finding.description}
+        </div>
+
+        {/* Expanded Content - Suggested Rewrite */}
+        {isExpanded && finding.proposedEdit && (
+          <div className="mb-6">
+            <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
+              <h4 className="text-teal-400 font-medium text-sm mb-3">SUGGESTED REWRITE</h4>
+              <p className="text-gray-300">
+                {finding.proposedEdit.newText}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        {!isAccepted && !isDismissed && finding.proposedEdit && (
+          <div className="flex items-center gap-3 mb-4">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleAcceptEdit();
+              }}
+              className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-medium transition-colors"
+            >
+              Accept Rewrite
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowEditModal(true);
+                setEditedText(finding.proposedEdit?.newText || '');
+              }}
+              className="px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors"
+            >
+              Edit
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onAccept();
+              }}
+              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+            >
+              Accept Issue
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDismiss();
+              }}
+              className="px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg font-medium transition-colors"
+            >
               Dismiss
-            </Button>
-            {finding.proposedEdit && (
-              <Button
-                size="sm"
-                variant="ghost"
-                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowEditModal(true);
-                  setEditedText(finding.proposedEdit?.newText || '');
-                }}
-              >
-                <Edit className="w-4 h-4 mr-1" />
-                View Suggestion
-              </Button>
-            )}
+            </button>
+          </div>
+        )}
+
+        {/* Action buttons for non-rewrite issues */}
+        {!isAccepted && !isDismissed && !finding.proposedEdit && (
+          <div className="flex items-center gap-3 mb-4">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onAccept();
+              }}
+              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+            >
+              Accept Issue
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDismiss();
+              }}
+              className="px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg font-medium transition-colors"
+            >
+              Dismiss
+            </button>
           </div>
         )}
 
         {/* Status Indicators */}
         {isAccepted && (
-          <div className="flex items-center gap-2 mt-3 text-green-600">
-            <Check className="w-4 h-4" />
-            <span className="text-sm font-medium">Accepted</span>
+          <div className="flex items-center gap-2 text-green-500 mb-4">
+            <Check className="w-5 h-5" />
+            <span className="font-medium">Accepted</span>
           </div>
         )}
         {isDismissed && (
-          <div className="flex items-center gap-2 mt-3 text-gray-500">
-            <X className="w-4 h-4" />
-            <span className="text-sm font-medium">Dismissed</span>
+          <div className="flex items-center gap-2 text-gray-500 mb-4">
+            <X className="w-5 h-5" />
+            <span className="font-medium">Dismissed</span>
           </div>
         )}
+
+        {/* Expand/Collapse at bottom */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsExpanded(!isExpanded);
+          }}
+          className="flex items-center gap-2 text-gray-500 hover:text-gray-400 transition-colors text-sm"
+        >
+          {isExpanded ? (
+            <>
+              Show less <ChevronUp className="w-4 h-4" />
+            </>
+          ) : (
+            <>
+              Show more <ChevronDown className="w-4 h-4" />
+            </>
+          )}
+        </button>
       </div>
 
       {/* Edit Modal */}

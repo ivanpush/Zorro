@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Check, X, ChevronDown, ChevronRight, RotateCcw, Undo2, AlertCircle } from 'lucide-react';
+import { Check, X, ChevronDown, ChevronRight, RotateCcw, Undo2, AlertCircle, Edit2 } from 'lucide-react';
 import type { Finding } from '@/types';
 
 interface IssuesPanelProps {
@@ -25,6 +25,8 @@ export function IssuesPanel({
     new Set(['need-attention', 'critical', 'major', 'minor'])
   );
   const [expandedIssueId, setExpandedIssueId] = useState<string | null>(null);
+  const [editModalIssue, setEditModalIssue] = useState<Finding | null>(null);
+  const [editedText, setEditedText] = useState<string>('');
 
   // Categorize issues
   const categorizedIssues = useMemo(() => {
@@ -103,13 +105,21 @@ export function IssuesPanel({
         onClick={() => onSelectIssue(issue.id)}
       >
         <div className="p-3">
-          <div className="flex items-start gap-3">
+          <div className="flex items-start justify-between mb-2">
+            <div className="flex items-start gap-2">
+              <span className={`
+                inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium border
+                ${getSeverityBadge(issue.severity)}
+              `}>
+                {issue.severity.toUpperCase()}
+              </span>
+            </div>
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 setExpandedIssueId(isExpanded ? null : issue.id);
               }}
-              className="mt-0.5 text-muted-foreground hover:text-foreground transition-colors"
+              className="text-muted-foreground hover:text-foreground transition-colors p-0.5"
             >
               {isExpanded ? (
                 <ChevronDown className="w-3 h-3" />
@@ -117,50 +127,93 @@ export function IssuesPanel({
                 <ChevronRight className="w-3 h-3" />
               )}
             </button>
+          </div>
 
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start gap-2 mb-2">
-                <span className={`
-                  inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium border
-                  ${getSeverityBadge(issue.severity)}
-                `}>
-                  {issue.severity.toUpperCase()}
-                </span>
-                <h4 className="text-sm font-medium flex-1">
-                  {issue.title}
-                </h4>
-              </div>
+          <h4 className="text-sm font-medium mb-2">
+            {issue.title}
+          </h4>
 
+          {issue.anchors.length > 0 && issue.anchors[0].quoted_text && !isExpanded && (
+            <blockquote className="mt-2 pl-3 border-l-2 border-muted/30">
+              <p className="text-xs text-muted-foreground/70 italic leading-relaxed line-clamp-2">
+                {issue.anchors[0].quoted_text}
+              </p>
+            </blockquote>
+          )}
+
+          {isExpanded && (
+            <div className="mt-3 space-y-3">
               {issue.anchors.length > 0 && issue.anchors[0].quoted_text && (
-                <blockquote className="mt-2 pl-3 border-l-2 border-muted/30">
+                <blockquote className="pl-3 border-l-2 border-muted/30">
                   <p className="text-xs text-muted-foreground/70 italic leading-relaxed">
                     {issue.anchors[0].quoted_text}
                   </p>
                 </blockquote>
               )}
 
-              {isExpanded && (
-                <div className="mt-3 space-y-3">
-                  <div className="text-sm text-muted-foreground">
-                    {issue.description}
-                  </div>
+              <div className="text-sm text-muted-foreground">
+                {issue.description}
+              </div>
 
-                  {issue.proposedEdit && (
-                    <div className="bg-accent/5 p-2 rounded border border-accent/10">
-                      <p className="text-xs font-medium text-accent mb-1">Suggested Rewrite:</p>
-                      <p className="text-sm text-muted-foreground">
-                        {issue.proposedEdit.newText}
-                      </p>
-                    </div>
-                  )}
+              {issue.proposedEdit && (
+                <div className="bg-green-900/10 p-3 rounded-lg border border-green-800/20">
+                  <p className="text-xs font-medium text-green-400 mb-2">Suggested Rewrite:</p>
+                  <p className="text-sm text-gray-300">
+                    {issue.proposedEdit.newText}
+                  </p>
+                </div>
+              )}
 
-                  <div className="flex gap-2 pt-2">
+              <div className="flex gap-2 pt-3">
+                {issue.proposedEdit ? (
+                  <>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         onAcceptIssue(issue.id);
                       }}
-                      className="px-3 py-1 text-xs bg-primary/10 text-primary hover:bg-primary/20 rounded transition-colors"
+                      className="px-4 py-2 text-xs bg-green-600 text-white hover:bg-green-700 rounded-lg transition-colors font-medium"
+                    >
+                      Accept Rewrite
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditModalIssue(issue);
+                        setEditedText(issue.proposedEdit.newText);
+                      }}
+                      className="px-4 py-2 text-xs bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors flex items-center gap-1 font-medium"
+                    >
+                      <Edit2 className="w-3 h-3" />
+                      Edit
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onAcceptIssue(issue.id);
+                      }}
+                      className="px-4 py-2 text-xs bg-teal-600 text-white hover:bg-teal-700 rounded-lg transition-colors font-medium"
+                    >
+                      Accept (No Rewrite)
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDismissIssue(issue.id);
+                      }}
+                      className="px-4 py-2 text-xs bg-gray-600 text-white hover:bg-gray-700 rounded-lg transition-colors font-medium"
+                    >
+                      Dismiss
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onAcceptIssue(issue.id);
+                      }}
+                      className="px-4 py-2 text-xs bg-teal-600 text-white hover:bg-teal-700 rounded-lg transition-colors font-medium"
                     >
                       Accept
                     </button>
@@ -169,15 +222,15 @@ export function IssuesPanel({
                         e.stopPropagation();
                         onDismissIssue(issue.id);
                       }}
-                      className="px-3 py-1 text-xs bg-muted/50 text-muted-foreground hover:bg-muted/70 rounded transition-colors"
+                      className="px-4 py-2 text-xs bg-gray-600 text-white hover:bg-gray-700 rounded-lg transition-colors font-medium"
                     >
                       Dismiss
                     </button>
-                  </div>
-                </div>
-              )}
+                  </>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     );
@@ -414,6 +467,56 @@ export function IssuesPanel({
           </div>
         )}
       </div>
+
+      {/* Edit Modal */}
+      {editModalIssue && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setEditModalIssue(null)}>
+          <div
+            className="bg-background border rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-semibold mb-4">Edit Suggested Rewrite</h3>
+
+            <div className="mb-4">
+              <p className="text-sm text-muted-foreground mb-2">Original text:</p>
+              <blockquote className="pl-3 border-l-2 border-muted/30">
+                <p className="text-sm text-muted-foreground/70 italic">
+                  {editModalIssue.anchors[0]?.quoted_text}
+                </p>
+              </blockquote>
+            </div>
+
+            <div className="mb-4">
+              <label className="text-sm font-medium mb-2 block">Your edited version:</label>
+              <textarea
+                value={editedText}
+                onChange={(e) => setEditedText(e.target.value)}
+                className="w-full min-h-[150px] p-3 border rounded bg-background text-sm"
+                autoFocus
+              />
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setEditModalIssue(null)}
+                className="px-4 py-2 text-sm bg-muted/50 text-muted-foreground hover:bg-muted/70 rounded transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  // TODO: Need to add a new prop for handling edited rewrites
+                  onAcceptIssue(editModalIssue.id);
+                  setEditModalIssue(null);
+                }}
+                className="px-4 py-2 text-sm bg-green-500/10 text-green-500 hover:bg-green-500/20 rounded transition-colors"
+              >
+                Apply Edit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
