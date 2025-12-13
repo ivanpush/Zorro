@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronDown, ArrowLeft, ArrowRight, User, Users } from 'lucide-react';
 import { useAppStore } from '@/store';
 import type { ReviewConfig, FocusDimension } from '@/types';
+import { loadDemoFindings } from '@/services/fixtures';
 
 type DocumentClass = 'research-article' | 'grant' | 'essay' | 'other';
 type ReviewMode = 'single-reviewer' | 'panel-review';
@@ -51,7 +52,7 @@ const FOCUS_PILLS: Record<DocumentClass, string[]> = {
 
 export function SetupScreen() {
   const navigate = useNavigate();
-  const { currentDocument, setReviewConfig, setReviewMode } = useAppStore();
+  const { currentDocument, setReviewConfig, setReviewMode, findings, setFindings } = useAppStore();
 
   const [documentClass, setDocumentClass] = useState<DocumentClass>('research-article');
   const [directive, setDirective] = useState('');
@@ -107,7 +108,7 @@ export function SetupScreen() {
     });
   };
 
-  const handleInitiateReview = () => {
+  const handleInitiateReview = async () => {
     if (!reviewDepth) return;
 
     const focusDimensions: FocusDimension[] = ['argumentation', 'methodology', 'clarity', 'completeness'];
@@ -125,6 +126,19 @@ export function SetupScreen() {
     setReviewMode(isDemo ? 'demo' : 'dynamic');
 
     if (isDemo) {
+      // In demo mode, ensure findings are loaded before navigating
+      if (findings.length === 0) {
+        // Load demo findings - determine which demo document we're using
+        // Based on the document, load the appropriate findings
+        try {
+          // Default to manuscript_pdf demo
+          const demoFindings = await loadDemoFindings('manuscript_pdf');
+          setFindings(demoFindings);
+        } catch (error) {
+          console.error('Failed to load demo findings:', error);
+          // Still navigate even if loading fails - the ReviewScreen will handle it
+        }
+      }
       navigate('/review');
     } else {
       navigate('/process');

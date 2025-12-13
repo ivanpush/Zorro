@@ -24,6 +24,7 @@ export function ReviewScreen() {
     addDecision,
     selectedFindingId,
     setSelectedFindingId,
+    reviewMode,
   } = useAppStore();
 
   const [filters, setFilters] = useState<FilterState>({
@@ -39,10 +40,15 @@ export function ReviewScreen() {
   });
 
   useEffect(() => {
-    if (!currentDocument || findings.length === 0) {
+    // Only redirect if we're missing document or if we're not in demo mode with no findings
+    // In demo mode, findings might be loading
+    if (!currentDocument) {
+      navigate('/upload');
+    } else if (reviewMode !== 'demo' && findings.length === 0) {
+      // In dynamic mode, if there are no findings, something went wrong
       navigate('/upload');
     }
-  }, [currentDocument, findings, navigate]);
+  }, [currentDocument, findings, navigate, reviewMode]);
 
   // Filter findings
   const filteredFindings = useMemo(() => {
@@ -240,6 +246,20 @@ export function ReviewScreen() {
 
   if (!currentDocument) {
     return null;
+  }
+
+  // In demo mode, if we have no findings yet, show a loading state
+  if (reviewMode === 'demo' && findings.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-180px)]">
+        <div className="text-center">
+          <div className="animate-pulse mb-4">
+            <div className="w-16 h-16 bg-primary/20 rounded-full mx-auto"></div>
+          </div>
+          <p className="text-muted-foreground">Loading demo findings...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
