@@ -155,6 +155,9 @@ export function DocumentViewer({
     }
   };
 
+  // Track rendered paragraph IDs to avoid duplicates
+  const renderedParagraphIds = useMemo(() => new Set<string>(), []);
+
   return (
     <div className="bg-white rounded-lg border p-6 h-full overflow-y-auto">
       {/* Document Title */}
@@ -162,9 +165,15 @@ export function DocumentViewer({
 
       {/* Sections and Paragraphs */}
       {document.sections.map((section, sectionIdx) => {
-        const sectionParagraphs = document.paragraphs.filter((p) =>
-          section.paragraph_ids?.includes(p.paragraph_id) || false
-        );
+        const sectionParagraphs = document.paragraphs.filter((p) => {
+          // Only include if this paragraph belongs to this section AND hasn't been rendered yet
+          const belongsToSection = section.paragraph_ids?.includes(p.paragraph_id) || false;
+          if (belongsToSection && !renderedParagraphIds.has(p.paragraph_id)) {
+            renderedParagraphIds.add(p.paragraph_id);
+            return true;
+          }
+          return false;
+        });
 
         return (
           <div key={section.section_id || `section-${sectionIdx}`} className="mb-6">
@@ -189,7 +198,7 @@ export function DocumentViewer({
 
               return (
                 <div
-                  key={paragraph.paragraph_id || `para-${sectionIdx}-${paraIdx}`}
+                  key={`${section.section_id}-${paragraph.paragraph_id}-${paraIdx}`}
                   className={cn(
                     'mb-4 flex group',
                     hasFindings && 'cursor-pointer hover:bg-muted/50',
@@ -229,9 +238,9 @@ export function DocumentViewer({
 
       {/* Orphaned Paragraphs (not in any section) */}
       {(() => {
-        const allSectionParagraphIds = document.sections.flatMap(s => s.paragraph_ids || []);
+        // Only show paragraphs that haven't been rendered yet
         const orphanedParagraphs = document.paragraphs.filter(p =>
-          p.paragraph_id && !allSectionParagraphIds.includes(p.paragraph_id)
+          p.paragraph_id && !renderedParagraphIds.has(p.paragraph_id)
         );
 
         if (orphanedParagraphs.length === 0) return null;
@@ -244,7 +253,7 @@ export function DocumentViewer({
 
               return (
                 <div
-                  key={`orphan-${paragraph.paragraph_id || `index-${idx}`}`}
+                  key={`orphan-${paragraph.paragraph_id}-${idx}`}
                   className={cn(
                     'mb-4 flex group',
                     hasFindings && 'cursor-pointer hover:bg-muted/50',
