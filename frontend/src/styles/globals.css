@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Vibrant dark theme with energy */
+  :root, .dark {
+    --background: 220 20% 7%;
+    --foreground: 0 0% 95%;
+    --card: 220 15% 11%;
+    --card-foreground: 0 0% 95%;
+    --popover: 220 15% 11%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 160 84% 50%;
+    --primary-foreground: 0 0% 2%;
+    --secondary: 220 15% 16%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 220 12% 18%;
+    --muted-foreground: 220 10% 65%;
+    --accent: 160 60% 45%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 220 13% 26%;
+    --input: 220 15% 16%;
+    --ring: 160 84% 50%;
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+}
+
+/* Custom severity colors for findings - dark mode optimized */
+.severity-critical {
+  @apply text-red-400 bg-red-950/50 border-red-800;
+}
+
+.severity-major {
+  @apply text-orange-400 bg-orange-950/50 border-orange-800;
+}
+
+.severity-minor {
+  @apply text-yellow-400 bg-yellow-950/50 border-yellow-800;
+}
+
+.severity-suggestion {
+  @apply text-blue-400 bg-blue-950/50 border-blue-800;
+}
+
+/* Anchor highlight colors - dark mode optimized */
+.highlight-critical {
+  @apply bg-red-900/30;
+}
+
+.highlight-major {
+  @apply bg-orange-900/30;
+}
+
+.highlight-minor {
+  @apply bg-yellow-900/30;
+}
+
+.highlight-suggestion {
+  @apply bg-blue-900/30;
+}

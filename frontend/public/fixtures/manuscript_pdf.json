@@ -1,0 +1,2858 @@
+{
+  "document_id": "man_f61b2cf0",
+  "title": "Building an atlas of mechanobiology: high-throughput contractility screen of 2418 kinase inhibitors in five primary human cell types reveals selective divergent responses among related cell types",
+  "authors": "Anton Shpak\n, Jeremy Wan\n, Ricky Huang\n, Enrico Cortes\n, Yao Wang\nRobert Damoiseaux\na,b\n, Ivan Pushkarsky\n*Corresponding author.\nAuthors 2-5 are listed in inverse order of the day of their birthday.\na Focyte Biotechnologies, Inc",
+  "affiliations": "b University of California Los Angeles, Los Angeles, CA 90095, United States\nc California NanoSystems Institute at UCLA, Los Angeles, Los Angeles, CA 90095, United States",
+  "sections": [
+    {
+      "section_id": "sec_front_matter",
+      "section_title": "Front Matter",
+      "paragraph_ids": []
+    },
+    {
+      "section_id": "abstract",
+      "section_title": "Abstract",
+      "paragraph_ids": [
+        "p_abs_1"
+      ]
+    },
+    {
+      "section_id": "sec_intro",
+      "section_title": "1. Introduction",
+      "paragraph_ids": [
+        "p_int_1",
+        "p_int_2",
+        "p_int_3",
+        "p_int_4"
+      ]
+    },
+    {
+      "section_id": "sec_results",
+      "section_title": "2. Results",
+      "paragraph_ids": [
+        "p_res_sub_2_1",
+        "p_res_1",
+        "p_res_2",
+        "p_res_sub_2_1",
+        "p_res_3",
+        "p_res_4",
+        "p_res_5",
+        "p_res_6",
+        "p_res_7",
+        "p_res_sub_2_2",
+        "p_res_8",
+        "p_res_9",
+        "p_res_10",
+        "p_res_11",
+        "p_res_12",
+        "p_res_13",
+        "p_res_14",
+        "p_res_15",
+        "p_res_16",
+        "p_res_17",
+        "p_res_18",
+        "p_res_19",
+        "p_res_sub_2_3",
+        "p_res_20",
+        "p_res_21",
+        "p_res_22",
+        "p_res_23",
+        "p_res_24",
+        "p_res_25",
+        "p_res_26",
+        "p_res_sub_2_3",
+        "p_res_27",
+        "p_res_28",
+        "p_res_29",
+        "p_res_30",
+        "p_res_31",
+        "p_res_32",
+        "p_res_33",
+        "p_res_sub_2_4",
+        "p_res_34",
+        "p_res_35",
+        "p_res_36",
+        "p_res_37",
+        "p_res_sub_2_5",
+        "p_res_38",
+        "p_res_39",
+        "p_res_40",
+        "p_res_41",
+        "p_res_42",
+        "p_res_sub_2_6",
+        "p_res_43",
+        "p_res_44",
+        "p_res_45",
+        "p_res_46"
+      ]
+    },
+    {
+      "section_id": "sec_disc",
+      "section_title": "3. Discussion",
+      "paragraph_ids": [
+        "p_dis_1",
+        "p_dis_2",
+        "p_dis_3",
+        "p_dis_4",
+        "p_dis_5",
+        "p_dis_6",
+        "p_dis_7"
+      ]
+    },
+    {
+      "section_id": "sec_methods",
+      "section_title": "4. Methods",
+      "paragraph_ids": [
+        "p_met_sub_4_1",
+        "p_met_1",
+        "p_met_sub_4_2",
+        "p_met_2",
+        "p_met_sub_4_3",
+        "p_met_3",
+        "p_met_sub_4_4",
+        "p_met_4",
+        "p_met_sub_4_5",
+        "p_met_5",
+        "p_met_6",
+        "p_met_7",
+        "p_met_8",
+        "p_met_9",
+        "p_met_10"
+      ]
+    },
+    {
+      "section_id": "sec_ack",
+      "section_title": "Acknowledgements",
+      "paragraph_ids": [
+        "p_ack_1"
+      ]
+    },
+    {
+      "section_id": "sec_refs",
+      "section_title": "References",
+      "paragraph_ids": [
+        "p_refs_1",
+        "p_refs_2",
+        "p_refs_3",
+        "p_refs_4",
+        "p_refs_5",
+        "p_refs_6",
+        "p_refs_7",
+        "p_refs_8",
+        "p_refs_9",
+        "p_refs_10",
+        "p_refs_11",
+        "p_refs_12",
+        "p_refs_13",
+        "p_refs_14",
+        "p_refs_15",
+        "p_refs_16",
+        "p_refs_17",
+        "p_refs_18",
+        "p_refs_19",
+        "p_refs_20",
+        "p_refs_21"
+      ]
+    }
+  ],
+  "paragraphs": [
+    {
+      "paragraph_id": "p_abs_1",
+      "section_id": "abstract",
+      "para_type": "text",
+      "text": "Cellular mechanical forces play crucial roles in both normal physiology and disease, yet drug discovery efforts targeting mechanobiology have been limited in part by assumptions about the conservation of contractile pathways across cell types. Here, we present the first high-throughput contractility screen of an annotated kinase inhibitor library, evaluating 2,418 compounds across five primary human cell types using the FLECS (Fluorescent Elastomer Contractility Sensors) platform. Quantification of contractile responses revealed selective divergent responses among related cell types. Clustering analysis identified distinct mechanobiological profiles and novel pathway associations that challenge the assumption that contractile pathways are too highly conserved for selective targeting. This systematic approach supports wider adoption of mechanical phenotypic screening as a viable strategy for discovering cell-type specific contractile pathway modulators for a broad range of mechanically-driven disease indications.",
+      "sentences": [
+        {
+          "sentence_id": "s_abs_1_1",
+          "text": "Cellular mechanical forces play crucial roles in both normal physiology and disease, yet drug discovery efforts targeting mechanobiology have been limited in part by assumptions about the conservation of contractile pathways across cell types.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_abs_1_2",
+          "text": "Here, we present the first high-throughput contractility screen of an annotated kinase inhibitor library, evaluating 2,418 compounds across five primary human cell types using the FLECS (Fluorescent Elastomer Contractility Sensors) platform.",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_abs_1_3",
+          "text": "Quantification of contractile responses revealed selective divergent responses among related cell types.",
+          "position": 2
+        },
+        {
+          "sentence_id": "s_abs_1_4",
+          "text": "Clustering analysis identified distinct mechanobiological profiles and novel pathway associations that challenge the assumption that contractile pathways are too highly conserved for selective targeting.",
+          "position": 3
+        },
+        {
+          "sentence_id": "s_abs_1_5",
+          "text": "This systematic approach supports wider adoption of mechanical phenotypic screening as a viable strategy for discovering cell-type specific contractile pathway modulators for a broad range of mechanically-driven disease indications.",
+          "position": 4
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_int_1",
+      "section_id": "sec_intro",
+      "para_type": "text",
+      "text": "Working alongside the well-established importance of chemistry and biology in health, the physics of cellular behavior\u2014known as mechanobiology\u2014also plays a crucial role. All cells, as well as the tissues and organs they constitute, possess the intrinsic ability to generate mechanical force. This capability is housed within the molecular machinery of each individual cell and is governed by a wide variety of pathways, many of which remain poorly understood. At the single-cell level, mechanical forces are utilized in processes such as cell division [1] , anchoring, and motility [2] , while in more complex scenarios, these forces contribute to functions such as wound repair [3] . At the tissue level, mechanical forces facilitate essential physiological processes, such as the contractions seen in cardiac, smooth, and skeletal muscle systems, which impact organs such as the bladder, intestine, and others. Mechanobiology is, therefore, a fundamental and ubiquitous feature of biological systems throughout the body [4,5]  ( Fig 1)",
+      "sentences": [
+        {
+          "sentence_id": "s_int_1_1",
+          "text": "Working alongside the well-established importance of chemistry and biology in health, the physics of cellular behavior\u2014known as mechanobiology\u2014also plays a crucial role.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_int_1_2",
+          "text": "All cells, as well as the tissues and organs they constitute, possess the intrinsic ability to generate mechanical force.",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_int_1_3",
+          "text": "This capability is housed within the molecular machinery of each individual cell and is governed by a wide variety of pathways, many of which remain poorly understood.",
+          "position": 2
+        },
+        {
+          "sentence_id": "s_int_1_4",
+          "text": "At the single-cell level, mechanical forces are utilized in processes such as cell division [1] , anchoring, and motility [2] , while in more complex scenarios, these forces contribute to functions such as wound repair [3] .",
+          "position": 3
+        },
+        {
+          "sentence_id": "s_int_1_5",
+          "text": "At the tissue level, mechanical forces facilitate essential physiological processes, such as the contractions seen in cardiac, smooth, and skeletal muscle systems, which impact organs such as the bladder, intestine, and others.",
+          "position": 4
+        },
+        {
+          "sentence_id": "s_int_1_6",
+          "text": "Mechanobiology is, therefore, a fundamental and ubiquitous feature of biological systems throughout the body [4,5]  ( Fig 1)",
+          "position": 5
+        }
+      ],
+      "metadata": {
+        "fig_refs": [
+          "fig_1"
+        ],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_int_2",
+      "section_id": "sec_intro",
+      "para_type": "text",
+      "text": "Dysregulation of these mechanical processes within cells can contribute, either partially or entirely, to the development of various complex diseases. These conditions can be grouped into several broad categories, including diseases related to connective tissue, such as asthma [6-8]  and bladder dysfunction [9-11] , fibrotic conditions such as lung and liver fibrosis [12-14] , as well as oncological and rarer disorders. The development of therapies to target these diseases has been constrained by our limited understanding of the underlying biological mechanisms. Although there are existing therapeutic strategies that directly modulate contractile forces to treat disease, such as in the treatment of asthma with beta-2 adrenergic receptor agonists, such as albuterol used to relax smooth muscle, we overall lack comprehensive insight into the full spectrum of druggable pathways that regulate cellular and tissue mechanics.",
+      "sentences": [
+        {
+          "sentence_id": "s_int_2_1",
+          "text": "Dysregulation of these mechanical processes within cells can contribute, either partially or entirely, to the development of various complex diseases.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_int_2_2",
+          "text": "These conditions can be grouped into several broad categories, including diseases related to connective tissue, such as asthma [6-8]  and bladder dysfunction [9-11] , fibrotic conditions such as lung and liver fibrosis [12-14] , as well as oncological and rarer disorders.",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_int_2_3",
+          "text": "The development of therapies to target these diseases has been constrained by our limited understanding of the underlying biological mechanisms.",
+          "position": 2
+        },
+        {
+          "sentence_id": "s_int_2_4",
+          "text": "Although there are existing therapeutic strategies that directly modulate contractile forces to treat disease, such as in the treatment of asthma with beta-2 adrenergic receptor agonists, such as albuterol used to relax smooth muscle, we overall lack comprehensive insight into the full spectrum of druggable pathways that regulate cellular and tissue mechanics.",
+          "position": 3
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_int_3",
+      "section_id": "sec_intro",
+      "para_type": "text",
+      "text": "Historically, a lack of technological means to quantitatively profile contractile cell force at sufficient scale, and the long-held conservative assumption that contractile pathways are highly conserved across cell types (making them challenging to target with precision and safety), has prevented a deeper pursuit of mechanobiological readouts as a means for phenotypic drug discovery.",
+      "sentences": [
+        {
+          "sentence_id": "s_int_3_1",
+          "text": "Historically, a lack of technological means to quantitatively profile contractile cell force at sufficient scale, and the long-held conservative assumption that contractile pathways are highly conserved across cell types (making them challenging to target with precision and safety), has prevented a deeper pursuit of mechanobiological readouts as a means for phenotypic drug discovery.",
+          "position": 0
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_int_4",
+      "section_id": "sec_intro",
+      "para_type": "text",
+      "text": "To address this, we conducted the first ever high-throughput cell contractility screen of an annotated library of kinase inhibitors across two distinct disease categories within mechanobiology and utilizing five primary human cell types representative of these conditions. Our results reveal that, while some responses are conserved, there are also highly specific and selective activities observed across different cell types in response to the same treatment. These findings provide empirical evidence that selective pathways can indeed be exploited to safely target mechanical processes in the treatment of disease.",
+      "sentences": [
+        {
+          "sentence_id": "s_int_4_1",
+          "text": "To address this, we conducted the first ever high-throughput cell contractility screen of an annotated library of kinase inhibitors across two distinct disease categories within mechanobiology and utilizing five primary human cell types representative of these conditions.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_int_4_2",
+          "text": "Our results reveal that, while some responses are conserved, there are also highly specific and selective activities observed across different cell types in response to the same treatment.",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_int_4_3",
+          "text": "These findings provide empirical evidence that selective pathways can indeed be exploited to safely target mechanical processes in the treatment of disease.",
+          "position": 2
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_sub_2_1",
+      "section_id": "sec_results",
+      "para_type": "subsection_header",
+      "text": "2.1 FLECS technology is a general purpose platform to scalably screen contractile cell force",
+      "sentences": [],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_1",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "Previously, we introduced the FLECS Technology platform as an automated, high-throughput system for assaying contractile force at the single-cell level across large populations of various types of primary human cells [6,8,13,15-19] . Briefly, this platform enables precise measurement of both acute and longer-term contractile responses in distinct cell types. Specifically, we have demonstrated its ability to classify the acute contractile responses of smooth muscle cells as well as the longer-term response of fibroblasts to TGF-    activation.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_1_1",
+          "text": "Previously, we introduced the FLECS Technology platform as an automated, high-throughput system for assaying contractile force at the single-cell level across large populations of various types of primary human cells [6,8,13,15-19] .",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_1_2",
+          "text": "Briefly, this platform enables precise measurement of both acute and longer-term contractile responses in distinct cell types.",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_res_1_3",
+          "text": "Specifically, we have demonstrated its ability to classify the acute contractile responses of smooth muscle cells as well as the longer-term response of fibroblasts to TGF-    activation.",
+          "position": 2
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_2",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "To explore how different human cell types and classes respond to the same pharmacological treatments, we screened a library of kinase inhibitors in two types of smooth muscle cells relevant to connective tissue disorders and two progenitor myofibroblast cell types involved in organ fibrosis. The smooth muscle cells, derived from bladder and airway tissues, were screened for their acute responses (45 minutes and 2 hours post-drug exposure) since conditions like asthma and spastic bladder require rapid intervention during flare-ups. The fibroblast progenitor cells, specifically lung fibroblasts and hepatic stellate cells, were screened for their responses over a 24-hour period in the presence of TGF-   , as this more closely models the activation of myofibroblasts\u2014a key process in the progression of fibrosis.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_2_1",
+          "text": "To explore how different human cell types and classes respond to the same pharmacological treatments, we screened a library of kinase inhibitors in two types of smooth muscle cells relevant to connective tissue disorders and two progenitor myofibroblast cell types involved in organ fibrosis.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_2_2",
+          "text": "The smooth muscle cells, derived from bladder and airway tissues, were screened for their acute responses (45 minutes and 2 hours post-drug exposure) since conditions like asthma and spastic bladder require rapid intervention during flare-ups.",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_res_2_3",
+          "text": "The fibroblast progenitor cells, specifically lung fibroblasts and hepatic stellate cells, were screened for their responses over a 24-hour period in the presence of TGF-   , as this more closely models the activation of myofibroblasts\u2014a key process in the progression of fibrosis.",
+          "position": 2
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_sub_2_1",
+      "section_id": "sec_results",
+      "para_type": "subsection_header",
+      "text": "2.1 Primary screen results",
+      "sentences": [],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_3",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "Following protocols developed in our prior works, we conducted acute, 45-min, response screens in primary human bladder (HBSM) and airway (HASM) smooth muscle cells (collectively, \"SMC\"), and 24-hour screen screens in primary human lung fibroblasts, hepatic stellate cells, and IPF patient derived lung fibroblasts - collectively referred to as myofibroblast progenitors (\"MYO\"), each while exposed to TGF-    over this 24-hour period. Our experimental parameters are summarized in Table 1.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_3_1",
+          "text": "Following protocols developed in our prior works, we conducted acute, 45-min, response screens in primary human bladder (HBSM) and airway (HASM) smooth muscle cells (collectively, \"SMC\"), and 24-hour screen screens in primary human lung fibroblasts, hepatic stellate cells, and IPF patient derived lung fibroblasts - collectively referred to as myofibroblast progenitors (\"MYO\"), each while exposed to TGF-    over this 24-hour period.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_3_2",
+          "text": "Our experimental parameters are summarized in Table 1.",
+          "position": 1
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": [
+          "table_1"
+        ]
+      }
+    },
+    {
+      "paragraph_id": "p_res_4",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "All experiments were performed on 384-well FLECS plates at two doses (356 nM and 35 nM).  In addition, to evaluate possible differential responses between the two categories of cell types, smooth muscle cells were also screened in a 24-hour format but without exposure to TGF-    at a single dose (356 nM). Collectively, over 38,000 drug-dosed wells were imaged each with >100 single cells, not including controls.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_4_1",
+          "text": "All experiments were performed on 384-well FLECS plates at two doses (356 nM and 35 nM).",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_4_2",
+          "text": "In addition, to evaluate possible differential responses between the two categories of cell types, smooth muscle cells were also screened in a 24-hour format but without exposure to TGF-    at a single dose (356 nM).",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_res_4_3",
+          "text": "Collectively, over 38,000 drug-dosed wells were imaged each with >100 single cells, not including controls.",
+          "position": 2
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_5",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "Acute SMC screens were performed by allowing seeded SMCs to adhere overnight on FLECS assay plates, imaging their contracted states at baseline, administering drug compounds, and reading their response at 45 minutes following drug addition. Final timepoints were taken 2 hours after drug administration. In this format, DMSO-only wells served as negative controls. No pharmacological positive control was administered since micropatterns lacking adhered cells serve as inherent positive controls.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_5_1",
+          "text": "Acute SMC screens were performed by allowing seeded SMCs to adhere overnight on FLECS assay plates, imaging their contracted states at baseline, administering drug compounds, and reading their response at 45 minutes following drug addition.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_5_2",
+          "text": "Final timepoints were taken 2 hours after drug administration.",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_res_5_3",
+          "text": "In this format, DMSO-only wells served as negative controls.",
+          "position": 2
+        },
+        {
+          "sentence_id": "s_res_5_4",
+          "text": "No pharmacological positive control was administered since micropatterns lacking adhered cells serve as inherent positive controls.",
+          "position": 3
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_6",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "All 24-hour SMC screens were conducted identically but were only imaged at 24 hours after drug addition. All 24-hour TGF-    MYO screens were performed by allowing MYO cells to adhere in FLECS assay plates pre-loaded with drug compounds for 4 hours. Then, TGF-   was added to the cells. After 24 hours, the plates were imaged at one terminal timepoint. In this format, DMSO-only wells served as negative controls while wells without TGF-   provided positive controls representing non-activated myofibroblast progenitor cells.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_6_1",
+          "text": "All 24-hour SMC screens were conducted identically but were only imaged at 24 hours after drug addition.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_6_2",
+          "text": "All 24-hour TGF-    MYO screens were performed by allowing MYO cells to adhere in FLECS assay plates pre-loaded with drug compounds for 4 hours.",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_res_6_3",
+          "text": "Then, TGF-   was added to the cells.",
+          "position": 2
+        },
+        {
+          "sentence_id": "s_res_6_4",
+          "text": "After 24 hours, the plates were imaged at one terminal timepoint.",
+          "position": 3
+        },
+        {
+          "sentence_id": "s_res_6_5",
+          "text": "In this format, DMSO-only wells served as negative controls while wells without TGF-   provided positive controls representing non-activated myofibroblast progenitor cells.",
+          "position": 4
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_7",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "Figure 3 shows the normalized screen results across all primary screens. Normalized contraction values are shown in the Appendix. The tightest distributions are observed in acute SMC screens (hit upper bound > 8 MADs below median of treated wells) while the most variation is seen in HLF-SC at the 356 nM dose (hit upper bound 1.5 MADs below median), Robust Z' factors for all TGF-    MYO screens are given in the appendix. For MYO screens, hits were defined as compounds that achieved both Z-score < -3 and normalized activity inhibition of at least 15% to ensure both statistical significance and biological relevance. For SMC screens, hits were defined as compounds that achieved a decrease in normalized activity inhibition of at least 20% from the baseline timepoint.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_7_1",
+          "text": "Figure 3 shows the normalized screen results across all primary screens.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_7_2",
+          "text": "Normalized contraction values are shown in the Appendix.",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_res_7_3",
+          "text": "The tightest distributions are observed in acute SMC screens (hit upper bound > 8 MADs below median of treated wells) while the most variation is seen in HLF-SC at the 356 nM dose (hit upper bound 1.5 MADs below median), Robust Z' factors for all TGF-    MYO screens are given in the appendix.",
+          "position": 2
+        },
+        {
+          "sentence_id": "s_res_7_4",
+          "text": "For MYO screens, hits were defined as compounds that achieved both Z-score < -3 and normalized activity inhibition of at least 15% to ensure both statistical significance and biological relevance.",
+          "position": 3
+        },
+        {
+          "sentence_id": "s_res_7_5",
+          "text": "For SMC screens, hits were defined as compounds that achieved a decrease in normalized activity inhibition of at least 20% from the baseline timepoint.",
+          "position": 4
+        }
+      ],
+      "metadata": {
+        "fig_refs": [
+          "fig_3"
+        ],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_sub_2_2",
+      "section_id": "sec_results",
+      "para_type": "subsection_header",
+      "text": "2.2 Clustering of pri mary screening data identifies clear activity clusters described by specific pathway representation.",
+      "sentences": [],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_8",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "To analyze broad patterns in compound responses, we applied agglomerative hierarchical clustering to the vectorized dataset (Fig 4a) , capturing compound activity across cell types and doses at the 24 hour timepoint.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_8_1",
+          "text": "To analyze broad patterns in compound responses, we applied agglomerative hierarchical clustering to the vectorized dataset (Fig 4a) , capturing compound activity across cell types and doses at the 24 hour timepoint.",
+          "position": 0
+        }
+      ],
+      "metadata": {
+        "fig_refs": [
+          "fig_4"
+        ],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_9",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "Agglomerative hierarchical clustering begins by treating each observation as its own cluster. Then, similar pairs of clusters are iteratively merged based on a linkage criterion that represents the dissimilarity between sets of observations. This criterion is computed as a function of the pairwise distances between the single observations within these sets.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_9_1",
+          "text": "Agglomerative hierarchical clustering begins by treating each observation as its own cluster.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_9_2",
+          "text": "Then, similar pairs of clusters are iteratively merged based on a linkage criterion that represents the dissimilarity between sets of observations.",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_res_9_3",
+          "text": "This criterion is computed as a function of the pairwise distances between the single observations within these sets.",
+          "position": 2
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_10",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "Given the low dimensionality of our data, and given that magnitude of response is of primary concern, we used Euclidean distance as the pairwise distance metric, thus quantifying the geometric relationships between compound response vectors. We performed the clustering using Ward's linkage, which minimizes the increase in total within-cluster variance when merging two clusters. To visualize this process, we created a hierarchical dendrogram that represents relationships at various levels of similarity.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_10_1",
+          "text": "Given the low dimensionality of our data, and given that magnitude of response is of primary concern, we used Euclidean distance as the pairwise distance metric, thus quantifying the geometric relationships between compound response vectors.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_10_2",
+          "text": "We performed the clustering using Ward's linkage, which minimizes the increase in total within-cluster variance when merging two clusters.",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_res_10_3",
+          "text": "To visualize this process, we created a hierarchical dendrogram that represents relationships at various levels of similarity.",
+          "position": 2
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_11",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "For this analysis, we focused on the penultimate branch point, where the dendrogram resolves into four clusters (Fig 4a) . We chose this number of clusters based on visual inspection. At the four-cluster level, the clusters appear sparse and well-separated, suggesting that they represent distinct and meaningful groupings. Moreover, the clusters remain large enough to yield statistically significant comparisons between them.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_11_1",
+          "text": "For this analysis, we focused on the penultimate branch point, where the dendrogram resolves into four clusters (Fig 4a) .",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_11_2",
+          "text": "We chose this number of clusters based on visual inspection.",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_res_11_3",
+          "text": "At the four-cluster level, the clusters appear sparse and well-separated, suggesting that they represent distinct and meaningful groupings.",
+          "position": 2
+        },
+        {
+          "sentence_id": "s_res_11_4",
+          "text": "Moreover, the clusters remain large enough to yield statistically significant comparisons between them.",
+          "position": 3
+        }
+      ],
+      "metadata": {
+        "fig_refs": [
+          "fig_4"
+        ],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_12",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "By examining the four primary clusters at this level, we identified fundamental groupings of compounds with similar mechanobiological effects, capturing both shared mechanisms and distinct response profiles across the dataset.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_12_1",
+          "text": "By examining the four primary clusters at this level, we identified fundamental groupings of compounds with similar mechanobiological effects, capturing both shared mechanisms and distinct response profiles across the dataset.",
+          "position": 0
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_13",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "Qualitative and quantitative analysis of mean drug responses across all cell types at this distance level revealed four distinct activity clusters, which we designate with the following labels:",
+      "sentences": [
+        {
+          "sentence_id": "s_res_13_1",
+          "text": "Qualitative and quantitative analysis of mean drug responses across all cell types at this distance level revealed four distinct activity clusters, which we designate with the following labels:",
+          "position": 0
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_14",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "HHSteC-specific compounds\n- compounds primarily active in human hepatic stellate cells (HHSteCs)",
+      "sentences": [
+        {
+          "sentence_id": "s_res_14_1",
+          "text": "HHSteC-specific compounds\n- compounds primarily active in human hepatic stellate cells (HHSteCs)",
+          "position": 0
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_15",
+      "section_id": "sec_results",
+      "para_type": "subheading",
+      "text": "Inhibitors\n- compounds with broad inhibition across all cell types tested",
+      "sentences": [],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_16",
+      "section_id": "sec_results",
+      "para_type": "subheading",
+      "text": "Inactives\n- compounds that did not affect contraction in any cell type",
+      "sentences": [],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_17",
+      "section_id": "sec_results",
+      "para_type": "subheading",
+      "text": "Inducers\n- compounds that increased contraction of cells",
+      "sentences": [],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_18",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "Following from this, we used the hypergeometric distribution to evaluate which pathways were overrepresented within each cluster (under the null hypothesis that pathways were identically distributed across clusters). We identified several expected associations as well as novel ones. Specifically, the Inhibitors cluster contained overrepresentations of the cell-cycle/DNA damage, ROCK, and TGF-beta/Smad pathways all of which are known to affect cytoskeletal function, contraction, or TGF-beta activation (which was induced in all MYO cell types). This result validated the FLECS Platform's ability to reflect known mechanobiological responses in cells.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_18_1",
+          "text": "Following from this, we used the hypergeometric distribution to evaluate which pathways were overrepresented within each cluster (under the null hypothesis that pathways were identically distributed across clusters).",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_18_2",
+          "text": "We identified several expected associations as well as novel ones.",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_res_18_3",
+          "text": "Specifically, the Inhibitors cluster contained overrepresentations of the cell-cycle/DNA damage, ROCK, and TGF-beta/Smad pathways all of which are known to affect cytoskeletal function, contraction, or TGF-beta activation (which was induced in all MYO cell types).",
+          "position": 2
+        },
+        {
+          "sentence_id": "s_res_18_4",
+          "text": "This result validated the FLECS Platform's ability to reflect known mechanobiological responses in cells.",
+          "position": 3
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_19",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "Novel results from this analysis include the overrepresentation of PI3K/Akt/mTOR in the HHSteC-specific cluster but not in the Inhibitors cluster, and the overrepresentation of MAP/ERK in the Inducers cluster, suggesting possible targets for disease indications where enhancement or restoration of higher contractile tone would benefit patients, such as underactive bladder.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_19_1",
+          "text": "Novel results from this analysis include the overrepresentation of PI3K/Akt/mTOR in the HHSteC-specific cluster but not in the Inhibitors cluster, and the overrepresentation of MAP/ERK in the Inducers cluster, suggesting possible targets for disease indications where enhancement or restoration of higher contractile tone would benefit patients, such as underactive bladder.",
+          "position": 0
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_sub_2_3",
+      "section_id": "sec_results",
+      "para_type": "subsection_header",
+      "text": "2.3 Subcluster Dissection Reveals Distinct Mechanobiological Response Profiles and Pathway Biases",
+      "sentences": [],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_20",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "To further refine our understanding of pathway groupings within the identified primary clusters, we performed a secondary clustering analysis. Each of the four main clusters \u2014",
+      "sentences": [
+        {
+          "sentence_id": "s_res_20_1",
+          "text": "To further refine our understanding of pathway groupings within the identified primary clusters, we performed a secondary clustering analysis.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_20_2",
+          "text": "Each of the four main clusters \u2014",
+          "position": 1
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_21",
+      "section_id": "sec_results",
+      "para_type": "subheading",
+      "text": "HHSteC-specific compounds, Inhibitors, Inactives, and Inducers",
+      "sentences": [],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_22",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "\u2014 was further subdivided.  The number of sub-clusters was chosen based on visual inspection of the dendrogram. This was done separately for each cluster, to ensure that sub-clusters were well-separated and were not singletons or otherwise too small to observe statistically significant differences. Overall, the subclusters maintained the general activity themes of the parent clusters. However, at this finer level of resolution, by similarly evaluating pathway overrepresentation using the hypergeometric distribution, additional mechanistic themes and pathway contributions that were not apparent at the primary cluster level were revealed.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_22_1",
+          "text": "\u2014 was further subdivided.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_22_2",
+          "text": "The number of sub-clusters was chosen based on visual inspection of the dendrogram.",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_res_22_3",
+          "text": "This was done separately for each cluster, to ensure that sub-clusters were well-separated and were not singletons or otherwise too small to observe statistically significant differences.",
+          "position": 2
+        },
+        {
+          "sentence_id": "s_res_22_4",
+          "text": "Overall, the subclusters maintained the general activity themes of the parent clusters.",
+          "position": 3
+        },
+        {
+          "sentence_id": "s_res_22_5",
+          "text": "However, at this finer level of resolution, by similarly evaluating pathway overrepresentation using the hypergeometric distribution, additional mechanistic themes and pathway contributions that were not apparent at the primary cluster level were revealed.",
+          "position": 4
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_23",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "In particular, the HHSteC-specific cluster was sub-divided into strong HHSteC inhibitors (HHS2), moderated HHSteC inhibitors (HHS3), and TGF-beta pathway inhibitors which only affected MYO cells (HHS3 - where nHLF, IPF-HLF, and HHSteC but not SMC cells were affected). Statistically significant overrepresentation of TGF-beta pathway in HHS1 confirms this association.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_23_1",
+          "text": "In particular, the HHSteC-specific cluster was sub-divided into strong HHSteC inhibitors (HHS2), moderated HHSteC inhibitors (HHS3), and TGF-beta pathway inhibitors which only affected MYO cells (HHS3 - where nHLF, IPF-HLF, and HHSteC but not SMC cells were affected).",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_23_2",
+          "text": "Statistically significant overrepresentation of TGF-beta pathway in HHS1 confirms this association.",
+          "position": 1
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_24",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "The Inhibitors sub-clusters broke out into strong general inhibitors (INH2), weak general inhibitors (INH2), and a third grouping which appears to represent strong inhibitors in non-diseased MYO cells but not in HLF-IPF nor the SMCs. Interestingly, INH1 (strong general inhibitors) are associated with metabolic enzyme pathway overrepresentation while INH2 (weak general inhibitors) are associated with ROCK pathway overrepresentation - a known broadly active regulator of cellular contractility.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_24_1",
+          "text": "The Inhibitors sub-clusters broke out into strong general inhibitors (INH2), weak general inhibitors (INH2), and a third grouping which appears to represent strong inhibitors in non-diseased MYO cells but not in HLF-IPF nor the SMCs.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_24_2",
+          "text": "Interestingly, INH1 (strong general inhibitors) are associated with metabolic enzyme pathway overrepresentation while INH2 (weak general inhibitors) are associated with ROCK pathway overrepresentation - a known broadly active regulator of cellular contractility.",
+          "position": 1
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_25",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "The Inactives subcluster\u2014the largest by compound count\u2014 further resolved into three distinct groups: a wholly inactive group that accounted for over 75% of the parent cluster (INA1), as expected, and two smaller subclusters with unexpected low, non-zero activity one of which showed selective effects in HHSteCs (INA2), and one which displayed low non-zero activity across all cell types (INA3). This result suggests that on a relative basis, the modest activities of sub-clusters INA2, INA3 were more numerically similar to entirely inactive compounds indicating their activities would be masked without this secondary subcluster analysis.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_25_1",
+          "text": "The Inactives subcluster\u2014the largest by compound count\u2014 further resolved into three distinct groups: a wholly inactive group that accounted for over 75% of the parent cluster (INA1), as expected, and two smaller subclusters with unexpected low, non-zero activity one of which showed selective effects in HHSteCs (INA2), and one which displayed low non-zero activity across all cell types (INA3).",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_25_2",
+          "text": "This result suggests that on a relative basis, the modest activities of sub-clusters INA2, INA3 were more numerically similar to entirely inactive compounds indicating their activities would be masked without this secondary subcluster analysis.",
+          "position": 1
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_26",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "Finally, the Inducers parent cluster was subdivided into two subclusters representing inducer activity in all cell types (IND1) and selective inducer activity only in SMCs (IND2). Pathway enrichment analysis on this subclusters suggest MAP/ERK pathway might regulate contractility in various different cell types while Protein Tyrosine Kinase/PTKs pathway might be selective towards SMCs.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_26_1",
+          "text": "Finally, the Inducers parent cluster was subdivided into two subclusters representing inducer activity in all cell types (IND1) and selective inducer activity only in SMCs (IND2).",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_26_2",
+          "text": "Pathway enrichment analysis on this subclusters suggest MAP/ERK pathway might regulate contractility in various different cell types while Protein Tyrosine Kinase/PTKs pathway might be selective towards SMCs.",
+          "position": 1
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_sub_2_3",
+      "section_id": "sec_results",
+      "para_type": "subsection_header",
+      "text": "2.3 Hit selection and confirmation",
+      "sentences": [],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_27",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "Next, we cherry-picked molecules that registered as hits per our original definitions. Some compounds that met the hit definition were excluded due to evidence of toxicity (observed through dead staining and from morphology). Other compounds were excluded due to inactivity in one cell type when picked together (e.g., compounds active in HLF-SC at the 35 nM dose but only active in HLF-IPF-1 at the 365 nM dose were picked at 35 nM and excluded from the analysis for HLF-IPF-1). A few borderline hits were excluded due suspected inactivity in combination with plate limitations (e.g., for HHSteC, there were slightly too many hits to fit on one cherry-pick drug plate).",
+      "sentences": [
+        {
+          "sentence_id": "s_res_27_1",
+          "text": "Next, we cherry-picked molecules that registered as hits per our original definitions.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_27_2",
+          "text": "Some compounds that met the hit definition were excluded due to evidence of toxicity (observed through dead staining and from morphology).",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_res_27_3",
+          "text": "Other compounds were excluded due to inactivity in one cell type when picked together (e.g. , compounds active in HLF-SC at the 35 nM dose but only active in HLF-IPF-1 at the 365 nM dose were picked at 35 nM and excluded from the analysis for HLF-IPF-1).",
+          "position": 2
+        },
+        {
+          "sentence_id": "s_res_27_4",
+          "text": "A few borderline hits were excluded due suspected inactivity in combination with plate limitations (e.g. , for HHSteC, there were slightly too many hits to fit on one cherry-pick drug plate).",
+          "position": 3
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_28",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "Compounds were cherry-picked for confirmation screening only their lowest active doses.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_28_1",
+          "text": "Compounds were cherry-picked for confirmation screening only their lowest active doses.",
+          "position": 0
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_29",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "Figure 6 summarizes our effort in taking primary screen data, identifying and retesting suspected hits, and advancing certain interesting confirmed hits into dose-response testing. As part of this process, certain molecules that were initially found to be more active in one cell type over another were re-tested across a dose-range in multiple cell types to better understand their selective activity.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_29_1",
+          "text": "Figure 6 summarizes our effort in taking primary screen data, identifying and retesting suspected hits, and advancing certain interesting confirmed hits into dose-response testing.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_29_2",
+          "text": "As part of this process, certain molecules that were initially found to be more active in one cell type over another were re-tested across a dose-range in multiple cell types to better understand their selective activity.",
+          "position": 1
+        }
+      ],
+      "metadata": {
+        "fig_refs": [
+          "fig_6"
+        ],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_30",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "As discussed previously, the SMCs, derived from bladder and airway tissues, were screened for their acute responses at 45 minutes and 2 hours post-drug exposure, as conditions like asthma and spastic bladder require rapid intervention during flare-ups. In contrast, the MYO cells\u2014specifically lung fibroblasts and hepatic stellate cells\u2014were screened for their responses over a 24-hour period in the presence of TGF-   . This longer time frame was chosen to model the activation of myofibroblasts, a key process in the progression of fibrosis. All subsequent confirmation screen analyses were conducted using these time-point-specific activity definitions.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_30_1",
+          "text": "As discussed previously, the SMCs, derived from bladder and airway tissues, were screened for their acute responses at 45 minutes and 2 hours post-drug exposure, as conditions like asthma and spastic bladder require rapid intervention during flare-ups.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_30_2",
+          "text": "In contrast, the MYO cells\u2014specifically lung fibroblasts and hepatic stellate cells\u2014were screened for their responses over a 24-hour period in the presence of TGF-   .",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_res_30_3",
+          "text": "This longer time frame was chosen to model the activation of myofibroblasts, a key process in the progression of fibrosis.",
+          "position": 2
+        },
+        {
+          "sentence_id": "s_res_30_4",
+          "text": "All subsequent confirmation screen analyses were conducted using these time-point-specific activity definitions.",
+          "position": 3
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_31",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "Based on the strictest criteria of having all 3 replicates of the confirmation screen meet our definition for a hit, we observed a confirmation rate of >40% in all cell types with the exception of IPF-HLF which are primary IPF patient-derived and appear much more heterogenous in morphology, size, and contractile activity.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_31_1",
+          "text": "Based on the strictest criteria of having all 3 replicates of the confirmation screen meet our definition for a hit, we observed a confirmation rate of >40% in all cell types with the exception of IPF-HLF which are primary IPF patient-derived and appear much more heterogenous in morphology, size, and contractile activity.",
+          "position": 0
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_32",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "Data from the triplicate confirmation screen experiments demonstrated strong consistency, with mean pairwise R\u00b2 correlation values exceeding 0.75 and approaching 0.9 for certain cell types (Fig 7b) , underscoring the robustness of the results. A heatmap of the confirmation index (out of 3 replicates) across cell type and compound combinations (Fig 7c) reinforced our primary screening findings, revealing both highly cell-type-specific responses and shared effects across multiple cell types induced by certain compounds.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_32_1",
+          "text": "Data from the triplicate confirmation screen experiments demonstrated strong consistency, with mean pairwise R\u00b2 correlation values exceeding 0.75 and approaching 0.9 for certain cell types (Fig 7b) , underscoring the robustness of the results.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_32_2",
+          "text": "A heatmap of the confirmation index (out of 3 replicates) across cell type and compound combinations (Fig 7c) reinforced our primary screening findings, revealing both highly cell-type-specific responses and shared effects across multiple cell types induced by certain compounds.",
+          "position": 1
+        }
+      ],
+      "metadata": {
+        "fig_refs": [
+          "fig_7",
+          "fig_7"
+        ],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_33",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "To further classify these diverse activities and elucidate the underlying biological pathways driving them, we performed agglomerative hierarchical clustering on the confirmation dataset and evaluated the pathways associated with the compounds comprising each cluster.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_33_1",
+          "text": "To further classify these diverse activities and elucidate the underlying biological pathways driving them, we performed agglomerative hierarchical clustering on the confirmation dataset and evaluated the pathways associated with the compounds comprising each cluster.",
+          "position": 0
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_sub_2_4",
+      "section_id": "sec_results",
+      "para_type": "subsection_header",
+      "text": "2.4 Pathway analysis of confirmation data",
+      "sentences": [],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_34",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "As with the earlier analysis of the 24-hour primary screen dataset, the number of clusters was chosen based on visual inspection of the clustering dendrogram (Fig 8a) . At the four-cluster level, the branches of the dendrogram appear well-separated, suggesting that these clusters represent meaningful groupings.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_34_1",
+          "text": "As with the earlier analysis of the 24-hour primary screen dataset, the number of clusters was chosen based on visual inspection of the clustering dendrogram (Fig 8a) .",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_34_2",
+          "text": "At the four-cluster level, the branches of the dendrogram appear well-separated, suggesting that these clusters represent meaningful groupings.",
+          "position": 1
+        }
+      ],
+      "metadata": {
+        "fig_refs": [
+          "fig_8"
+        ],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_35",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "Within these four clusters, we identified fundamental groupings of compounds with similar mechanobiological effects, encompassing both shared mechanisms and distinct response profiles across the dataset. Two clusters characterized  response types similar to those observed in the primary screen data - the \"HHSteC-specific\" cluster (typified by a greater response in HHSteC cells), and the \"General\" cluster (typified by a broad inhibitory response across all cell types), resemble the \"HHSteC-specific\" and \"Inhibitors\" primary screen clusters respectively.  This suggests that these groupings reflect similarities in the constituent compounds across the two screens. Furthermore, cell-type-specific activities were observed in the remaining two clusters, which we designated as \"Long-term/MYO-specific\" and \"Acute/SMC-specific,\" reflecting the earlier observation time points used for SMCs.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_35_1",
+          "text": "Within these four clusters, we identified fundamental groupings of compounds with similar mechanobiological effects, encompassing both shared mechanisms and distinct response profiles across the dataset.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_35_2",
+          "text": "Two clusters characterized  response types similar to those observed in the primary screen data - the \"HHSteC-specific\" cluster (typified by a greater response in HHSteC cells), and the \"General\" cluster (typified by a broad inhibitory response across all cell types), resemble the \"HHSteC-specific\" and \"Inhibitors\" primary screen clusters respectively.",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_res_35_3",
+          "text": "This suggests that these groupings reflect similarities in the constituent compounds across the two screens.",
+          "position": 2
+        },
+        {
+          "sentence_id": "s_res_35_4",
+          "text": "Furthermore, cell-type-specific activities were observed in the remaining two clusters, which we designated as \"Long-term/MYO-specific\" and \"Acute/SMC-specific,\" reflecting the earlier observation time points used for SMCs.",
+          "position": 3
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_36",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "To elucidate the pathways underpinning these activity profiles, we again applied the hypergeometric distribution to evaluate which pathways were overrepresented within each cluster (under the null hypothesis that pathways were identically distributed across clusters). Several expected associations were identified, along with novel ones (Fig 8c) . In particular, statistical overrepresentation of the ROCK pathway was observed in the \"General\" cluster, characterized by inhibition across all cell types. Meanwhile, the \"Long-term/MYO-specific\" cluster exhibited a statistical overrepresentation of immunology/inflammation pathways.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_36_1",
+          "text": "To elucidate the pathways underpinning these activity profiles, we again applied the hypergeometric distribution to evaluate which pathways were overrepresented within each cluster (under the null hypothesis that pathways were identically distributed across clusters).",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_36_2",
+          "text": "Several expected associations were identified, along with novel ones (Fig 8c) .",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_res_36_3",
+          "text": "In particular, statistical overrepresentation of the ROCK pathway was observed in the \"General\" cluster, characterized by inhibition across all cell types.",
+          "position": 2
+        },
+        {
+          "sentence_id": "s_res_36_4",
+          "text": "Meanwhile, the \"Long-term/MYO-specific\" cluster exhibited a statistical overrepresentation of immunology/inflammation pathways.",
+          "position": 3
+        }
+      ],
+      "metadata": {
+        "fig_refs": [
+          "fig_8"
+        ],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_37",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "The PI3K/Akt/mTOR and Cell Cycle/DNA Damage pathways was again statistically overrepresented in the \"HHSteC-specific\" cluster, consistent with the analysis performed on the entire primary screen dataset. Interestingly, the Protein Tyrosine Kinase/RTK and Neuronal Signaling pathways were overrepresented in the \"Acute/SMC-specific\" cluster, suggesting a unique influence of these pathways on SMC contractile function or acute response times.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_37_1",
+          "text": "The PI3K/Akt/mTOR and Cell Cycle/DNA Damage pathways was again statistically overrepresented in the \"HHSteC-specific\" cluster, consistent with the analysis performed on the entire primary screen dataset.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_37_2",
+          "text": "Interestingly, the Protein Tyrosine Kinase/RTK and Neuronal Signaling pathways were overrepresented in the \"Acute/SMC-specific\" cluster, suggesting a unique influence of these pathways on SMC contractile function or acute response times.",
+          "position": 1
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_sub_2_5",
+      "section_id": "sec_results",
+      "para_type": "subsection_header",
+      "text": "2.5 Comparison of HLF-SC to HHSteC",
+      "sentences": [],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_38",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "Following our comparison of activities and profiles across different clusters, we next focused on analyzing potential differences in responses between related cell types, beginning with HLF and HHSteC, both classified as MYO cell types.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_38_1",
+          "text": "Following our comparison of activities and profiles across different clusters, we next focused on analyzing potential differences in responses between related cell types, beginning with HLF and HHSteC, both classified as MYO cell types.",
+          "position": 0
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_39",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "To do this, we first plotted the mean robust Z-scores (using confirmation screen data) for each compound tested in both cell types against each other to directly compare their responses (Fig 9a) . Although the distribution of pathways represented among the confirmed hits was largely similar between the two cell types (Fig 9b) , the Z-score scatter plot suggests certain compounds were active in HHSteC but not HLF. This finding aligns with the presence of similar \"HHSteC-specific\" clusters observed in both the primary and confirmation screens.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_39_1",
+          "text": "To do this, we first plotted the mean robust Z-scores (using confirmation screen data) for each compound tested in both cell types against each other to directly compare their responses (Fig 9a) .",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_39_2",
+          "text": "Although the distribution of pathways represented among the confirmed hits was largely similar between the two cell types (Fig 9b) , the Z-score scatter plot suggests certain compounds were active in HHSteC but not HLF.",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_res_39_3",
+          "text": "This finding aligns with the presence of similar \"HHSteC-specific\" clusters observed in both the primary and confirmation screens.",
+          "position": 2
+        }
+      ],
+      "metadata": {
+        "fig_refs": [
+          "fig_9",
+          "fig_9"
+        ],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_40",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "This analysis suggested the possibility of significant differential responses to the same treatments between these two related cell types. To test this hypothesis, we conducted concentration-response experiments on selected hits that appeared to exhibit such differences (Fig 9c) . Using the 24-hour MYO screening protocol, we evaluated a 10-step, 3-fold dose range spanning low nM to double-digit \u00b5M concentrations in both HLF and HHSteC.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_40_1",
+          "text": "This analysis suggested the possibility of significant differential responses to the same treatments between these two related cell types.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_40_2",
+          "text": "To test this hypothesis, we conducted concentration-response experiments on selected hits that appeared to exhibit such differences (Fig 9c) .",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_res_40_3",
+          "text": "Using the 24-hour MYO screening protocol, we evaluated a 10-step, 3-fold dose range spanning low nM to double-digit \u00b5M concentrations in both HLF and HHSteC.",
+          "position": 2
+        }
+      ],
+      "metadata": {
+        "fig_refs": [
+          "fig_9"
+        ],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_41",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "Our findings revealed distinct responses in both potency and efficacy for certain compounds. For instance, compound 9A produced highly similar responses in the two cell types, with slightly better potency in HLF. In contrast, compounds 9C-9F exhibited marginally to significantly greater potency in HHSteC. Moreover, compounds 9E and 9F demonstrated over 100% greater percent inhibition in HHSteC compared to HLF. Collectively, these dose-response curves demonstrate that highly related human cell types can exhibit substantially different responses to the same treatments under identical conditions.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_41_1",
+          "text": "Our findings revealed distinct responses in both potency and efficacy for certain compounds.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_41_2",
+          "text": "For instance, compound 9A produced highly similar responses in the two cell types, with slightly better potency in HLF.",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_res_41_3",
+          "text": "In contrast, compounds 9C-9F exhibited marginally to significantly greater potency in HHSteC.",
+          "position": 2
+        },
+        {
+          "sentence_id": "s_res_41_4",
+          "text": "Moreover, compounds 9E and 9F demonstrated over 100% greater percent inhibition in HHSteC compared to HLF.",
+          "position": 3
+        },
+        {
+          "sentence_id": "s_res_41_5",
+          "text": "Collectively, these dose-response curves demonstrate that highly related human cell types can exhibit substantially different responses to the same treatments under identical conditions.",
+          "position": 4
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_42",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "-960",
+      "sentences": [
+        {
+          "sentence_id": "s_res_42_1",
+          "text": "-960",
+          "position": 0
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_sub_2_6",
+      "section_id": "sec_results",
+      "para_type": "subsection_header",
+      "text": "2.6 Comparison of HTSM to HBSM",
+      "sentences": [],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_43",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "Finally, we repeated this analysis on SMC cells (derived from bladder or airway tissue) used in the screens. As before, we plotted the mean robust Z-scores (from the confirmation screen) for each compound tested in both cell types against each other to directly compare their responses (Fig 10a)",
+      "sentences": [
+        {
+          "sentence_id": "s_res_43_1",
+          "text": "Finally, we repeated this analysis on SMC cells (derived from bladder or airway tissue) used in the screens.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_43_2",
+          "text": "As before, we plotted the mean robust Z-scores (from the confirmation screen) for each compound tested in both cell types against each other to directly compare their responses (Fig 10a)",
+          "position": 1
+        }
+      ],
+      "metadata": {
+        "fig_refs": [
+          "fig_10"
+        ],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_44",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "Fig 10b shows that the majority of confirmed hits were active in both cell types. However, some hits were not uniformly confirmed across all triplicates (e.g., not all three replicates met the criteria for a hit). This reflects the data presented in the Z-score scatter plot in which some hits are active but narrowly miss the hit criteria on an averaged basis. This suggests potential overall weaker activity in cases where only partial confirmation was achieved. Once again, the distribution of pathways represented among the confirmed hits were similar between the two cell types (Fig 10c)",
+      "sentences": [
+        {
+          "sentence_id": "s_res_44_1",
+          "text": "Fig 10b shows that the majority of confirmed hits were active in both cell types.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_44_2",
+          "text": "However, some hits were not uniformly confirmed across all triplicates (e.g. , not all three replicates met the criteria for a hit).",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_res_44_3",
+          "text": "This reflects the data presented in the Z-score scatter plot in which some hits are active but narrowly miss the hit criteria on an averaged basis.",
+          "position": 2
+        },
+        {
+          "sentence_id": "s_res_44_4",
+          "text": "This suggests potential overall weaker activity in cases where only partial confirmation was achieved.",
+          "position": 3
+        },
+        {
+          "sentence_id": "s_res_44_5",
+          "text": "Once again, the distribution of pathways represented among the confirmed hits were similar between the two cell types (Fig 10c)",
+          "position": 4
+        }
+      ],
+      "metadata": {
+        "fig_refs": [
+          "fig_10",
+          "fig_10"
+        ],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_45",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "From this dataset, we selected six compounds for re-testing in both cell types under the same assay conditions as the original screen (i.e., 45-minute acute response to drug exposure) across a 10-step, 3-fold dose range spanning low nM to double-digit \u00b5M concentrations. Although the differences were less pronounced than those observed in the MYO comparison (Fig 9) , we still identified distinct responses between the two cell types. Specifically, compounds 10A-10D exhibited better potency in HBSM with similar efficacy in both cell types. Conversely, compound 10F, and to a lesser extent 10E, demonstrated greater percent inhibition in HTSM compared to HBSM.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_45_1",
+          "text": "From this dataset, we selected six compounds for re-testing in both cell types under the same assay conditions as the original screen (i.e. , 45-minute acute response to drug exposure) across a 10-step, 3-fold dose range spanning low nM to double-digit \u00b5M concentrations.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_45_2",
+          "text": "Although the differences were less pronounced than those observed in the MYO comparison (Fig 9) , we still identified distinct responses between the two cell types.",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_res_45_3",
+          "text": "Specifically, compounds 10A-10D exhibited better potency in HBSM with similar efficacy in both cell types.",
+          "position": 2
+        },
+        {
+          "sentence_id": "s_res_45_4",
+          "text": "Conversely, compound 10F, and to a lesser extent 10E, demonstrated greater percent inhibition in HTSM compared to HBSM.",
+          "position": 3
+        }
+      ],
+      "metadata": {
+        "fig_refs": [
+          "fig_9"
+        ],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_res_46",
+      "section_id": "sec_results",
+      "para_type": "text",
+      "text": "Importantly, all experiments were conducted simultaneously on the same plates, ruling out batch effects or inter-experimental variability as potential causes for these differences. Collectively, these findings further demonstrate that highly related cell types, such as primary human bladder smooth muscle cells (HBSM) and primary human airway smooth muscle cells (HASM), can exhibit distinct responses to the same compound treatments.",
+      "sentences": [
+        {
+          "sentence_id": "s_res_46_1",
+          "text": "Importantly, all experiments were conducted simultaneously on the same plates, ruling out batch effects or inter-experimental variability as potential causes for these differences.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_res_46_2",
+          "text": "Collectively, these findings further demonstrate that highly related cell types, such as primary human bladder smooth muscle cells (HBSM) and primary human airway smooth muscle cells (HASM), can exhibit distinct responses to the same compound treatments.",
+          "position": 1
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_dis_1",
+      "section_id": "sec_disc",
+      "para_type": "text",
+      "text": "The purpose of this study was twofold. First, to demonstrate that contractility and mechanical cell function, though governed by the same family of contractile proteins, can exhibit distinct regulatory mechanisms across cell types. Our findings, derived from the first-ever high-throughput kinase inhibitor screen targeting cell contraction, provide compelling evidence that mechanobiological pathways are diverse and selectively targetable. This suggests that direct screening for contraction modulators could unveil novel, first-in-class therapeutics with potential for high therapeutic indices, even among related cell or tissue types.",
+      "sentences": [
+        {
+          "sentence_id": "s_dis_1_1",
+          "text": "The purpose of this study was twofold.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_dis_1_2",
+          "text": "First, to demonstrate that contractility and mechanical cell function, though governed by the same family of contractile proteins, can exhibit distinct regulatory mechanisms across cell types.",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_dis_1_3",
+          "text": "Our findings, derived from the first-ever high-throughput kinase inhibitor screen targeting cell contraction, provide compelling evidence that mechanobiological pathways are diverse and selectively targetable.",
+          "position": 2
+        },
+        {
+          "sentence_id": "s_dis_1_4",
+          "text": "This suggests that direct screening for contraction modulators could unveil novel, first-in-class therapeutics with potential for high therapeutic indices, even among related cell or tissue types.",
+          "position": 3
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_dis_2",
+      "section_id": "sec_disc",
+      "para_type": "text",
+      "text": "Second, this work highlights the unprecedented capability and scalability of the FLECS platform. For the first time, we were able to scalably quantify the effects of >2,400 annotated kinase inhibitors across 5 cell-types at multiple doses, as well as perform confirmation and dose-response studies. This was accomplished all using the same assay and readout, in under 8 weeks of run time, including plate manufacturing (in house) and data analysis. This dataset comprises over 38,000 unique drug-loaded wells each with 100s of single-cell datapoints in a single study. This scale and quantitative resolution enables a network level of insight into mechanobiology laying the groundwork for building a mechanobiology atlas, a resource with the potential to transform how we approach drug discovery and deepen our understanding of cellular mechanics.",
+      "sentences": [
+        {
+          "sentence_id": "s_dis_2_1",
+          "text": "Second, this work highlights the unprecedented capability and scalability of the FLECS platform.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_dis_2_2",
+          "text": "For the first time, we were able to scalably quantify the effects of >2,400 annotated kinase inhibitors across 5 cell-types at multiple doses, as well as perform confirmation and dose-response studies.",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_dis_2_3",
+          "text": "This was accomplished all using the same assay and readout, in under 8 weeks of run time, including plate manufacturing (in house) and data analysis.",
+          "position": 2
+        },
+        {
+          "sentence_id": "s_dis_2_4",
+          "text": "This dataset comprises over 38,000 unique drug-loaded wells each with 100s of single-cell datapoints in a single study.",
+          "position": 3
+        },
+        {
+          "sentence_id": "s_dis_2_5",
+          "text": "This scale and quantitative resolution enables a network level of insight into mechanobiology laying the groundwork for building a mechanobiology atlas, a resource with the potential to transform how we approach drug discovery and deepen our understanding of cellular mechanics.",
+          "position": 4
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_dis_3",
+      "section_id": "sec_disc",
+      "para_type": "text",
+      "text": "Our systematic analysis of kinase inhibitors revealed that cellular contractility can be selectively modulated by small molecules, with even related cell types exhibiting divergent responses to the same compounds. While many compounds showed similar effects across cell types, we identified specific cases where responses clearly diverged. This divergence was particularly well-demonstrated in MYO cells, where the distinct response patterns were confirmed in dose-response experiments. SMCs also exhibited divergent responses, though less consistently when examined in targeted dose-response studies compared to the initial screens. Collectively, these results underscore the complexity of mechanobiological pathways and demonstrate that contractility regulation can differ even among related cell types, suggesting the possibility of selectively regulating contractile phenotypes with good therapeutic indices.",
+      "sentences": [
+        {
+          "sentence_id": "s_dis_3_1",
+          "text": "Our systematic analysis of kinase inhibitors revealed that cellular contractility can be selectively modulated by small molecules, with even related cell types exhibiting divergent responses to the same compounds.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_dis_3_2",
+          "text": "While many compounds showed similar effects across cell types, we identified specific cases where responses clearly diverged.",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_dis_3_3",
+          "text": "This divergence was particularly well-demonstrated in MYO cells, where the distinct response patterns were confirmed in dose-response experiments.",
+          "position": 2
+        },
+        {
+          "sentence_id": "s_dis_3_4",
+          "text": "SMCs also exhibited divergent responses, though less consistently when examined in targeted dose-response studies compared to the initial screens.",
+          "position": 3
+        },
+        {
+          "sentence_id": "s_dis_3_5",
+          "text": "Collectively, these results underscore the complexity of mechanobiological pathways and demonstrate that contractility regulation can differ even among related cell types, suggesting the possibility of selectively regulating contractile phenotypes with good therapeutic indices.",
+          "position": 4
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_dis_4",
+      "section_id": "sec_disc",
+      "para_type": "text",
+      "text": "Our clustering analyses of the dataset revealed both expected and novel mechanobiological signatures. We identified known pathway associations like ROCK [20,21]  and TGF-beta, validating our approach, while also discovering unexpected pathway overrepresentations such as MAP/ERK in SMCs and PI3K/Akt/mTOR in HHSteCs, suggesting new therapeutic opportunities like enhancing contractility in underactive bladder through MAP/ERK modulation. Interestingly, despite using TGF-beta for myofibroblast activation, the MYO-specific cluster did not show statistical overrepresentation of the TGF-beta/SMAD pathway, likely because these compounds generated activity profiles that clustered with other mechanobiological response patterns rather than forming a distinct signature. This distribution of responses across multiple clusters suggests that mechanical responses to kinase inhibitors may not cleanly segregate by canonical pathway annotations. Moreover, these clustering patterns reveal the complex evolutionary landscape of contractile regulation, suggesting that while core contractile machinery is conserved, its regulation has diversified to meet tissue-specific functional demands.",
+      "sentences": [
+        {
+          "sentence_id": "s_dis_4_1",
+          "text": "Our clustering analyses of the dataset revealed both expected and novel mechanobiological signatures.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_dis_4_2",
+          "text": "We identified known pathway associations like ROCK [20,21]  and TGF-beta, validating our approach, while also discovering unexpected pathway overrepresentations such as MAP/ERK in SMCs and PI3K/Akt/mTOR in HHSteCs, suggesting new therapeutic opportunities like enhancing contractility in underactive bladder through MAP/ERK modulation.",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_dis_4_3",
+          "text": "Interestingly, despite using TGF-beta for myofibroblast activation, the MYO-specific cluster did not show statistical overrepresentation of the TGF-beta/SMAD pathway, likely because these compounds generated activity profiles that clustered with other mechanobiological response patterns rather than forming a distinct signature.",
+          "position": 2
+        },
+        {
+          "sentence_id": "s_dis_4_4",
+          "text": "This distribution of responses across multiple clusters suggests that mechanical responses to kinase inhibitors may not cleanly segregate by canonical pathway annotations.",
+          "position": 3
+        },
+        {
+          "sentence_id": "s_dis_4_5",
+          "text": "Moreover, these clustering patterns reveal the complex evolutionary landscape of contractile regulation, suggesting that while core contractile machinery is conserved, its regulation has diversified to meet tissue-specific functional demands.",
+          "position": 4
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_dis_5",
+      "section_id": "sec_disc",
+      "para_type": "text",
+      "text": "The robustness of our findings is supported by high confirmation rates exceeding 40% across triplicates in most cell types, though we noted some important technical considerations. Lower confirmation rates in patient-derived IPF-HLF cells reflect the inherent variability of such samples, highlighting the importance of multiple cell models in translational research. Additionally, compound storage conditions may have affected the reproducibility of weakly active compounds, though this limitation did not impact our major hits, which showed consistent activity across experiments. Future studies will benefit from standardized compound preparation protocols across all screening stages.",
+      "sentences": [
+        {
+          "sentence_id": "s_dis_5_1",
+          "text": "The robustness of our findings is supported by high confirmation rates exceeding 40% across triplicates in most cell types, though we noted some important technical considerations.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_dis_5_2",
+          "text": "Lower confirmation rates in patient-derived IPF-HLF cells reflect the inherent variability of such samples, highlighting the importance of multiple cell models in translational research.",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_dis_5_3",
+          "text": "Additionally, compound storage conditions may have affected the reproducibility of weakly active compounds, though this limitation did not impact our major hits, which showed consistent activity across experiments.",
+          "position": 2
+        },
+        {
+          "sentence_id": "s_dis_5_4",
+          "text": "Future studies will benefit from standardized compound preparation protocols across all screening stages.",
+          "position": 3
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_dis_6",
+      "section_id": "sec_disc",
+      "para_type": "text",
+      "text": "The creation of this first mechanobiological response atlas represents a significant advance in our understanding of cellular mechanics. By systematically mapping how diverse cell types respond to pharmaceutical perturbations, we establish a framework for predicting tissue-specific drug effects on mechanical properties. This approach could revolutionize drug development by enabling early identification of both desired tissue-specific effects and potential mechanical side effects. The atlas concept could be further expanded by incorporating additional cell types, drug classes beyond kinase inhibitors, and complementary readouts such as transcriptional profiles. Such a comprehensive resource would provide unprecedented insight into the relationship between chemical structure, pathway activation, and mechanical outcomes across tissues.",
+      "sentences": [
+        {
+          "sentence_id": "s_dis_6_1",
+          "text": "The creation of this first mechanobiological response atlas represents a significant advance in our understanding of cellular mechanics.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_dis_6_2",
+          "text": "By systematically mapping how diverse cell types respond to pharmaceutical perturbations, we establish a framework for predicting tissue-specific drug effects on mechanical properties.",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_dis_6_3",
+          "text": "This approach could revolutionize drug development by enabling early identification of both desired tissue-specific effects and potential mechanical side effects.",
+          "position": 2
+        },
+        {
+          "sentence_id": "s_dis_6_4",
+          "text": "The atlas concept could be further expanded by incorporating additional cell types, drug classes beyond kinase inhibitors, and complementary readouts such as transcriptional profiles.",
+          "position": 3
+        },
+        {
+          "sentence_id": "s_dis_6_5",
+          "text": "Such a comprehensive resource would provide unprecedented insight into the relationship between chemical structure, pathway activation, and mechanical outcomes across tissues.",
+          "position": 4
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_dis_7",
+      "section_id": "sec_disc",
+      "para_type": "text",
+      "text": "In conclusion, this work advances our understanding of mechanobiology, demonstrating that contractility pathways are not universally conserved and that selective targeting is feasible. Our findings suggest new strategies for drug development, where mechanical phenotypes could be modulated with tissue specificity despite shared molecular machinery. It also showcases the transformative potential of the FLECS platform to uncover novel therapeutic targets and create a comprehensive mechanobiology atlas. These findings lay the groundwork for future studies and provide a strong foundation for translating these insights into meaningful therapeutic advances.",
+      "sentences": [
+        {
+          "sentence_id": "s_dis_7_1",
+          "text": "In conclusion, this work advances our understanding of mechanobiology, demonstrating that contractility pathways are not universally conserved and that selective targeting is feasible.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_dis_7_2",
+          "text": "Our findings suggest new strategies for drug development, where mechanical phenotypes could be modulated with tissue specificity despite shared molecular machinery.",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_dis_7_3",
+          "text": "It also showcases the transformative potential of the FLECS platform to uncover novel therapeutic targets and create a comprehensive mechanobiology atlas.",
+          "position": 2
+        },
+        {
+          "sentence_id": "s_dis_7_4",
+          "text": "These findings lay the groundwork for future studies and provide a strong foundation for translating these insights into meaningful therapeutic advances.",
+          "position": 3
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_met_sub_4_1",
+      "section_id": "sec_methods",
+      "para_type": "subsection_header",
+      "text": "4.1 Cell Culture",
+      "sentences": [],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_met_1",
+      "section_id": "sec_methods",
+      "para_type": "text",
+      "text": "Cryopreserved human primary lung fibroblasts (HLF) and human tracheal), human primary hepatic stellate cells (HHSteC), human airway smooth muscle (HASM) cells, and human bladder smooth muscle (HBSM) cells were obtained from ScienCell. IPF-HLF were a gift from Prof. Brigette Gomperts (UCLA). HLF and IPF-HLF were cultured in Lung Fibroblast Growth Medium (Cell Applications, catalog #516-500),). HHSteC were cultured in Stellate Cell Medium (SteCM, Cat. #5301). HTSM and BTSM cells were maintained in Ham's F-12 medium supplemented with 10% fetal bovine serum (FBS) and 1% penicillin/streptomycin. All cell types were grown in T75 flasks under standard conditions (37 \u00b0C, 5% CO ) until ready for experiments. Cells were detached using 0.05% Trypsin-EDTA and prepared for experiments at passage 3. For experiments, HLF, HHSteC and IPF-HLF were tested in Dulbecco's Modified Eagle Medium (DMEM) containing 10% FBS and 1% penicillin-streptomycin, while HTSM and BTSM cells were tested in their respective Ham's F-12 growth medium.",
+      "sentences": [
+        {
+          "sentence_id": "s_met_1_1",
+          "text": "Cryopreserved human primary lung fibroblasts (HLF) and human tracheal), human primary hepatic stellate cells (HHSteC), human airway smooth muscle (HASM) cells, and human bladder smooth muscle (HBSM) cells were obtained from ScienCell.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_met_1_2",
+          "text": "IPF-HLF were a gift from Prof. Brigette Gomperts (UCLA).",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_met_1_3",
+          "text": "HLF and IPF-HLF were cultured in Lung Fibroblast Growth Medium (Cell Applications, catalog #516-500),).",
+          "position": 2
+        },
+        {
+          "sentence_id": "s_met_1_4",
+          "text": "HHSteC were cultured in Stellate Cell Medium (SteCM, Cat. #5301).",
+          "position": 3
+        },
+        {
+          "sentence_id": "s_met_1_5",
+          "text": "HTSM and BTSM cells were maintained in Ham's F-12 medium supplemented with 10% fetal bovine serum (FBS) and 1% penicillin/streptomycin.",
+          "position": 4
+        },
+        {
+          "sentence_id": "s_met_1_6",
+          "text": "All cell types were grown in T75 flasks under standard conditions (37 \u00b0C, 5% CO ) until ready for experiments.",
+          "position": 5
+        },
+        {
+          "sentence_id": "s_met_1_7",
+          "text": "Cells were detached using 0.05% Trypsin-EDTA and prepared for experiments at passage 3.",
+          "position": 6
+        },
+        {
+          "sentence_id": "s_met_1_8",
+          "text": "For experiments, HLF, HHSteC and IPF-HLF were tested in Dulbecco's Modified Eagle Medium (DMEM) containing 10% FBS and 1% penicillin-streptomycin, while HTSM and BTSM cells were tested in their respective Ham's F-12 growth medium.",
+          "position": 7
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_met_sub_4_2",
+      "section_id": "sec_methods",
+      "para_type": "subsection_header",
+      "text": "4.2 FLECS Contractility Assay Protocol",
+      "sentences": [],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_met_2",
+      "section_id": "sec_methods",
+      "para_type": "text",
+      "text": "The FLECS contractility assay followed protocols previously published [x]. Plates pre-coated with 70 \u00b5m \"X\"-shaped collagen type IV micropatterns on an 8 kPa substrate (Forcyte Biotechnologies, product #384-HC4R-QC10) were used throughout the study. Wells were initially filled with 25 \u00b5L of either serum-free DMEM (MYO cells) or Ham's F12 media (SMC) supplemented with 1% penicillin-streptomycin. The appropriate cells were resuspended at 50,000 cells/mL in their proper culture medium.  Cells were seeded in 25 \u00b5L volumes per well and allowed to settle for 1.5 hours at room temperature before being transferred to a 37 \u00b0C incubator. For MYO cells, compounds were added via Biomek automation 1.5 hours after incubation, followed by 10 minutes of plate shaking. TGF-   1 (PeproTech, 2.5 ng/mL) was added 30 minutes after compound addition. Plates were then returned to the incubator. At 24 hours post-TGF-  1 addition, Hoechst 33342 live nuclear stain (1 \u00b5g/mL) was added, and plates were imaged after 30 minutes using a Molecular Devices ImageXpress automated microscope. For SMC cells, plates were incubated for 24 hours post-seeding. Baseline images were acquired before compound addition via Biomek, followed by 10 minutes of plate shaking. Wells were then imaged at 45 minutes and 2 hours post-compound addition. Prior to the 2-hour imaging timepoint, Hoechst 33342 live nuclear stain was added for 30 minutes to enable nuclear imaging. Analysis of cell contraction and adhesion was performed using proprietary computer vision algorithms developed by Forcyte [16].",
+      "sentences": [
+        {
+          "sentence_id": "s_met_2_1",
+          "text": "The FLECS contractility assay followed protocols previously published [x].",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_met_2_2",
+          "text": "Plates pre-coated with 70 \u00b5m \"X\"-shaped collagen type IV micropatterns on an 8 kPa substrate (Forcyte Biotechnologies, product #384-HC4R-QC10) were used throughout the study.",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_met_2_3",
+          "text": "Wells were initially filled with 25 \u00b5L of either serum-free DMEM (MYO cells) or Ham's F12 media (SMC) supplemented with 1% penicillin-streptomycin.",
+          "position": 2
+        },
+        {
+          "sentence_id": "s_met_2_4",
+          "text": "The appropriate cells were resuspended at 50,000 cells/mL in their proper culture medium.",
+          "position": 3
+        },
+        {
+          "sentence_id": "s_met_2_5",
+          "text": "Cells were seeded in 25 \u00b5L volumes per well and allowed to settle for 1.5 hours at room temperature before being transferred to a 37 \u00b0C incubator.",
+          "position": 4
+        },
+        {
+          "sentence_id": "s_met_2_6",
+          "text": "For MYO cells, compounds were added via Biomek automation 1.5 hours after incubation, followed by 10 minutes of plate shaking.",
+          "position": 5
+        },
+        {
+          "sentence_id": "s_met_2_7",
+          "text": "TGF-   1 (PeproTech, 2.5 ng/mL) was added 30 minutes after compound addition.",
+          "position": 6
+        },
+        {
+          "sentence_id": "s_met_2_8",
+          "text": "Plates were then returned to the incubator.",
+          "position": 7
+        },
+        {
+          "sentence_id": "s_met_2_9",
+          "text": "At 24 hours post-TGF-  1 addition, Hoechst 33342 live nuclear stain (1 \u00b5g/mL) was added, and plates were imaged after 30 minutes using a Molecular Devices ImageXpress automated microscope.",
+          "position": 8
+        },
+        {
+          "sentence_id": "s_met_2_10",
+          "text": "For SMC cells, plates were incubated for 24 hours post-seeding.",
+          "position": 9
+        },
+        {
+          "sentence_id": "s_met_2_11",
+          "text": "Baseline images were acquired before compound addition via Biomek, followed by 10 minutes of plate shaking.",
+          "position": 10
+        },
+        {
+          "sentence_id": "s_met_2_12",
+          "text": "Wells were then imaged at 45 minutes and 2 hours post-compound addition.",
+          "position": 11
+        },
+        {
+          "sentence_id": "s_met_2_13",
+          "text": "Prior to the 2-hour imaging timepoint, Hoechst 33342 live nuclear stain was added for 30 minutes to enable nuclear imaging.",
+          "position": 12
+        },
+        {
+          "sentence_id": "s_met_2_14",
+          "text": "Analysis of cell contraction and adhesion was performed using proprietary computer vision algorithms developed by Forcyte [16].",
+          "position": 13
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_met_sub_4_3",
+      "section_id": "sec_methods",
+      "para_type": "subsection_header",
+      "text": "4.3 Compound Libraries",
+      "sentences": [],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_met_3",
+      "section_id": "sec_methods",
+      "para_type": "text",
+      "text": "The screen was conducted using the Kinase Inhibitor Library (MedChemExpress), which consists of 18 unique 384-well source plates. Each source plate is laid out according to one of nine unique plate maps, and each map is repeated at two different stock concentrations.",
+      "sentences": [
+        {
+          "sentence_id": "s_met_3_1",
+          "text": "The screen was conducted using the Kinase Inhibitor Library (MedChemExpress), which consists of 18 unique 384-well source plates.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_met_3_2",
+          "text": "Each source plate is laid out according to one of nine unique plate maps, and each map is repeated at two different stock concentrations.",
+          "position": 1
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_met_sub_4_4",
+      "section_id": "sec_methods",
+      "para_type": "subsection_header",
+      "text": "4.4 Hit Criteria",
+      "sentences": [],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_met_4",
+      "section_id": "sec_methods",
+      "para_type": "text",
+      "text": "For MYO cells, compounds were selected as 'hits' for retesting if the robust Z-score of contraction was more than -3 (> 3 MADs below the median of the negative controls) and the normalized inhibition was at least 15%. Primary screen hits were also filtered for toxicity based on morphology.  For SMC cells, compounds were selected as 'hits' for retesting for a given timepoint if the normalized percent decrease in contraction (compared to the baseline timepoint) was greater than 20%. Primary screen hits were also filtered for toxicity based on dead stain imaging, with a cutoff of 3 times the median dead percent of the negative controls. Compounds defined to be 'confirmed hits' in a given cell type if after being chosen for retesting, they met the above conditions for 3/3 replicates. In addition, all preliminary hits were also filtered for toxicity based on dead stain imaging, with a cutoff of 3 times the median dead percent of the negative controls. If any of the 3 replicates were beyond this cutoff, compounds were excluded from the confirmed hits.",
+      "sentences": [
+        {
+          "sentence_id": "s_met_4_1",
+          "text": "For MYO cells, compounds were selected as 'hits' for retesting if the robust Z-score of contraction was more than -3 (> 3 MADs below the median of the negative controls) and the normalized inhibition was at least 15%.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_met_4_2",
+          "text": "Primary screen hits were also filtered for toxicity based on morphology.",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_met_4_3",
+          "text": "For SMC cells, compounds were selected as 'hits' for retesting for a given timepoint if the normalized percent decrease in contraction (compared to the baseline timepoint) was greater than 20%.",
+          "position": 2
+        },
+        {
+          "sentence_id": "s_met_4_4",
+          "text": "Primary screen hits were also filtered for toxicity based on dead stain imaging, with a cutoff of 3 times the median dead percent of the negative controls.",
+          "position": 3
+        },
+        {
+          "sentence_id": "s_met_4_5",
+          "text": "Compounds defined to be 'confirmed hits' in a given cell type if after being chosen for retesting, they met the above conditions for 3/3 replicates.",
+          "position": 4
+        },
+        {
+          "sentence_id": "s_met_4_6",
+          "text": "In addition, all preliminary hits were also filtered for toxicity based on dead stain imaging, with a cutoff of 3 times the median dead percent of the negative controls.",
+          "position": 5
+        },
+        {
+          "sentence_id": "s_met_4_7",
+          "text": "If any of the 3 replicates were beyond this cutoff, compounds were excluded from the confirmed hits.",
+          "position": 6
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_met_sub_4_5",
+      "section_id": "sec_methods",
+      "para_type": "subsection_header",
+      "text": "4.5  Data Analysis",
+      "sentences": [],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_met_5",
+      "section_id": "sec_methods",
+      "para_type": "text",
+      "text": "Hierarchical agglomerative clustering was performed using the AgglomerativeClustering() function from the scikit-learn Python library. Compounds were characterized by vectors with five components, with each component corresponding to the robust Z-score of contraction (for MYO cells) or the robust Z-score of the normalized percent inhibition (for SMC cells) in a given cell type. Clustering was done using Ward's linkage, computed from the Euclidean distance metric. The number of clusters for comparison and the corresponding distance threshold in each case was chosen based on visual inspection of the clustering dendrogram. Clusters were chosen at the point where branches of the dendrogram appeared most sparse and well-separated, deviating where necessary to ensure that (a) there were no singletons/clusters too small to yield statistically significant differences and (b) meaningful differences in response were not obscured.  Pathway overrepresentation was analyzed using the hypergeometric distribution. This was performed using the hypergeom.cdf() function from the SciPy Python library. The p-value that a pathway is overrepresented was computed as the probability that a given cluster (or group of confirmed hits for a given cell type) contains at least the observed number compounds affecting that pathway when drawing groups of the observed size randomly without replacement under the null hypothesis that pathways are evenly distributed throughout the population.",
+      "sentences": [
+        {
+          "sentence_id": "s_met_5_1",
+          "text": "Hierarchical agglomerative clustering was performed using the AgglomerativeClustering() function from the scikit-learn Python library.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_met_5_2",
+          "text": "Compounds were characterized by vectors with five components, with each component corresponding to the robust Z-score of contraction (for MYO cells) or the robust Z-score of the normalized percent inhibition (for SMC cells) in a given cell type.",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_met_5_3",
+          "text": "Clustering was done using Ward's linkage, computed from the Euclidean distance metric.",
+          "position": 2
+        },
+        {
+          "sentence_id": "s_met_5_4",
+          "text": "The number of clusters for comparison and the corresponding distance threshold in each case was chosen based on visual inspection of the clustering dendrogram.",
+          "position": 3
+        },
+        {
+          "sentence_id": "s_met_5_5",
+          "text": "Clusters were chosen at the point where branches of the dendrogram appeared most sparse and well-separated, deviating where necessary to ensure that (a) there were no singletons/clusters too small to yield statistically significant differences and (b) meaningful differences in response were not obscured.",
+          "position": 4
+        },
+        {
+          "sentence_id": "s_met_5_6",
+          "text": "Pathway overrepresentation was analyzed using the hypergeometric distribution.",
+          "position": 5
+        },
+        {
+          "sentence_id": "s_met_5_7",
+          "text": "This was performed using the hypergeom.cdf() function from the SciPy Python library.",
+          "position": 6
+        },
+        {
+          "sentence_id": "s_met_5_8",
+          "text": "The p-value that a pathway is overrepresented was computed as the probability that a given cluster (or group of confirmed hits for a given cell type) contains at least the observed number compounds affecting that pathway when drawing groups of the observed size randomly without replacement under the null hypothesis that pathways are evenly distributed throughout the population.",
+          "position": 7
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_met_6",
+      "section_id": "sec_methods",
+      "para_type": "subheading",
+      "text": "Author Contribution",
+      "sentences": [],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_met_7",
+      "section_id": "sec_methods",
+      "para_type": "text",
+      "text": "I.P. conceived of the project. E.C., Y.W., R.H., J.W., and A.S. performed the experiments. A.S., E.C., J.W., Y.W., and I.P. analyzed the data. R.D. developed the automation strategy and oversaw the robotic laboratory and lead compound management. A.S. developed data analysis and interpretation scripts and prepared the figures. A.S., I.P., Y.W., and R.D interpreted the data. I.P., A.S., and R.D. wrote the manuscript.",
+      "sentences": [
+        {
+          "sentence_id": "s_met_7_1",
+          "text": "I.P. conceived of the project.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_met_7_2",
+          "text": "E.C., Y.W., R.H., J.W., and A.S. performed the experiments.",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_met_7_3",
+          "text": "A.S., E.C., J.W., Y.W., and I.P. analyzed the data.",
+          "position": 2
+        },
+        {
+          "sentence_id": "s_met_7_4",
+          "text": "R.D. developed the automation strategy and oversaw the robotic laboratory and lead compound management.",
+          "position": 3
+        },
+        {
+          "sentence_id": "s_met_7_5",
+          "text": "A.S. developed data analysis and interpretation scripts and prepared the figures.",
+          "position": 4
+        },
+        {
+          "sentence_id": "s_met_7_6",
+          "text": "A.S., I.P., Y.W., and R.D interpreted the data.",
+          "position": 5
+        },
+        {
+          "sentence_id": "s_met_7_7",
+          "text": "I.P., A.S., and R.D. wrote the manuscript.",
+          "position": 6
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_met_8",
+      "section_id": "sec_methods",
+      "para_type": "subheading",
+      "text": "Declaration of Competing Interest",
+      "sentences": [],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_met_9",
+      "section_id": "sec_methods",
+      "para_type": "text",
+      "text": "The authors declare the following financial interests/personal relationships which may be considered as potential competing interests:",
+      "sentences": [
+        {
+          "sentence_id": "s_met_9_1",
+          "text": "The authors declare the following financial interests/personal relationships which may be considered as potential competing interests:",
+          "position": 0
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_met_10",
+      "section_id": "sec_methods",
+      "para_type": "text",
+      "text": "Ivan Pushkarsky reports a relationship with Forcyte Biotechnologies, Inc that includes: board membership, employment, and equity or stocks. Robert Damoiseaux reports a relationship with Forcyte Biotechnologies, Inc that includes: consulting or advisory and equity or stocks. Yao Wang reports a relationship with Forcyte Biotechnologies, Inc that includes: employment and equity or stocks. Enrico Cortes reports a relationship with Forcyte Biotechnologies, Inc that includes: employment and equity or stocks. Ricky Huang reports a relationship with Forcyte Biotechnologies, Inc that includes: employment and equity or stocks. Jeremy Wan reports a relationship with Forcyte Biotechnologies, Inc that includes: employment and equity or stocks. Anton Shpak reports a relationship with Forcyte Biotechnologies, Inc that includes: employment and equity or stocks. Ivan Pushkarsky has patent #US11592438B2 issued to UCLA. Robert Damoiseaux is an employee at UCLA which holds the patent licensed by Forcyte which pertains to research presented in this work.",
+      "sentences": [
+        {
+          "sentence_id": "s_met_10_1",
+          "text": "Ivan Pushkarsky reports a relationship with Forcyte Biotechnologies, Inc that includes: board membership, employment, and equity or stocks.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_met_10_2",
+          "text": "Robert Damoiseaux reports a relationship with Forcyte Biotechnologies, Inc that includes: consulting or advisory and equity or stocks.",
+          "position": 1
+        },
+        {
+          "sentence_id": "s_met_10_3",
+          "text": "Yao Wang reports a relationship with Forcyte Biotechnologies, Inc that includes: employment and equity or stocks.",
+          "position": 2
+        },
+        {
+          "sentence_id": "s_met_10_4",
+          "text": "Enrico Cortes reports a relationship with Forcyte Biotechnologies, Inc that includes: employment and equity or stocks.",
+          "position": 3
+        },
+        {
+          "sentence_id": "s_met_10_5",
+          "text": "Ricky Huang reports a relationship with Forcyte Biotechnologies, Inc that includes: employment and equity or stocks.",
+          "position": 4
+        },
+        {
+          "sentence_id": "s_met_10_6",
+          "text": "Jeremy Wan reports a relationship with Forcyte Biotechnologies, Inc that includes: employment and equity or stocks.",
+          "position": 5
+        },
+        {
+          "sentence_id": "s_met_10_7",
+          "text": "Anton Shpak reports a relationship with Forcyte Biotechnologies, Inc that includes: employment and equity or stocks.",
+          "position": 6
+        },
+        {
+          "sentence_id": "s_met_10_8",
+          "text": "Ivan Pushkarsky has patent #US11592438B2 issued to UCLA.",
+          "position": 7
+        },
+        {
+          "sentence_id": "s_met_10_9",
+          "text": "Robert Damoiseaux is an employee at UCLA which holds the patent licensed by Forcyte which pertains to research presented in this work.",
+          "position": 8
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_ack_1",
+      "section_id": "sec_ack",
+      "para_type": "text",
+      "text": "The authors thank the Magnify Incubator at CNSI and the Nanolab at UCLA, and the Molecular Screening Shared Resource at CNSI for providing critical infrastructure to support the work. The authors also thank Mason Victors for his invaluable guidance regarding robust assay development and execution practices to ensure data quality and on relevant data analysis approaches.",
+      "sentences": [
+        {
+          "sentence_id": "s_ack_1_1",
+          "text": "The authors thank the Magnify Incubator at CNSI and the Nanolab at UCLA, and the Molecular Screening Shared Resource at CNSI for providing critical infrastructure to support the work.",
+          "position": 0
+        },
+        {
+          "sentence_id": "s_ack_1_2",
+          "text": "The authors also thank Mason Victors for his invaluable guidance regarding robust assay development and execution practices to ensure data quality and on relevant data analysis approaches.",
+          "position": 1
+        }
+      ],
+      "metadata": {
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_refs_1",
+      "section_id": "sec_refs",
+      "para_type": "reference",
+      "text": "1. Lesman, A., Notbohm, J., Tirrell, D. A. & Ravichandran, G. Contractile forces regulate cell division in three-dimensional environments.\n\nJ. Cell Biol.\n\n205 , 155-162 (2014).",
+      "sentences": [],
+      "metadata": {
+        "ref_number": 1,
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_refs_2",
+      "section_id": "sec_refs",
+      "para_type": "reference",
+      "text": "2. Jin, J.-P., Bloch, R. J., Huang, X. & Larsson, L. Muscle Contractility and Cell Motility.\n\nJ. Biomed. Biotechnol.\n\n2012 , 257812 (2012).",
+      "sentences": [],
+      "metadata": {
+        "ref_number": 2,
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_refs_3",
+      "section_id": "sec_refs",
+      "para_type": "reference",
+      "text": "3. Li, B. & Wang, J. H.-C. Fibroblasts and Myofibroblasts in Wound Healing: Force Generation and Measurement.\n\nJ. Tissue Viability , 108-120 (2011).",
+      "sentences": [],
+      "metadata": {
+        "ref_number": 3,
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_refs_4",
+      "section_id": "sec_refs",
+      "para_type": "reference",
+      "text": "4. Dunn, A. R. Mechanobiology: ubiquitous and useful.\n\nMol. Biol. Cell , 1917-1918 (2018).",
+      "sentences": [],
+      "metadata": {
+        "ref_number": 4,
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_refs_5",
+      "section_id": "sec_refs",
+      "para_type": "reference",
+      "text": "5. Eyckmans, J., Boudou, T., Yu, X. & Chen, C. S. A Hitchhiker's Guide to Mechanobiology.\n\nDev. Cell , 35-47 (2011).",
+      "sentences": [],
+      "metadata": {
+        "ref_number": 5,
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_refs_6",
+      "section_id": "sec_refs",
+      "para_type": "reference",
+      "text": "6. Yoo, E. J. et al.\n\nG   12 facilitates shortening in human airway smooth muscle by modulating phosphoinositide 3-kinase-mediated activation in a RhoA-dependent manner.\n\nBr. J. Pharmacol.\n\n174 , 4383-4395 (2017).",
+      "sentences": [],
+      "metadata": {
+        "ref_number": 6,
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_refs_7",
+      "section_id": "sec_refs",
+      "para_type": "reference",
+      "text": "7. Doeing, D. C. & Solway, J. Airway smooth muscle in the pathophysiology and treatment of asthma.\n\nJ. Appl. Physiol.\n\n114 , 834-843 (2013).",
+      "sentences": [],
+      "metadata": {
+        "ref_number": 7,
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_refs_8",
+      "section_id": "sec_refs",
+      "para_type": "reference",
+      "text": "8. Koziol-White, C. J. et al.\n\nInhibition of PI3K promotes dilation of human small airways in a rho kinase-dependent manner.\n\nBr. J. Pharmacol.\n\n173 , 2726-2738 (2016).",
+      "sentences": [],
+      "metadata": {
+        "ref_number": 8,
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_refs_9",
+      "section_id": "sec_refs",
+      "para_type": "reference",
+      "text": "9. Steers, W. D. Pathophysiology of Overactive Bladder and Urge Urinary Incontinence.\n\nRev. Urol. , S7-S18 (2002).",
+      "sentences": [],
+      "metadata": {
+        "ref_number": 9,
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_refs_10",
+      "section_id": "sec_refs",
+      "para_type": "reference",
+      "text": "10. Aizawa, N. & Igawa, Y. Pathophysiology of the underactive bladder.\n\nInvestig. Clin. Urol. , S82-S89 (2017).",
+      "sentences": [],
+      "metadata": {
+        "ref_number": 10,
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_refs_11",
+      "section_id": "sec_refs",
+      "para_type": "reference",
+      "text": "11. Miyazato, M., Yoshimura, N. & Chancellor, M. B. The Other Bladder Syndrome: Underactive Bladder.\n\nRev. Urol. , 11-22 (2013).",
+      "sentences": [],
+      "metadata": {
+        "ref_number": 11,
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_refs_12",
+      "section_id": "sec_refs",
+      "para_type": "reference",
+      "text": "12. Younesi, F. S., Miller, A. E., Barker, T. H., Rossi, F. M. V. & Hinz, B. Fibroblast and myofibroblast activation in normal tissue repair and fibrosis.\n\nNat. Rev. Mol. Cell Biol. , 617-638 (2024).",
+      "sentences": [],
+      "metadata": {
+        "ref_number": 12,
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_refs_13",
+      "section_id": "sec_refs",
+      "para_type": "reference",
+      "text": "13. Wang, Y. et al.\n\nFLECS technology for high-throughput screening of hypercontractile cellular phenotypes in fibrosis: A function-first approach to anti-fibrotic drug discovery.\n\nSLAS Discov. Adv. Life Sci. R D , 100138 (2024).",
+      "sentences": [],
+      "metadata": {
+        "ref_number": 13,
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_refs_14",
+      "section_id": "sec_refs",
+      "para_type": "reference",
+      "text": "14. Wipff, P.-J., Rifkin, D. B., Meister, J.-J. & Hinz, B. Myofibroblast contraction activates latent TGF-   1 from the extracellular matrix.\n\nJ. Cell Biol.\n\n179 , 1311-1323 (2007).",
+      "sentences": [],
+      "metadata": {
+        "ref_number": 14,
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_refs_15",
+      "section_id": "sec_refs",
+      "para_type": "reference",
+      "text": "15. Pushkarsky, I. et al.\n\nElastomeric sensor surfaces for high-throughput single-cell force cytometry.\n\nNat. Biomed. Eng. , 124-137 (2018).",
+      "sentences": [],
+      "metadata": {
+        "ref_number": 15,
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_refs_16",
+      "section_id": "sec_refs",
+      "para_type": "reference",
+      "text": "16. Pushkarsky, I. FLECS Technology for High-Throughput Single-Cell Force Biology and Screening.\n\nASSAY Drug Dev. Technol. , 7-11 (2018).",
+      "sentences": [],
+      "metadata": {
+        "ref_number": 16,
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_refs_17",
+      "section_id": "sec_refs",
+      "para_type": "reference",
+      "text": "17. Hairapetian, L. et al.\n\nSimplified, High-throughput Analysis of Single-cell Contractility using Micropatterned Elastomers.\n\nJoVE J. Vis. Exp. e63211 (2022) doi:10.3791/63211.",
+      "sentences": [],
+      "metadata": {
+        "ref_number": 17,
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_refs_18",
+      "section_id": "sec_refs",
+      "para_type": "reference",
+      "text": "18. Ezzo, M. et al.\n\nAcute contact with profibrotic macrophages mechanically activates fibroblasts via    v  3 integrin-mediated engagement of Piezo1.\n\nSci. Adv. , eadp4726 (2024).",
+      "sentences": [],
+      "metadata": {
+        "ref_number": 18,
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_refs_19",
+      "section_id": "sec_refs",
+      "para_type": "reference",
+      "text": "19. Tseng, P., Pushkarsky, I. & Carlo, D. D. Metallization and Biopatterning on Ultra-Flexible Substrates via Dextran Sacrificial Layers.\n\nPLOS ONE , e106091 (2014).",
+      "sentences": [],
+      "metadata": {
+        "ref_number": 19,
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_refs_20",
+      "section_id": "sec_refs",
+      "para_type": "reference",
+      "text": "20. Kawada, N., Seki, S., Kuroki, T. & Kaneda, K. ROCK Inhibitor Y-27632 Attenuates Stellate Cell Contraction and Portal Pressure Increase Induced by Endothelin-1.\n\nBiochem. Biophys. Res. Commun.\n\n266 , 296-300 (1999).",
+      "sentences": [],
+      "metadata": {
+        "ref_number": 20,
+        "fig_refs": [],
+        "table_refs": []
+      }
+    },
+    {
+      "paragraph_id": "p_refs_21",
+      "section_id": "sec_refs",
+      "para_type": "reference",
+      "text": "21. Roda, V. M. de P. et al.\n\nInhibition of Rho kinase (ROCK) impairs cytoskeletal contractility in human M  glial cells without effects on cell viability, migration, and extracellular matrix production.\n\nExp. Eye Res.\n\n238 , 109745 (2024).",
+      "sentences": [],
+      "metadata": {
+        "ref_number": 21,
+        "fig_refs": [],
+        "table_refs": []
+      }
+    }
+  ],
+  "figures": [
+    {
+      "figure_id": "fig_1",
+      "caption": "Body map of mechanobiological disease caused in part or in whole by contractile dysfunction in cells. Three main classes of disease are represented here: connective tissue such as asthma and spastic or underactive bladder, fibrotic disease such as lung fibrosis, and oncology where tumor microenvironments, metastasis and tumor tension all play key pathological roles. There is a major need to develop therapeutics that modulate the mechanobiological function in cells to treat these classes of diseases.",
+      "mentions": [
+        "p_int_1"
+      ],
+      "img_path": null,
+      "metadata": {
+        "detected_number": 1
+      }
+    },
+    {
+      "figure_id": "fig_2",
+      "caption": "(a) Schematic representation of the FLECS technology: Single cells adhered to adhesive micropatterns embedded within an elastomeric film exert mechanical force onto the micropatterns resulting in their displacements. Top view demonstrates various pattern shapes, while a magnified image illustrates a contracting cell inwardly displacing its terminals. Overlay of fluorescent patterns and phase contrast images captures contracting cells, with time-lapsed images showcasing the cell's contraction over the underlying micropattern. Scale bars represent 25 \u03bcm. (b) Implementation of FLECS Technology in a 384 well-plate format. (c) Workflow for image analysis: Input includes aligned image sets of the micropatterns (set 1) and stained cell nuclei (set 2). Analysis involves (i) identification and measurement of all micropatterns in image set 1, (ii) cross-referencing the positions of each micropattern in image set 2, and (iii) determining the presence of 0, 1, or >2 nuclei (cells). Output consists of mean center-to-terminal displacements of micropatterns containing a single nucleus (one cell), compared to the median measurement of non-displaced patterns with zero nuclei. The resulting differences are presented as a horizontal histogram. MATLAB code enabling describing original versions of these algorithms are described in a previous work[16]. Figure adapted with permission from Pushkarsky et al. [13,15,16]",
+      "mentions": [],
+      "img_path": null,
+      "metadata": {
+        "detected_number": 2
+      }
+    },
+    {
+      "figure_id": "fig_3",
+      "caption": "Results from primary contraction screens across multiple cell types. The data demonstrates the platform's scalability and robustness, with clear separation between controls and hits. Expectedly, most compounds did not elicit significant responses, yet a notable subset of inhibitors was identified across cell types and doses. This underscores the non-random distribution of responses. A 'Hit upper bound' threshold is marked by the green line, with non-hits below this threshold shaded in dark grey. These non-hits fail to meet normalized contraction constraints (< 0.85) despite achieving robust Z-score criteria. (a) Scatter plots of acute SMC screen results. Robust Z-scores of contraction are shown, stratified by dose, timepoint, and cell type. Compounds are ordered by the average Z-score of contraction across all cell types, timepoints, and doses, with the same order maintained across all subplots. (b) Scatter plots of MYO screen results. Compounds are ordered by the average normalized percent change in contraction across all cell types, timepoints, and doses, with the same order maintained across all subplots.",
+      "mentions": [
+        "p_res_7"
+      ],
+      "img_path": null,
+      "metadata": {
+        "detected_number": 3
+      }
+    },
+    {
+      "figure_id": "fig_4",
+      "caption": "Clustering of 24-hour primary screen compounds reveals distinct contractile response types and pathway associations. (a) Dendrogram and pairwise distance matrix showing hierarchical clustering of compounds based on Z-score vectors across five cell types. Clusters highlight compounds with distinct response profiles, with pairwise distances >50 indicating highly divergent responses. (b) Bar graph comparing mean robust Z-scores of contraction (\u00b195% CI) for each cell type within clusters, with the dotted line marking the Z = -3 upper bound for hits. (c) Distribution of compounds by affected pathways within each cluster, emphasizing pathway overrepresentation (e.g., ROCK, apoptosis, cell cycle/DNA damage) and novel pathway associations.",
+      "mentions": [
+        "p_res_8",
+        "p_res_11"
+      ],
+      "img_path": null,
+      "metadata": {
+        "detected_number": 4
+      }
+    },
+    {
+      "figure_id": "fig_5",
+      "caption": "Sub-clustering of 24-hour primary screen compounds reveals distinct contractile response types and pathway associations. (a) Dendrogram and pairwise distance matrix showing hierarchical clustering of compounds based on Z-score. (b) Bar graph comparing mean robust Z-scores of contraction (\u00b195% CI) for each cell type within sub-clusters, with the dotted line marking the Z = -3 upper bound for hits. (c) Distribution of compounds by affected pathways within each sub-cluster, emphasizing pathway overrepresentation within general cluster.",
+      "mentions": [],
+      "img_path": null,
+      "metadata": {
+        "detected_number": 5
+      }
+    },
+    {
+      "figure_id": "fig_6",
+      "caption": "Screening flow-chart from primary screening to confirmation and does response. Flowchart illustrating the screening process and the number of hits identified at each stage. A total of 2,418 compounds were screened at multiple doses in both MYO and SMC cell types, with imaging performed at biologically relevant time points. MYO cells were imaged at a single 24-hour time point to capture their response to TGF-\u03b2, which aligns with the biological timescale of myofibroblast activation. In contrast, SMCs were imaged pre-drug exposure, and at 45 minutes and 2 hours post-drug exposure to capture their acute responses. Hit definitions were established based on these time points. For comparison, SMCs were also screened at 24 hours; however, hits from this time point were not selected for further analysis as the focus remained on acute responses. Confirmation screens were subsequently conducted in triplicate using the same formats as the primary screen. Confirmed hits were defined as compounds which maintained their initial activity levels in all 3 of the triplicate tests.",
+      "mentions": [
+        "p_res_29"
+      ],
+      "img_path": null,
+      "metadata": {
+        "detected_number": 6
+      }
+    },
+    {
+      "figure_id": "fig_7",
+      "caption": "Confirmation screen results show strong correlation and cell-specific responses. (a) Scatter plot showing comparing robust Z-score of contraction between two replicates in HLF-SC confirmation screen, colored by density. (b) Bar graphs showing correlation in response variables by cell type. Note that the SMC graphs show only the 45-min results. (c) Heatmap showing confirmation index by cell type for each compound. Note that some compounds were picked at different doses in different cell types. For SMC cells, the maximum number of hits across both timepoints is shown.",
+      "mentions": [
+        "p_res_32",
+        "p_res_32"
+      ],
+      "img_path": null,
+      "metadata": {
+        "detected_number": 7
+      }
+    },
+    {
+      "figure_id": "fig_8",
+      "caption": "Clustering of confirmation screen results reveals distinct response types with differences in associated pathways. (a) Dendrogram and pairwise distance matrix showing hierarchical clustering of compounds based on Z-score vectors across five cell types. Selected compound targets are highlighted. (b) Bar graph comparing mean robust Z-scores of contraction (\u00b195% CI) for each cell type within clusters, with the dotted line marking the Z = -3 upper bound for hits. (c) Distribution of compounds by affected pathways within each cluster, emphasizing pathway overrepresentation. *Note: only 45-min data was included in activity vectors for SMC cells.",
+      "mentions": [
+        "p_res_34",
+        "p_res_36"
+      ],
+      "img_path": null,
+      "metadata": {
+        "detected_number": 8
+      }
+    },
+    {
+      "figure_id": "fig_9",
+      "caption": "Comparing responses in HLF-SC and HHSteC shows both general and selective responses. (a) Scatter plot of average z-scores for contraction for compounds tested in both cell types at the confirmation screen level. Note: not all hits were tested in both cell types, as in this case molecules were only re-tested in the cell type where they were originally identified as hits. (b) Distribution of compounds by affected pathways for confirmed hits in each cell type, highlighting pathway overrepresentation. (c) Dose response curves for selected compounds demonstrating cell-type selectivity among the MYO cells. Compounds labelled with an asterisk (*) were over 10 times more potent (by IC50) in HHSteC.",
+      "mentions": [
+        "p_res_39",
+        "p_res_39",
+        "p_res_40",
+        "p_res_45"
+      ],
+      "img_path": null,
+      "metadata": {
+        "detected_number": 9
+      }
+    },
+    {
+      "figure_id": "fig_10",
+      "caption": "Comparing responses in HTSM and HBSM shows both general and selective responses. (a) Scatter plot of average Z-score of contraction for compounds tested in both cell types at the confirmation screen level. (b) Venn diagram showing overlap in confirmed hits. (c) Distribution of compounds by affected pathways for confirmed hits in each cell type, emphasizing pathway overrepresentation. (d) Dose response curves for selected compounds.",
+      "mentions": [
+        "p_res_43",
+        "p_res_44",
+        "p_res_44"
+      ],
+      "img_path": null,
+      "metadata": {
+        "detected_number": 10
+      }
+    }
+  ],
+  "tables": [
+    {
+      "table_id": "table_1",
+      "caption": "Summary of the five primary human cell types and their screening conditions. SMC cells (blue rows) and MYO cells (orange rows) differ in assay format (acute vs. 24-hour), TGF-\u03b2 activation, time points, and dosing. This table highlights how each cell type was tested under distinct protocols to capture disease-relevant contractile responses. The secondary 24hr screens in SMC were performed at the primary single-point level for cursory comparison to MYO responses, but these hits were not advanced into confirmation and subsequent stages.",
+      "mentions": [
+        "p_res_3"
+      ],
+      "metadata": {
+        "detected_number": 1
+      }
+    }
+  ],
+  "issues": [
+    {
+      "id": "B-001",
+      "track": "B",
+      "dimensions": [
+        "WQ"
+      ],
+      "category": "grammar",
+      "severity": "minor",
+      "title": "Grammar Error in Introduction",
+      "message": "The sentence 'The cells was cultured...' should use 'were' instead of 'was' for subject-verb agreement.",
+      "issue_type": "grammar",
+      "scope": "paragraph",
+      "persona": "Dr. Clarity (Communication)",
+      "location": {
+        "section_id": "sec_intro",
+        "paragraph_id": "p_int_1"
+      }
+    },
+    {
+      "id": "B-002",
+      "track": "B",
+      "dimensions": [
+        "WQ"
+      ],
+      "category": "clarity",
+      "severity": "major",
+      "title": "Ambiguous Reference in Results",
+      "message": "The phrase 'these results' in paragraph 3 could refer to either the contractility data or the viability assays. Please clarify which specific results are being discussed.",
+      "issue_type": "clarity",
+      "scope": "paragraph",
+      "persona": "Dr. Clarity (Communication)",
+      "location": {
+        "section_id": "sec_results",
+        "paragraph_id": "p_res_3"
+      }
+    },
+    {
+      "id": "B-003",
+      "track": "B",
+      "dimensions": [
+        "WQ",
+        "AS"
+      ],
+      "category": "reporting",
+      "severity": "major",
+      "title": "Incomplete Statistical Reporting",
+      "message": "The p-values are reported without confidence intervals or effect sizes. Include 95% CI and Cohen's d for complete statistical reporting.",
+      "issue_type": "reporting",
+      "scope": "paragraph",
+      "persona": "Dr. Clarity (Communication)",
+      "location": {
+        "section_id": "sec_results",
+        "paragraph_id": "p_res_5"
+      }
+    },
+    {
+      "id": "A-001",
+      "track": "A",
+      "dimensions": [
+        "AS"
+      ],
+      "category": "methods",
+      "severity": "critical",
+      "title": "Missing Control Group Description",
+      "message": "The methods section does not describe the vehicle control conditions for the kinase inhibitor treatments. This is essential for interpreting the results.",
+      "issue_type": "methods",
+      "scope": "paragraph",
+      "persona": "Dr. Rigorous (Methods & Evidence)",
+      "location": {
+        "section_id": "sec_methods",
+        "paragraph_id": "p_met_2"
+      }
+    },
+    {
+      "id": "A-002",
+      "track": "A",
+      "dimensions": [
+        "AS"
+      ],
+      "category": "statistics",
+      "severity": "major",
+      "title": "Multiple Testing Correction Needed",
+      "message": "With 2418 kinase inhibitors tested, multiple comparison correction (e.g., Bonferroni or FDR) should be applied to avoid Type I errors.",
+      "issue_type": "statistics",
+      "scope": "paragraph",
+      "persona": "Dr. Rigorous (Methods & Evidence)",
+      "location": {
+        "section_id": "sec_methods",
+        "paragraph_id": "p_met_sub_4_4"
+      }
+    },
+    {
+      "id": "A-003",
+      "track": "A",
+      "dimensions": [
+        "AS"
+      ],
+      "category": "logic",
+      "severity": "major",
+      "title": "Circular Reasoning in Discussion",
+      "message": "The argument that 'cells show different responses because they are different cell types' is circular. Provide mechanistic explanations for the observed differences.",
+      "issue_type": "logic",
+      "scope": "paragraph",
+      "persona": "Dr. Rigorous (Methods & Evidence)",
+      "location": {
+        "section_id": "sec_discussion",
+        "paragraph_id": "p_dis_3"
+      }
+    },
+    {
+      "id": "C-001",
+      "track": "C",
+      "dimensions": [
+        "CR"
+      ],
+      "category": "limitation",
+      "severity": "major",
+      "title": "Unacknowledged Technical Limitation",
+      "message": "The study does not discuss the limitation that contractility measurements may be affected by cell confluence, which varied between 70-90% across experiments.",
+      "issue_type": "limitation",
+      "scope": "paragraph",
+      "persona": "Dr. Critical (Alternative Views)",
+      "location": {
+        "section_id": "sec_discussion",
+        "paragraph_id": "p_dis_5"
+      }
+    },
+    {
+      "id": "C-002",
+      "track": "C",
+      "dimensions": [
+        "CR"
+      ],
+      "category": "alternative_explanation",
+      "severity": "major",
+      "title": "Alternative Interpretation Not Considered",
+      "message": "The divergent responses between cell types could be due to differential expression of drug transporters rather than mechanobiological differences. This alternative should be discussed.",
+      "issue_type": "alternative_explanation",
+      "scope": "paragraph",
+      "persona": "Dr. Critical (Alternative Views)",
+      "location": {
+        "section_id": "sec_discussion",
+        "paragraph_id": "p_dis_2"
+      }
+    },
+    {
+      "id": "C-003",
+      "track": "C",
+      "dimensions": [
+        "AS",
+        "CR"
+      ],
+      "category": "methodology",
+      "severity": "critical",
+      "title": "Questionable Experimental Design Choice",
+      "message": "Using only a single concentration (10 \u00b5M) for all 2418 inhibitors ignores dose-response relationships and may miss important effects at physiological concentrations.",
+      "issue_type": "methodology",
+      "scope": "paragraph",
+      "persona": "Dr. Critical (Alternative Views)",
+      "location": {
+        "section_id": "sec_methods",
+        "paragraph_id": "p_met_3"
+      }
+    },
+    {
+      "id": "B-004",
+      "track": "B",
+      "dimensions": [
+        "WQ",
+        "AS"
+      ],
+      "category": "logical_flow",
+      "severity": "major",
+      "title": "Missing Logical Connection",
+      "message": "The transition from single-cell contractility data to tissue-level implications lacks intermediate reasoning steps.",
+      "issue_type": "logical_flow",
+      "scope": "paragraph",
+      "persona": "Dr. Clarity (Communication)",
+      "location": {
+        "section_id": "sec_discussion",
+        "paragraph_id": "p_dis_1"
+      }
+    },
+    {
+      "id": "C-004",
+      "track": "C",
+      "dimensions": [
+        "CR"
+      ],
+      "category": "overclaim",
+      "severity": "major",
+      "title": "Overgeneralization of Findings",
+      "message": "Claiming this is a 'comprehensive atlas of mechanobiology' overstates the scope - only 5 cell types and one functional readout were tested.",
+      "issue_type": "overclaim",
+      "scope": "paragraph",
+      "persona": "Dr. Critical (Alternative Views)",
+      "location": {
+        "section_id": "abstract",
+        "paragraph_id": "p_abs_1"
+      }
+    }
+  ],
+  "document_type": "academic_manuscript",
+  "source_format": "pdf",
+  "meta": {
+    "page_count": 23,
+    "word_count": 8432,
+    "section_names": [
+      "Abstract",
+      "Introduction",
+      "Results",
+      "Discussion",
+      "Methods",
+      "References"
+    ]
+  }
+}

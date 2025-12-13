@@ -1,0 +1,94 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv
+ENV/
+env.bak/
+venv.bak/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+*.egg-info/
+dist/
+build/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Frontend build
+frontend/dist/
+frontend/build/
+apps/web/dist/
+apps/web/build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+*.env
+
+# Logs
+logs/
+*.log
+
+# Testing
+coverage/
+.nyc_output/
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+temp/
+
+# Claude
+.claude/cache/
+
+# Backend specific
+apps/api/__pycache__/
+apps/api/*.egg-info/
+apps/api/.pytest_cache/
+apps/api/.coverage
+apps/api/htmlcov/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploads (if storing locally)
+uploads/
+media/
+
+# Package manager locks (optional - you may want to keep these)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
