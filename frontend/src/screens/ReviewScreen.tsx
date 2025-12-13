@@ -245,13 +245,13 @@ export function ReviewScreen() {
   return (
     <div className="h-screen flex flex-col">
       {/* Export button */}
-      <div className="absolute top-8 right-10 z-10">
+      <div className="absolute top-8 right-10 z-50">
         <button
           onClick={handleExport}
-          className="group flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
-                     bg-coral-500/10 text-coral-500 hover:bg-coral-500/20 border border-coral-500/30"
+          className="group flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-all duration-200
+                     bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300"
         >
-          <Download className="w-4 h-4 group-hover:animate-bounce" />
+          <Download className="w-4 h-4" />
           Export Review
         </button>
       </div>
@@ -265,7 +265,7 @@ export function ReviewScreen() {
           style={{ flexBasis: '70%' }}
         >
           {/* ZORRO branding - centered over manuscript */}
-          <div className="sticky top-8 z-10 flex justify-center pointer-events-none">
+          <div className="sticky top-8 z-20 flex justify-center pointer-events-none">
             <h1 className="text-2xl font-serif tracking-wide opacity-25"
                 style={{ color: '#E89855' }}>
               ZORRO

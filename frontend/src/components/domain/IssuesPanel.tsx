@@ -156,9 +156,9 @@ export function IssuesPanel({
               </div>
 
               {issue.proposedEdit && (
-                <div className="bg-green-900/10 p-3 rounded-lg border border-green-800/20">
-                  <p className="text-xs font-medium text-green-400 mb-2">Suggested Rewrite:</p>
-                  <p className="text-sm text-gray-300">
+                <div className="bg-gray-50 p-3 rounded border border-gray-200">
+                  <p className="text-xs font-medium text-gray-600 mb-1">Suggested Rewrite:</p>
+                  <p className="text-sm text-gray-700">
                     {issue.proposedEdit.newText}
                   </p>
                 </div>
@@ -172,7 +172,7 @@ export function IssuesPanel({
                         e.stopPropagation();
                         onAcceptIssue(issue.id);
                       }}
-                      className="px-4 py-2 text-xs bg-green-600 text-white hover:bg-green-700 rounded-lg transition-colors font-medium"
+                      className="px-3 py-1 text-xs text-green-600 hover:bg-green-50 rounded transition-colors"
                     >
                       Accept Rewrite
                     </button>
@@ -182,7 +182,7 @@ export function IssuesPanel({
                         setEditModalIssue(issue);
                         setEditedText(issue.proposedEdit.newText);
                       }}
-                      className="px-4 py-2 text-xs bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors flex items-center gap-1 font-medium"
+                      className="px-3 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded transition-colors flex items-center gap-1"
                     >
                       <Edit2 className="w-3 h-3" />
                       Edit
@@ -192,16 +192,16 @@ export function IssuesPanel({
                         e.stopPropagation();
                         onAcceptIssue(issue.id);
                       }}
-                      className="px-4 py-2 text-xs bg-teal-600 text-white hover:bg-teal-700 rounded-lg transition-colors font-medium"
+                      className="px-3 py-1 text-xs text-gray-600 hover:bg-gray-100 rounded transition-colors"
                     >
-                      Accept (No Rewrite)
+                      Accept Issue
                     </button>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         onDismissIssue(issue.id);
                       }}
-                      className="px-4 py-2 text-xs bg-gray-600 text-white hover:bg-gray-700 rounded-lg transition-colors font-medium"
+                      className="px-3 py-1 text-xs text-gray-500 hover:bg-gray-100 rounded transition-colors"
                     >
                       Dismiss
                     </button>
@@ -213,16 +213,16 @@ export function IssuesPanel({
                         e.stopPropagation();
                         onAcceptIssue(issue.id);
                       }}
-                      className="px-4 py-2 text-xs bg-teal-600 text-white hover:bg-teal-700 rounded-lg transition-colors font-medium"
+                      className="px-3 py-1 text-xs text-gray-600 hover:bg-gray-100 rounded transition-colors"
                     >
-                      Accept
+                      Accept Issue
                     </button>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         onDismissIssue(issue.id);
                       }}
-                      className="px-4 py-2 text-xs bg-gray-600 text-white hover:bg-gray-700 rounded-lg transition-colors font-medium"
+                      className="px-3 py-1 text-xs text-gray-500 hover:bg-gray-100 rounded transition-colors"
                     >
                       Dismiss
                     </button>
