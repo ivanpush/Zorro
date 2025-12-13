@@ -180,12 +180,13 @@ export function UploadScreen() {
         <div className="w-full max-w-xl px-6">
 
           {/* Title with Compelling Tagline */}
-          <div className="text-center mb-10">
+          <div className="text-center mb-16">
             <h1 className="text-5xl font-serif tracking-tight mb-2" style={{ color: '#f5f0e8' }}>
               ZORRO
             </h1>
             <p className="text-base font-light max-w-md mx-auto" style={{ color: '#a0a0b0' }}>
-              A hostile reading of your manuscript. Surface the arguments reviewers will challenge.
+              A <span style={{ color: '#E89855' }}>hostile reading</span> of your manuscript.<br />
+              <span style={{ opacity: 0.65 }}>Surface the arguments reviewers will challenge.</span>
             </p>
           </div>
 
@@ -194,9 +195,9 @@ export function UploadScreen() {
             <div
               className={`relative border rounded-xl transition-all duration-300`}
               style={{
-                borderColor: isDragging ? '#e85555' : 'rgba(160, 160, 176, 0.3)',
-                backgroundColor: isDragging ? 'rgba(232, 85, 85, 0.05)' : 'rgba(255, 255, 255, 0.03)',
-                boxShadow: isHovering ? '0 0 40px rgba(232, 85, 85, 0.15)' : 'none',
+                borderColor: isDragging ? '#E89855' : 'rgba(160, 160, 176, 0.3)',
+                backgroundColor: isDragging ? 'rgba(232, 152, 85, 0.05)' : 'rgba(255, 255, 255, 0.03)',
+                boxShadow: isHovering ? '0 0 40px rgba(232, 152, 85, 0.15)' : 'none',
               }}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
@@ -209,9 +210,9 @@ export function UploadScreen() {
                   <div className="animate-in fade-in duration-300">
                     <div
                       className="w-10 h-10 mx-auto mb-3 rounded-full flex items-center justify-center"
-                      style={{ backgroundColor: 'rgba(232, 85, 85, 0.15)' }}
+                      style={{ backgroundColor: 'rgba(232, 152, 85, 0.15)' }}
                     >
-                      <svg className="w-5 h-5" style={{ color: '#e85555' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5" style={{ color: '#E89855' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                     </div>
@@ -247,11 +248,11 @@ export function UploadScreen() {
                       <span
                         className="px-6 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-all inline-block"
                         style={{
-                          backgroundColor: '#e85555',
+                          backgroundColor: '#E89855',
                           color: '#ffffff'
                         }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#c43d3d'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e85555'}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#D08045'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#E89855'}
                       >
                         Select File
                       </span>
@@ -272,7 +273,7 @@ export function UploadScreen() {
               <div className="text-center">
                 {/* Animated Checkmark */}
                 <div className="w-10 h-10 mx-auto mb-4">
-                  <svg className="animate-in zoom-in duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#e85555' }}>
+                  <svg className="animate-in zoom-in duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#E89855' }}>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
@@ -286,11 +287,11 @@ export function UploadScreen() {
                   onClick={() => navigate('/setup')}
                   className="px-6 py-2.5 rounded-lg text-sm font-medium transition-all inline-block"
                   style={{
-                    backgroundColor: '#e85555',
+                    backgroundColor: '#E89855',
                     color: '#ffffff'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#c43d3d'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e85555'}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#D08045'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#E89855'}
                 >
                   Continue to Setup
                 </button>
@@ -312,11 +313,11 @@ export function UploadScreen() {
             <div
               className="mt-4 p-3 rounded-lg"
               style={{
-                backgroundColor: 'rgba(232, 85, 85, 0.1)',
-                border: '1px solid rgba(232, 85, 85, 0.3)'
+                backgroundColor: 'rgba(232, 152, 85, 0.1)',
+                border: '1px solid rgba(232, 152, 85, 0.3)'
               }}
             >
-              <div className="text-sm flex items-center gap-2" style={{ color: '#e85555' }}>
+              <div className="text-sm flex items-center gap-2" style={{ color: '#E89855' }}>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>

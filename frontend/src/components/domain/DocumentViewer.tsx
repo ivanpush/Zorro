@@ -163,7 +163,7 @@ export function DocumentViewer({
       {/* Sections and Paragraphs */}
       {document.sections.map((section) => {
         const sectionParagraphs = document.paragraphs.filter((p) =>
-          section.paragraphIds.includes(p.id)
+          section.paragraphIds?.includes(p.id) || false
         );
 
         return (
