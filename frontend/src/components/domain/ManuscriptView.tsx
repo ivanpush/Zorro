@@ -5,6 +5,7 @@ interface ManuscriptViewProps {
   document: DocObj;
   selectedIssueId: string | null;
   findings: Finding[];
+  rewrittenParagraphs: Map<string, string>;
   onParagraphClick: (paragraphId: string) => void;
 }
 
@@ -12,6 +13,7 @@ export function ManuscriptView({
   document,
   selectedIssueId,
   findings,
+  rewrittenParagraphs,
   onParagraphClick
 }: ManuscriptViewProps) {
   // Map paragraphs to their issues
@@ -48,6 +50,8 @@ export function ManuscriptView({
     const hasIssues = paragraphIssuesMap.has(paragraph.paragraph_id);
     const isSelected = paragraph.paragraph_id === selectedParagraphId;
     const issues = paragraphIssuesMap.get(paragraph.paragraph_id) || [];
+    const isRewritten = rewrittenParagraphs.has(paragraph.paragraph_id);
+    const rewrittenText = rewrittenParagraphs.get(paragraph.paragraph_id);
 
     // Get the selected issue's sentence for highlighting
     const selectedIssue = selectedIssueId ? findings.find(f => f.id === selectedIssueId) : null;
@@ -120,8 +124,15 @@ export function ManuscriptView({
             {typeof paragraph.paragraph_index === 'number' ? paragraph.paragraph_index + 1 : ''}
           </div>
           <div className="flex-1">
+            {isRewritten && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 mb-2">
+                REWRITTEN
+              </span>
+            )}
             <p className="text-base leading-relaxed text-foreground/80">
-              {renderTextWithHighlight(paragraph.text)}
+              {isRewritten
+                ? rewrittenText
+                : renderTextWithHighlight(paragraph.text)}
             </p>
             {hasIssues && (
               <div className="mt-2 flex gap-2 flex-wrap">
@@ -152,7 +163,7 @@ export function ManuscriptView({
   return (
     <div className="p-6">
       {/* Document Title */}
-      <h1 className="text-3xl font-bold mb-6">{document.title}</h1>
+      <h1 className="text-xl font-bold mb-6">{document.title}</h1>
 
       {/* Render sections and paragraphs */}
       {document.sections.length > 0 ? (

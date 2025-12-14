@@ -7,8 +7,10 @@ interface IssuesPanelProps {
   selectedIssueId: string | null;
   acceptedIssueIds: Set<string>;
   dismissedIssueIds: Set<string>;
+  rewrittenParagraphs: Map<string, string>;
   onSelectIssue: (issueId: string) => void;
   onAcceptIssue: (issueId: string) => void;
+  onAcceptRewrite: (issueId: string) => void;
   onDismissIssue: (issueId: string) => void;
 }
 
@@ -17,8 +19,10 @@ export function IssuesPanel({
   selectedIssueId,
   acceptedIssueIds,
   dismissedIssueIds,
+  rewrittenParagraphs,
   onSelectIssue,
   onAcceptIssue,
+  onAcceptRewrite,
   onDismissIssue
 }: IssuesPanelProps) {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
@@ -177,12 +181,12 @@ export function IssuesPanel({
             {issue.title}
           </h4>
 
-          {issue.anchors.length > 0 && issue.anchors[0].quoted_text && !isExpanded && (
-            <blockquote className="mt-3 pl-3 border-l-2 border-muted/30">
-              <p className="text-xs text-muted-foreground/70 italic leading-relaxed line-clamp-2">
-                "{issue.anchors[0].quoted_text}"
+          {!isExpanded && (
+            <div className="mt-3">
+              <p className="text-xs text-muted-foreground/70 leading-relaxed line-clamp-2">
+                {issue.description}
               </p>
-            </blockquote>
+            </div>
           )}
 
           {isExpanded && (
@@ -195,8 +199,11 @@ export function IssuesPanel({
                 </blockquote>
               )}
 
-              <div className="text-sm text-muted-foreground">
-                {issue.description}
+              <div>
+                <span className="text-xs font-semibold text-muted-foreground">Critique:</span>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {issue.description}
+                </p>
               </div>
 
               {issue.proposedEdit && (

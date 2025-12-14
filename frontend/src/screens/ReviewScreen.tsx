@@ -186,6 +186,16 @@ export function ReviewScreen() {
     });
   }, []);
 
+  // Handle accepting a rewrite
+  const handleAcceptRewrite = useCallback((issueId: string) => {
+    const issue = findings.find(f => f.id === issueId);
+    if (issue && issue.proposedEdit && issue.anchors.length > 0) {
+      const paragraphId = issue.anchors[0].paragraph_id;
+      setRewrittenParagraphs(prev => new Map(prev).set(paragraphId, issue.proposedEdit!.newText));
+      handleAcceptIssue(issueId);
+    }
+  }, [findings, handleAcceptIssue]);
+
   const handleDismissIssue = useCallback((issueId: string) => {
     setDismissedIssueIds(prev => new Set([...prev, issueId]));
     setAcceptedIssueIds(prev => {
@@ -281,6 +291,7 @@ export function ReviewScreen() {
             document={currentDocument}
             selectedIssueId={selectedIssueId}
             findings={findings}
+            rewrittenParagraphs={rewrittenParagraphs}
             onParagraphClick={handleParagraphClick}
           />
         </div>
@@ -296,8 +307,10 @@ export function ReviewScreen() {
             selectedIssueId={selectedIssueId}
             acceptedIssueIds={acceptedIssueIds}
             dismissedIssueIds={dismissedIssueIds}
+            rewrittenParagraphs={rewrittenParagraphs}
             onSelectIssue={handleIssueSelect}
             onAcceptIssue={handleAcceptIssue}
+            onAcceptRewrite={handleAcceptRewrite}
             onDismissIssue={handleDismissIssue}
           />
         </div>
