@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Download } from 'lucide-react';
 import { useAppStore } from '@/store';
 import { ManuscriptView } from '@/components/domain/ManuscriptView';
-import { IssuesPanel } from '@/components/domain/IssuesPanel';
+import { IssuesPanel } from './ReviewScreen/IssuesPanel';
 import type { DocObj, Finding } from '@/types';
 
 export function ReviewScreen() {
@@ -244,41 +244,44 @@ export function ReviewScreen() {
 
   return (
     <div className="h-screen flex flex-col">
-      {/* Export button */}
-      <div className="absolute top-8 right-10" style={{ zIndex: 9999 }}>
+      {/* Header - reduced height from h-14 to h-11 (20% reduction) */}
+      <div className="h-11 flex items-center justify-between px-6 border-b bg-background">
+        {/* ZORRO on the left */}
+        <h1 className="text-lg font-serif tracking-wide" style={{ color: '#E89855' }}>
+          ZORRO
+        </h1>
+
+        {/* Empty center for balance */}
+        <div></div>
+
+        {/* Export button on the right */}
         <button
           onClick={handleExport}
-          className="group flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-all duration-200
-                     bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300"
+          className="flex items-center gap-2 px-4 py-1.5 text-sm rounded-md transition-all duration-200
+                   hover:bg-gray-800/50"
+          style={{ color: '#a0a0b0' }}
+          onMouseEnter={(e) => e.currentTarget.style.color = '#E89855'}
+          onMouseLeave={(e) => e.currentTarget.style.color = '#a0a0b0'}
         >
           <Download className="w-4 h-4" />
           Export Review
         </button>
       </div>
 
-      {/* Main content area */}
+      {/* Main content - no longer needs absolute export button */}
       <div className="flex-1 flex overflow-hidden">
         {/* Manuscript View - 60% */}
         <div
           ref={manuscriptRef}
-          className="flex-1 overflow-y-auto border-r bg-background relative"
+          className="flex-1 overflow-y-auto border-r bg-background"
           style={{ flexBasis: '60%' }}
         >
-          {/* ZORRO branding - centered over manuscript */}
-          <div className="sticky top-8 flex justify-center pointer-events-none" style={{ zIndex: 999 }}>
-            <h1 className="text-2xl font-serif tracking-wide opacity-25"
-                style={{ color: '#E89855' }}>
-              ZORRO
-            </h1>
-          </div>
-          <div className="relative" style={{ marginTop: '-3rem' }}>
-            <ManuscriptView
-              document={currentDocument}
-              selectedIssueId={selectedIssueId}
-              findings={findings}
-              onParagraphClick={handleParagraphClick}
-            />
-          </div>
+          <ManuscriptView
+            document={currentDocument}
+            selectedIssueId={selectedIssueId}
+            findings={findings}
+            onParagraphClick={handleParagraphClick}
+          />
         </div>
 
         {/* Issues Panel - 40% */}

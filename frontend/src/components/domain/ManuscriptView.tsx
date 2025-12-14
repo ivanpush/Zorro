@@ -53,6 +53,18 @@ export function ManuscriptView({
     const selectedIssue = selectedIssueId ? findings.find(f => f.id === selectedIssueId) : null;
     const highlightedSentence = selectedIssue?.anchors[0]?.quoted_text;
 
+    // Get the selected issue's severity for coloring
+    const getHighlightColor = () => {
+      if (!selectedIssue) return 'rgba(232, 152, 85, 0.3)'; // default coral
+      switch (selectedIssue.severity) {
+        case 'critical': return 'rgba(239, 68, 68, 0.3)'; // red
+        case 'major': return 'rgba(249, 115, 22, 0.3)'; // orange
+        case 'minor': return 'rgba(234, 179, 8, 0.3)'; // yellow
+        case 'suggestion': return 'rgba(59, 130, 246, 0.3)'; // blue
+        default: return 'rgba(232, 152, 85, 0.3)';
+      }
+    };
+
     // Function to render text with sentence highlighting
     const renderTextWithHighlight = (text: string) => {
       if (!highlightedSentence || !isSelected) {
@@ -66,7 +78,8 @@ export function ManuscriptView({
       return (
         <>
           {text.substring(0, index)}
-          <span className="bg-coral-500/30 text-foreground font-medium rounded px-0.5">
+          <span className="text-foreground font-medium rounded px-0.5"
+                style={{ backgroundColor: getHighlightColor() }}>
             {highlightedSentence}
           </span>
           {text.substring(index + highlightedSentence.length)}
@@ -74,15 +87,28 @@ export function ManuscriptView({
       );
     };
 
+    // Get border color based on selected issue's severity
+    const getBorderColor = () => {
+      if (!selectedIssue) return '#E89855'; // default coral
+      switch (selectedIssue.severity) {
+        case 'critical': return '#ef4444'; // red-500
+        case 'major': return '#f97316'; // orange-500
+        case 'minor': return '#eab308'; // yellow-500
+        case 'suggestion': return '#3b82f6'; // blue-500
+        default: return '#E89855';
+      }
+    };
+
     return (
       <div
         key={paragraph.paragraph_id}
         id={paragraph.paragraph_id}
         className={`
-          p-3 mb-2 transition-all rounded bg-muted/10
-          ${isSelected ? 'border-l-4 border-coral-500 bg-muted/25' : ''}
-          ${hasIssues ? 'cursor-pointer hover:bg-muted/20' : 'hover:bg-muted/15'}
+          p-3 mb-2 transition-all rounded-lg bg-gray-800/35 hover:bg-gray-800/50
+          ${isSelected ? 'border-l-4 bg-gray-800/50' : ''}
+          ${hasIssues ? 'cursor-pointer' : ''}
         `}
+        style={isSelected ? { borderLeftColor: getBorderColor() } : {}}
         onClick={() => {
           if (hasIssues) {
             onParagraphClick(paragraph.paragraph_id);
@@ -91,7 +117,7 @@ export function ManuscriptView({
       >
         <div className="flex items-start gap-3">
           <div className="text-xs text-muted-foreground/60 mt-1 select-none">
-            {paragraph.paragraph_index + 1}
+            {typeof paragraph.paragraph_index === 'number' ? paragraph.paragraph_index + 1 : ''}
           </div>
           <div className="flex-1">
             <p className="text-sm leading-relaxed text-foreground/80">

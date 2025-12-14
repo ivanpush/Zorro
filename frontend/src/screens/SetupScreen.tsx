@@ -157,15 +157,18 @@ export function SetupScreen() {
 
   return (
     <div className="min-h-screen bg-background antialiased">
-      {/* Subtle ZORRO branding - fixed to viewport */}
-      <div className="fixed top-8 right-10 z-10">
-        <h1 className="text-2xl font-serif tracking-wide opacity-25 hover:opacity-40 transition-opacity duration-300"
-            style={{ color: '#E89855' }}>
-          ZORRO
-        </h1>
+      {/* Top bar with ZORRO branding */}
+      <div className="fixed top-0 left-0 right-0 h-20 bg-background/80 backdrop-blur-sm border-b border-border/20 z-50">
+        <div className="max-w-7xl mx-auto px-8 h-full flex items-center justify-between">
+          <div></div> {/* Empty div for spacing */}
+          <h1 className="text-2xl font-serif tracking-wider"
+              style={{ color: '#E89855' }}>
+            ZORRO
+          </h1>
+        </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-8 py-12">
+      <div className="max-w-3xl mx-auto px-8 pt-32 pb-12">
 
         {/* Document Classification - Refined */}
         <section className="mb-14">
