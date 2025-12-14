@@ -14,6 +14,7 @@ export function ReviewScreen() {
   const [selectedIssueId, setSelectedIssueId] = useState<string | null>(null);
   const [acceptedIssueIds, setAcceptedIssueIds] = useState<Set<string>>(new Set());
   const [dismissedIssueIds, setDismissedIssueIds] = useState<Set<string>>(new Set());
+  const [rewrittenParagraphs, setRewrittenParagraphs] = useState<Map<string, string>>(new Map());
   const [isLoading, setIsLoading] = useState(false);
 
   // Refs for scrolling

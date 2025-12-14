@@ -120,7 +120,7 @@ export function ManuscriptView({
             {typeof paragraph.paragraph_index === 'number' ? paragraph.paragraph_index + 1 : ''}
           </div>
           <div className="flex-1">
-            <p className="text-sm leading-relaxed text-foreground/80">
+            <p className="text-base leading-relaxed text-foreground/80">
               {renderTextWithHighlight(paragraph.text)}
             </p>
             {hasIssues && (
@@ -152,7 +152,7 @@ export function ManuscriptView({
   return (
     <div className="p-6">
       {/* Document Title */}
-      <h1 className="text-2xl font-bold mb-6">{document.title}</h1>
+      <h1 className="text-3xl font-bold mb-6">{document.title}</h1>
 
       {/* Render sections and paragraphs */}
       {document.sections.length > 0 ? (
@@ -162,9 +162,9 @@ export function ManuscriptView({
             {section.section_title && (
               <h2 className={`
                 font-semibold mb-4
-                ${section.level === 1 ? 'text-xl' : ''}
-                ${section.level === 2 ? 'text-lg' : ''}
-                ${section.level >= 3 ? 'text-base' : ''}
+                ${section.level === 1 ? 'text-2xl' : ''}
+                ${section.level === 2 ? 'text-xl' : ''}
+                ${section.level >= 3 ? 'text-lg' : ''}
               `}>
                 {section.section_title}
               </h2>
