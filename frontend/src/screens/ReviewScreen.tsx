@@ -1,10 +1,74 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Download } from 'lucide-react';
+import { Download, FileText, CheckCircle2 } from 'lucide-react';
 import { useAppStore } from '@/store';
 import { ManuscriptView } from '@/components/domain/ManuscriptView';
 import { IssuesPanel } from './ReviewScreen/IssuesPanel';
 import type { DocObj, Finding } from '@/types';
+
+// Progress Ring Component
+function ProgressRing({
+  progress,
+  size = 32,
+  strokeWidth = 3
+}: {
+  progress: number;
+  size?: number;
+  strokeWidth?: number;
+}) {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = radius * 2 * Math.PI;
+  const offset = circumference - (progress / 100) * circumference;
+
+  // Color transitions from amber to green based on progress
+  const getColor = () => {
+    if (progress < 33) return '#f59e0b'; // amber
+    if (progress < 66) return '#84cc16'; // lime
+    return '#22c55e'; // green
+  };
+
+  return (
+    <div className="relative" style={{ width: size, height: size }}>
+      {/* Background circle */}
+      <svg className="absolute" width={size} height={size}>
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          className="text-gray-800"
+        />
+      </svg>
+      {/* Progress circle */}
+      <svg
+        className="absolute -rotate-90"
+        width={size}
+        height={size}
+      >
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke={getColor()}
+          strokeWidth={strokeWidth}
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+          className="transition-all duration-500"
+        />
+      </svg>
+      {/* Center text */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="text-[10px] font-semibold text-white">
+          {Math.round(progress)}%
+        </span>
+      </div>
+    </div>
+  );
+}
 
 export function ReviewScreen() {
   const navigate = useNavigate();
@@ -16,30 +80,34 @@ export function ReviewScreen() {
   const [dismissedIssueIds, setDismissedIssueIds] = useState<Set<string>>(new Set());
   const [rewrittenParagraphs, setRewrittenParagraphs] = useState<Map<string, string>>(new Map());
   const [isLoading, setIsLoading] = useState(false);
+  const [filterSeverity, setFilterSeverity] = useState<string | null>(null);
 
   // Refs for scrolling
   const manuscriptRef = useRef<HTMLDivElement>(null);
   const issuesPanelRef = useRef<HTMLDivElement>(null);
+
+  // Calculate progress
+  const progress = useMemo(() => {
+    if (findings.length === 0) return 0;
+    const addressed = acceptedIssueIds.size + dismissedIssueIds.size;
+    return (addressed / findings.length) * 100;
+  }, [findings.length, acceptedIssueIds.size, dismissedIssueIds.size]);
 
   // Load data on mount
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true);
 
-      // Check how we got here
       const mode = sessionStorage.getItem('reviewMode') || reviewMode || 'static';
       const demoFile = sessionStorage.getItem('demoFile') || 'manuscript_pdf';
 
       if (mode === 'static' || !currentDocument || findings.length === 0) {
-        // Load from fixtures
         try {
-          // Load the review JSON which contains both document structure and issues
           const response = await fetch(`/reviews/${demoFile}_fullreview.json`);
           if (!response.ok) throw new Error('Failed to load review data');
 
           const data = await response.json();
 
-          // Extract and set document structure
           const doc: DocObj = {
             document_id: data.document_id || 'demo_doc',
             filename: `${demoFile}.pdf`,
@@ -56,7 +124,6 @@ export function ReviewScreen() {
             createdAt: new Date().toISOString()
           };
 
-          // Build document structure from issues
           const sectionMap = new Map<string, any>();
           const paragraphMap = new Map<string, any>();
 
@@ -90,7 +157,6 @@ export function ReviewScreen() {
           doc.sections = Array.from(sectionMap.values());
           doc.paragraphs = Array.from(paragraphMap.values());
 
-          // Convert issues to findings
           const mappedFindings: Finding[] = data.issues.map((issue: any) => ({
             id: issue.id,
             agentId: issue.persona || 'reviewer',
@@ -120,7 +186,6 @@ export function ReviewScreen() {
           setFindings(mappedFindings);
         } catch (error) {
           console.error('Failed to load review data:', error);
-          // Create minimal fallback data
           setCurrentDocument({
             document_id: 'fallback',
             filename: 'document.pdf',
@@ -147,7 +212,6 @@ export function ReviewScreen() {
   const handleIssueSelect = useCallback((issueId: string) => {
     setSelectedIssueId(issueId);
 
-    // Find the issue and scroll to its paragraph
     const issue = findings.find(f => f.id === issueId);
     if (issue && issue.anchors.length > 0) {
       const paragraphId = issue.anchors[0].paragraph_id;
@@ -160,7 +224,6 @@ export function ReviewScreen() {
 
   // Handle paragraph click
   const handleParagraphClick = useCallback((paragraphId: string) => {
-    // Find first issue for this paragraph
     const issue = findings.find(f =>
       f.anchors.some(a => a.paragraph_id === paragraphId)
     );
@@ -168,7 +231,6 @@ export function ReviewScreen() {
     if (issue) {
       setSelectedIssueId(issue.id);
 
-      // Scroll issues panel to this issue
       const issueElement = document.getElementById(`issue-${issue.id}`);
       if (issueElement) {
         issueElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -186,14 +248,13 @@ export function ReviewScreen() {
     });
   }, []);
 
-  // Handle accepting a rewrite
   const handleAcceptRewrite = useCallback((issueId: string) => {
     const issue = findings.find(f => f.id === issueId);
-    if (issue && issue.proposedEdit && issue.anchors.length > 0) {
-      const paragraphId = issue.anchors[0].paragraph_id;
-      setRewrittenParagraphs(prev => new Map(prev).set(paragraphId, issue.proposedEdit!.newText));
-      handleAcceptIssue(issueId);
-    }
+    if (!issue || !issue.proposedEdit?.newText || !issue.anchors[0]?.paragraph_id) return;
+    const paragraphId = issue.anchors[0].paragraph_id;
+    const newText = issue.proposedEdit.newText;
+    setRewrittenParagraphs(prev => new Map(prev).set(paragraphId, newText));
+    handleAcceptIssue(issueId);
   }, [findings, handleAcceptIssue]);
 
   const handleDismissIssue = useCallback((issueId: string) => {
@@ -205,12 +266,45 @@ export function ReviewScreen() {
     });
   }, []);
 
+  const handleUndoIssue = useCallback((issueId: string) => {
+    setAcceptedIssueIds(prev => {
+      const next = new Set(prev);
+      next.delete(issueId);
+      return next;
+    });
+    setDismissedIssueIds(prev => {
+      const next = new Set(prev);
+      next.delete(issueId);
+      return next;
+    });
+  }, []);
+
+  const handleRevertRewrite = useCallback((paragraphId: string) => {
+    // Remove the rewrite
+    setRewrittenParagraphs(prev => {
+      const next = new Map(prev);
+      next.delete(paragraphId);
+      return next;
+    });
+    // Find and un-accept the related issue
+    const relatedIssue = findings.find(f =>
+      f.anchors[0]?.paragraph_id === paragraphId && acceptedIssueIds.has(f.id)
+    );
+    if (relatedIssue) {
+      setAcceptedIssueIds(prev => {
+        const next = new Set(prev);
+        next.delete(relatedIssue.id);
+        return next;
+      });
+    }
+  }, [findings, acceptedIssueIds]);
+
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center h-screen bg-[#0a0a0b]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Loading review data...</p>
+          <div className="animate-spin rounded-full h-10 w-10 border-2 border-gray-700 border-t-amber-500 mx-auto"></div>
+          <p className="mt-4 text-gray-500 text-sm">Loading review...</p>
         </div>
       </div>
     );
@@ -218,12 +312,13 @@ export function ReviewScreen() {
 
   if (!currentDocument) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center h-screen bg-[#0a0a0b]">
         <div className="text-center">
-          <p className="text-muted-foreground mb-4">No document loaded</p>
+          <FileText className="w-12 h-12 text-gray-700 mx-auto mb-4" />
+          <p className="text-gray-500 mb-4">No document loaded</p>
           <button
             onClick={() => navigate('/upload')}
-            className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90"
+            className="px-4 py-2 bg-amber-500/10 text-amber-500 rounded-lg hover:bg-amber-500/20 transition-colors text-sm font-medium"
           >
             Upload Document
           </button>
@@ -233,7 +328,6 @@ export function ReviewScreen() {
   }
 
   const handleExport = () => {
-    // For now, just export as JSON
     const exportData = {
       document: currentDocument,
       findings: findings,
@@ -253,54 +347,99 @@ export function ReviewScreen() {
     URL.revokeObjectURL(url);
   };
 
+  const activeIssuesCount = findings.length - acceptedIssueIds.size - dismissedIssueIds.size;
+
   return (
-    <div className="h-screen flex flex-col">
-      {/* Header - reduced height from h-14 to h-11 (20% reduction) */}
-      <div className="h-11 flex items-center justify-between px-6 border-b bg-background">
-        {/* ZORRO on the left */}
-        <h1 className="text-lg font-serif tracking-wide" style={{ color: '#E89855' }}>
-          ZORRO
-        </h1>
-
-        {/* Empty center for balance */}
-        <div></div>
-
-        {/* Export button on the right */}
-        <button
-          onClick={handleExport}
-          className="flex items-center gap-2 px-4 py-1.5 text-sm rounded-md transition-all duration-200
-                   hover:bg-gray-800/50"
-          style={{ color: '#a0a0b0' }}
-          onMouseEnter={(e) => e.currentTarget.style.color = '#E89855'}
-          onMouseLeave={(e) => e.currentTarget.style.color = '#a0a0b0'}
-        >
-          <Download className="w-4 h-4" />
-          Export Review
-        </button>
-      </div>
-
-      {/* Main content - no longer needs absolute export button */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Manuscript View - 60% */}
-        <div
-          ref={manuscriptRef}
-          className="flex-1 overflow-y-auto border-r bg-background"
-          style={{ flexBasis: '60%' }}
-        >
-          <ManuscriptView
-            document={currentDocument}
-            selectedIssueId={selectedIssueId}
-            findings={findings}
-            rewrittenParagraphs={rewrittenParagraphs}
-            onParagraphClick={handleParagraphClick}
-          />
+    <div className="h-screen flex flex-col bg-[#0a0a0b]">
+      {/* Header - Refined minimal design */}
+      <header className="flex items-center justify-between px-5 py-3 border-b border-gray-800/50 bg-[#0a0a0b]">
+        {/* Left: Logo + Document info */}
+        <div className="flex items-center gap-4">
+          <h1
+            className="text-base font-semibold tracking-wide"
+            style={{ color: '#E89855' }}
+          >
+            ZORRO
+          </h1>
+          <div className="h-4 w-px bg-gray-800"></div>
+          <div className="flex items-center gap-2">
+            <FileText className="w-4 h-4 text-gray-600" />
+            <span className="text-sm text-gray-400 truncate max-w-[200px]">
+              {currentDocument.title}
+            </span>
+          </div>
         </div>
 
-        {/* Issues Panel - 40% */}
+        {/* Center: Progress */}
+        <div className="flex items-center gap-3">
+          <ProgressRing progress={progress} size={36} strokeWidth={3} />
+          <div className="text-xs">
+            <div className="text-gray-400">
+              <span className="text-white font-medium">{activeIssuesCount}</span> remaining
+            </div>
+            <div className="text-gray-600">
+              {acceptedIssueIds.size} accepted, {dismissedIssueIds.size} dismissed
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Actions */}
+        <div className="flex items-center gap-2">
+          {progress === 100 && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-500/10 text-green-500 text-xs font-medium">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              Review Complete
+            </div>
+          )}
+          <button
+            onClick={handleExport}
+            className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg
+                     text-gray-400 hover:text-white hover:bg-gray-800 transition-all"
+          >
+            <Download className="w-3.5 h-3.5" />
+            Export
+          </button>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Manuscript Panel - 62% */}
+        <div
+          ref={manuscriptRef}
+          className="flex-1 overflow-hidden"
+          style={{ flexBasis: '62%' }}
+        >
+          <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-800 scrollbar-track-transparent">
+            <div className="max-w-4xl mx-auto">
+              <ManuscriptView
+                document={currentDocument}
+                selectedIssueId={selectedIssueId}
+                findings={findings}
+                rewrittenParagraphs={rewrittenParagraphs}
+                acceptedIssueIds={acceptedIssueIds}
+                dismissedIssueIds={dismissedIssueIds}
+                onParagraphClick={handleParagraphClick}
+                onRevertRewrite={handleRevertRewrite}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Divider with glow effect when issue selected */}
+        <div
+          className="w-px transition-all duration-300"
+          style={{
+            backgroundColor: selectedIssueId ? 'rgba(232, 152, 85, 0.3)' : 'rgba(55, 65, 81, 0.5)',
+            boxShadow: selectedIssueId ? '0 0 20px rgba(232, 152, 85, 0.2)' : 'none'
+          }}
+        />
+
+        {/* Issues Panel - 38% */}
         <div
           ref={issuesPanelRef}
-          className="overflow-y-auto bg-background"
-          style={{ flexBasis: '40%' }}
+          className="overflow-hidden bg-[#0c0c0d]"
+          style={{ flexBasis: '38%' }}
         >
           <IssuesPanel
             issues={findings}
@@ -308,10 +447,13 @@ export function ReviewScreen() {
             acceptedIssueIds={acceptedIssueIds}
             dismissedIssueIds={dismissedIssueIds}
             rewrittenParagraphs={rewrittenParagraphs}
+            filterSeverity={filterSeverity}
+            onFilterChange={setFilterSeverity}
             onSelectIssue={handleIssueSelect}
             onAcceptIssue={handleAcceptIssue}
             onAcceptRewrite={handleAcceptRewrite}
             onDismissIssue={handleDismissIssue}
+            onUndoIssue={handleUndoIssue}
           />
         </div>
       </div>

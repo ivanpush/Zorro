@@ -22,7 +22,8 @@
       "Bash(npm run build:*)",
       "Bash(cat:*)",
       "Bash(python3:*)",
-      "Bash(kill:*)"
+      "Bash(kill:*)",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": [],
     "ask": []
