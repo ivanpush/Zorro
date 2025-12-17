@@ -663,7 +663,7 @@ export function IssuesPanel({
       </div>
 
       {/* Issues list */}
-      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto overscroll-contain">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto overscroll-contain pb-16">
         {/* Needs Attention Section */}
         {needsAttentionTotal > 0 && (
           <div className="border-b border-gray-700/30 py-2">

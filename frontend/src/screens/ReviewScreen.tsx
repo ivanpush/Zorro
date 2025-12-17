@@ -87,6 +87,14 @@ export function ReviewScreen() {
   // Highlighted paragraph (for user edit goto)
   const [highlightedParagraphId, setHighlightedParagraphId] = useState<string | null>(null);
 
+  // Draggable panel width (percentage for issues panel)
+  // Default 34%, can only expand (not shrink below 34%)
+  const [issuesPanelWidth, setIssuesPanelWidth] = useState(() => {
+    const saved = localStorage.getItem('issuesPanelWidth');
+    return saved ? Math.max(34, parseFloat(saved)) : 34;
+  });
+  const [isDragging, setIsDragging] = useState(false);
+
   // Refs for scrolling
   const manuscriptRef = useRef<HTMLDivElement>(null);
   const issuesPanelRef = useRef<HTMLDivElement>(null);
@@ -165,9 +173,19 @@ export function ReviewScreen() {
           const mappedFindings: Finding[] = data.issues.map((issue: any) => {
             // Handle different field names for different issue types
             // Counterpoint uses 'critique' instead of 'message'
-            // Counterpoint uses 'suggested_revision' instead of 'suggested_rewrite'
             const description = issue.message || issue.critique || '';
-            const rewriteText = issue.suggested_rewrite || issue.suggested_revision;
+
+            // Distinguish between actual rewrites and suggestions
+            // suggested_rewrite/proposed_rewrite = actual text replacements (type: 'replace')
+            // suggested_revision/outline_suggestion = actionable advice, not direct text swap (type: 'suggestion')
+            // If no rewrite or suggestion, fall back to rationale as suggestion
+            const rewriteText = issue.suggested_rewrite || issue.proposed_rewrite;
+            const suggestionText = issue.suggested_revision ||
+              (issue.outline_suggestion && Array.isArray(issue.outline_suggestion)
+                ? issue.outline_suggestion.map((s: string) => `• ${s}`).join('\n')
+                : null);
+            const proposedText = rewriteText || suggestionText || (issue.rationale && !rewriteText && !suggestionText ? issue.rationale : null);
+            const isSuggestion = !rewriteText && (!!suggestionText || (!suggestionText && !!issue.rationale));
 
             // Use scope for categorization (rigor, clarity, counterpoint)
             // Fall back to issue_type if scope not available
@@ -186,14 +204,15 @@ export function ReviewScreen() {
                 sentence_id: issue.sentence_ids?.[0],
                 quoted_text: issue.original_text || ''
               }] : [],
-              proposedEdit: rewriteText ? {
-                type: 'replace',
+              proposedEdit: proposedText ? {
+                type: isSuggestion ? 'suggestion' : 'replace',
                 anchor: {
                   paragraph_id: issue.paragraph_id,
                   quoted_text: issue.original_text || ''
                 },
-                newText: rewriteText,
-                rationale: issue.rationale || ''
+                newText: proposedText,
+                // Don't duplicate rationale in tooltip if it's already the main suggestion text
+                rationale: (rewriteText || suggestionText) ? (issue.rationale || '') : ''
               } : undefined,
               createdAt: new Date().toISOString()
             };
@@ -429,6 +448,37 @@ export function ReviewScreen() {
       return next;
     });
   }, [userEditDismissedIssues]);
+
+  // Drag handlers for resizable panel
+  const handleDragStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const containerWidth = window.innerWidth;
+      const newWidth = ((containerWidth - e.clientX) / containerWidth) * 100;
+      // Min 34% (default/max compression), max 55%
+      const clampedWidth = Math.min(55, Math.max(34, newWidth));
+      setIssuesPanelWidth(clampedWidth);
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      localStorage.setItem('issuesPanelWidth', issuesPanelWidth.toString());
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, issuesPanelWidth]);
 
   if (isLoading) {
     return (
