@@ -45,7 +45,7 @@ const typeConfig: Record<IssueType, { label: string; color: string; bg: string; 
 // Severity configuration
 const severityConfig = {
   major: { label: 'Major', color: '#fb923c', bg: 'rgba(251, 146, 60, 0.15)' },
-  minor: { label: 'Minor', color: '#6b7280', bg: 'rgba(107, 114, 128, 0.15)' }
+  minor: { label: 'Minor', color: '#E6E6E6', bg: 'rgba(230, 230, 230, 0.15)' }
 };
 
 // Universal selection color - #53A4A4 (teal, matching ManuscriptView)
@@ -225,7 +225,7 @@ export function IssuesPanel({
                 className="w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold"
                 style={{
                   backgroundColor: sevConfig.color,
-                  color: '#fff'
+                  color: severity === 'major' ? '#fff' : '#000'
                 }}
               >
                 {severity === 'major' ? '!' : 'i'}
@@ -606,7 +606,7 @@ export function IssuesPanel({
                       {/* Severity icon */}
                       <span
                         className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
-                        style={{ backgroundColor: sevConfig.color, color: '#fff' }}
+                        style={{ backgroundColor: sevConfig.color, color: severity === 'major' ? '#fff' : '#000' }}
                       >
                         {severity === 'major' ? '!' : 'i'}
                       </span>
@@ -680,7 +680,7 @@ export function IssuesPanel({
                       {/* Severity icon */}
                       <span
                         className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
-                        style={{ backgroundColor: sevConfig.color, color: '#fff' }}
+                        style={{ backgroundColor: sevConfig.color, color: severity === 'major' ? '#fff' : '#000' }}
                       >
                         {severity === 'major' ? '!' : 'i'}
                       </span>

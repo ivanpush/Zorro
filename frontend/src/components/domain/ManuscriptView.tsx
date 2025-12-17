@@ -44,7 +44,7 @@ const selectionColor = {
 // Severity pill colors
 const severityPillColors = {
   major: { bg: '#f97316', text: '#fff' },
-  minor: { bg: '#6b7280', text: '#fff' }
+  minor: { bg: '#E6E6E6', text: '#000' }
 };
 
 export function ManuscriptView({
@@ -515,7 +515,7 @@ export function ManuscriptView({
                     className={`font-bold pointer-events-none ${
                       isMajor ? 'text-[12px]' : 'text-[11px]'
                     }`}
-                    style={{ color: '#fff' }}
+                    style={{ color: sevPill.text }}
                   >
                     {config.letter}
                   </span>
