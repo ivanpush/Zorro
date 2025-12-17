@@ -220,13 +220,13 @@ export function IssuesPanel({
           {/* Header with badges */}
           <div className="flex items-start justify-between gap-3 mb-3">
             <div className="flex items-center gap-2 flex-wrap">
-              {/* Severity icon - ! for major (filled), i for minor (hollow) */}
+              {/* Severity icon - ! for major, i for minor */}
               <span
                 className="w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold"
                 style={{
-                  backgroundColor: severity === 'major' ? '#f97316' : 'rgba(156, 163, 175, 0.1)',
-                  border: severity === 'major' ? 'none' : '2px solid #9ca3af',
-                  color: severity === 'major' ? '#fff' : '#9ca3af'
+                  backgroundColor: severity === 'major' ? 'rgba(249, 115, 22, 0.1)' : 'rgba(156, 163, 175, 0.1)',
+                  border: severity === 'major' ? '2px solid #f97316' : '2px solid #9ca3af',
+                  color: severity === 'major' ? '#f97316' : '#9ca3af'
                 }}
               >
                 {severity === 'major' ? '!' : 'i'}
@@ -608,9 +608,9 @@ export function IssuesPanel({
                       <span
                         className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
                         style={{
-                          backgroundColor: severity === 'major' ? '#f97316' : 'rgba(156, 163, 175, 0.1)',
-                          border: severity === 'major' ? 'none' : '2px solid #9ca3af',
-                          color: severity === 'major' ? '#fff' : '#9ca3af'
+                          backgroundColor: severity === 'major' ? 'rgba(249, 115, 22, 0.1)' : 'rgba(156, 163, 175, 0.1)',
+                          border: severity === 'major' ? '2px solid #f97316' : '2px solid #9ca3af',
+                          color: severity === 'major' ? '#f97316' : '#9ca3af'
                         }}
                       >
                         {severity === 'major' ? '!' : 'i'}
@@ -686,9 +686,9 @@ export function IssuesPanel({
                       <span
                         className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
                         style={{
-                          backgroundColor: severity === 'major' ? '#f97316' : 'rgba(156, 163, 175, 0.1)',
-                          border: severity === 'major' ? 'none' : '2px solid #9ca3af',
-                          color: severity === 'major' ? '#fff' : '#9ca3af'
+                          backgroundColor: severity === 'major' ? 'rgba(249, 115, 22, 0.1)' : 'rgba(156, 163, 175, 0.1)',
+                          border: severity === 'major' ? '2px solid #f97316' : '2px solid #9ca3af',
+                          color: severity === 'major' ? '#f97316' : '#9ca3af'
                         }}
                       >
                         {severity === 'major' ? '!' : 'i'}
