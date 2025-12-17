@@ -313,7 +313,7 @@ export function IssuesPanel({
             <div className="flex items-center gap-2 flex-wrap">
               {/* Severity icon - ! for major, i for minor */}
               <span
-                className="w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold"
+                className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold"
                 style={{
                   backgroundColor: severity === 'major' ? 'rgba(249, 115, 22, 0.1)' : 'rgba(156, 163, 175, 0.1)',
                   border: severity === 'major' ? '2px solid #f97316' : '2px solid #9ca3af',
@@ -393,7 +393,7 @@ export function IssuesPanel({
           </div>
 
           {/* Title */}
-          <h4 className="text-[15px] font-semibold text-white leading-snug mb-2">
+          <h4 className="text-[17px] font-semibold text-white leading-snug mb-2">
             {issue.title}
           </h4>
 
@@ -406,15 +406,14 @@ export function IssuesPanel({
 
           {/* Expanded content */}
           {isExpanded && (
-            <div className="space-y-4">
-              {/* Quoted text - teal styling like PeerPreview */}
+            <div className="space-y-4 mt-3">
+              {/* Quoted text - light gray with left accent */}
               {issue.anchors[0]?.quoted_text && (
                 <div
-                  className="p-3 rounded-md italic text-sm leading-relaxed"
+                  className="pl-3 py-1 italic text-xs leading-relaxed"
                   style={{
-                    backgroundColor: 'rgba(45, 212, 191, 0.08)',
-                    color: '#5eead4',
-                    borderLeft: '3px solid #2dd4bf'
+                    color: '#c0c0c0',
+                    borderLeft: '3px solid rgba(232, 152, 85, 0.6)'
                   }}
                 >
                   "{issue.anchors[0].quoted_text}"
@@ -422,7 +421,10 @@ export function IssuesPanel({
               )}
 
               {/* CRITIQUE section */}
-              <div>
+              <div
+                className="pl-3 py-1"
+                style={{ borderLeft: '3px solid rgba(156, 163, 175, 0.4)' }}
+              >
                 <h5 className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">
                   Critique
                 </h5>
@@ -431,15 +433,15 @@ export function IssuesPanel({
                 </p>
               </div>
 
-              {/* STRATEGIC SOLUTION section */}
+              {/* SUGGESTED REWRITE section */}
               {issue.proposedEdit?.newText && !isEditing && (
                 <div
                   className={`p-3 rounded-md ${isRewriteDisabled ? 'opacity-60' : ''}`}
-                  style={{ backgroundColor: 'rgba(52, 211, 153, 0.08)' }}
+                  style={{ backgroundColor: 'rgba(136, 202, 202, 0.08)' }}
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <h5 className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">
-                      Strategic Solution
+                    <h5 className="text-[11px] font-bold uppercase tracking-wider" style={{ color: '#88CACA' }}>
+                      Suggested Rewrite
                       {isRewriteDisabled && (
                         <span className="ml-2 text-amber-400/80 normal-case font-normal">(disabled)</span>
                       )}
@@ -450,7 +452,10 @@ export function IssuesPanel({
                           e.stopPropagation();
                           handleEditRewrite(issue);
                         }}
-                        className="flex items-center gap-1 text-[11px] text-gray-400 hover:text-emerald-400 transition-colors"
+                        className="flex items-center gap-1 text-[11px] text-gray-400 transition-colors"
+                        style={{ }}
+                        onMouseEnter={(e) => e.currentTarget.style.color = '#88CACA'}
+                        onMouseLeave={(e) => e.currentTarget.style.color = '#9ca3af'}
                       >
                         <Edit3 className="w-3 h-3" />
                         Edit
@@ -465,17 +470,27 @@ export function IssuesPanel({
 
               {/* Edit mode */}
               {isEditing && (
-                <div className="p-3 rounded-md bg-emerald-500/10 border border-emerald-500/20">
+                <div className="p-3 rounded-md" style={{ backgroundColor: 'rgba(136, 202, 202, 0.1)', border: '1px solid rgba(136, 202, 202, 0.2)' }}>
                   <div className="flex items-center gap-1.5 mb-2">
-                    <Edit3 className="w-3 h-3 text-emerald-400" />
-                    <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Edit Solution</span>
+                    <Edit3 className="w-3 h-3" style={{ color: '#88CACA' }} />
+                    <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: '#88CACA' }}>Edit Rewrite</span>
                   </div>
                   <textarea
+                    ref={(el) => {
+                      if (el) {
+                        el.style.height = 'auto';
+                        el.style.height = el.scrollHeight + 'px';
+                      }
+                    }}
                     value={editText}
-                    onChange={(e) => setEditText(e.target.value)}
+                    onChange={(e) => {
+                      setEditText(e.target.value);
+                      e.target.style.height = 'auto';
+                      e.target.style.height = e.target.scrollHeight + 'px';
+                    }}
                     onClick={(e) => e.stopPropagation()}
-                    className="w-full p-3 text-sm text-gray-100 bg-gray-800/50 border border-gray-600 rounded-md resize-none focus:outline-none focus:border-emerald-400/50"
-                    rows={4}
+                    className="w-full p-3 text-sm text-gray-100 bg-gray-800/50 border border-gray-600 rounded-md resize-y focus:outline-none focus:border-gray-500"
+                    style={{ minHeight: '100px', overflow: 'hidden' }}
                   />
                   <div className="flex gap-2 mt-3">
                     <button
@@ -483,7 +498,10 @@ export function IssuesPanel({
                         e.stopPropagation();
                         handleSaveEdit(issue.id);
                       }}
-                      className="px-4 py-2 text-sm font-medium rounded-md bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors"
+                      className="px-4 py-2 text-sm font-medium rounded-md transition-colors"
+                      style={{ backgroundColor: 'rgba(136, 202, 202, 0.2)', color: '#88CACA' }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(136, 202, 202, 0.3)'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(136, 202, 202, 0.2)'}
                     >
                       Save & Accept
                     </button>
@@ -510,7 +528,7 @@ export function IssuesPanel({
                     </div>
                   )}
                   <div className="flex items-center gap-3 flex-wrap">
-                    {/* Accept Rewrite - only if has proposed edit and not disabled */}
+                    {/* Accept Rewrite - teal filled button */}
                     {issue.proposedEdit?.newText && (
                       <button
                         onClick={(e) => {
@@ -520,31 +538,49 @@ export function IssuesPanel({
                           }
                         }}
                         disabled={isRewriteDisabled}
-                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors border ${
-                          isRewriteDisabled
-                            ? 'bg-gray-700/30 text-gray-500 border-gray-600/30 cursor-not-allowed'
-                            : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border-emerald-500/30'
-                        }`}
+                        className="px-4 py-2 text-sm font-medium rounded-md transition-all"
+                        style={isRewriteDisabled
+                          ? { backgroundColor: 'rgba(107, 114, 128, 0.3)', color: '#6b7280', cursor: 'not-allowed' }
+                          : { backgroundColor: '#6fb3b3', color: '#ffffff' }
+                        }
+                        onMouseEnter={(e) => {
+                          if (!isRewriteDisabled) {
+                            e.currentTarget.style.backgroundColor = '#5a9e9e';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isRewriteDisabled) {
+                            e.currentTarget.style.backgroundColor = '#6fb3b3';
+                          }
+                        }}
                         title={isRewriteDisabled ? 'Rewrite disabled because paragraph was edited' : 'Accept the AI-suggested rewrite'}
                       >
                         Accept Rewrite
                       </button>
                     )}
+                    {/* Accept Issue - outline button */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         onAcceptIssue(issue.id);
                       }}
-                      className="px-4 py-2 text-sm font-medium rounded-md bg-teal-500/20 text-teal-400 hover:bg-teal-500/30 transition-colors border border-teal-500/30"
+                      className="px-4 py-2 text-sm font-medium rounded-md transition-colors border"
+                      style={{
+                        color: '#95A8D4',
+                        borderColor: 'rgba(149, 168, 212, 0.5)'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(149, 168, 212, 0.1)'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                     >
                       Accept Issue
                     </button>
+                    {/* Dismiss - text only */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         onDismissIssue(issue.id);
                       }}
-                      className="px-4 py-2 text-sm font-medium rounded-md text-gray-400 hover:text-gray-200 hover:bg-gray-700/50 transition-colors"
+                      className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-300 transition-colors"
                     >
                       Dismiss
                     </button>
