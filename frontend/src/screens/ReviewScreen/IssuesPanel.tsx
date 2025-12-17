@@ -80,16 +80,26 @@ export function IssuesPanel({
   // Auto-expand issue when selected (e.g., from clicking bubble in manuscript)
   useEffect(() => {
     if (selectedIssueId) {
+      // Find the selected issue to check its category
+      const selectedIssue = issues.find(i => i.id === selectedIssueId);
+      if (selectedIssue) {
+        const issueType = getCategoryType(selectedIssue.category);
+        // If there's a filter active and it doesn't match, clear the filter
+        if (categoryFilter && categoryFilter !== issueType) {
+          setCategoryFilter(null);
+        }
+      }
+
       setExpandedIssueId(selectedIssueId);
-      // Scroll the card into view
+      // Scroll the card into view (slight delay to allow filter change to render)
       setTimeout(() => {
         const element = document.getElementById(`issue-${selectedIssueId}`);
         if (element) {
           element.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
-      }, 50);
+      }, 100);
     }
-  }, [selectedIssueId]);
+  }, [selectedIssueId, issues, categoryFilter]);
 
   // Build user edits list with original text
   const userEdits = useMemo(() => {
