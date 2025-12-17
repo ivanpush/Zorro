@@ -48,11 +48,11 @@ const severityConfig = {
   minor: { label: 'Minor', color: '#fbbf24', bg: 'rgba(251, 191, 36, 0.15)' }
 };
 
-// Universal selection color - #736ABA (matching ManuscriptView)
+// Universal selection color - #53A4A4 (teal, matching ManuscriptView)
 const selectionColor = {
-  bg: 'rgba(115, 106, 186, 0.06)',
-  border: 'rgba(115, 106, 186, 0.4)',
-  accent: '#736ABA'
+  bg: 'rgba(83, 164, 164, 0.06)',
+  border: 'rgba(83, 164, 164, 0.4)',
+  accent: '#53A4A4'
 };
 
 export function IssuesPanel({
