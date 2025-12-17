@@ -78,8 +78,15 @@ export function IssuesPanel({
   const [categoryFilter, setCategoryFilter] = useState<IssueType | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  // Track previous selectedIssueId to detect actual changes
+  const prevSelectedIssueIdRef = useRef<string | null>(null);
+
   // Auto-expand issue when selected (e.g., from clicking bubble in manuscript)
   useEffect(() => {
+    // Only run when selectedIssueId actually changes
+    if (selectedIssueId === prevSelectedIssueIdRef.current) return;
+    prevSelectedIssueIdRef.current = selectedIssueId;
+
     if (!selectedIssueId) return;
 
     const selectedIssue = issues.find(i => i.id === selectedIssueId);
@@ -106,13 +113,8 @@ export function IssuesPanel({
     // Expand the card
     setExpandedIssueId(selectedIssueId);
 
-  }, [selectedIssueId, issues, acceptedIssueIds, dismissedIssueIds, categoryFilter]);
-
-  // Separate effect for scrolling - runs after DOM updates
-  useEffect(() => {
-    if (!selectedIssueId) return;
-
-    const scrollToCard = () => {
+    // Scroll to the card after a delay for DOM to update
+    setTimeout(() => {
       const element = document.getElementById(`issue-${selectedIssueId}`);
       const container = scrollContainerRef.current;
       if (element && container) {
@@ -120,17 +122,10 @@ export function IssuesPanel({
         const containerRect = container.getBoundingClientRect();
         const scrollTop = container.scrollTop + (elementRect.top - containerRect.top) - 100;
         container.scrollTo({ top: Math.max(0, scrollTop), behavior: 'smooth' });
-      } else {
-        // Element not found yet, try again
-        requestAnimationFrame(scrollToCard);
       }
-    };
+    }, 300);
 
-    // Wait for React to flush updates, then scroll
-    requestAnimationFrame(() => {
-      requestAnimationFrame(scrollToCard);
-    });
-  }, [selectedIssueId, expandedIssueId]);
+  }, [selectedIssueId, issues, acceptedIssueIds, dismissedIssueIds, categoryFilter]);
 
   // Build user edits list with original text
   const userEdits = useMemo(() => {
