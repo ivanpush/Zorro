@@ -150,7 +150,9 @@ export function ManuscriptView({
     const issueTypes = getIssueTypes(activeIssues);
     const isEditing = editingParagraphId === paragraph.paragraph_id;
 
-    // Universal selection styling (no longer severity-dependent)
+    // Get the selected issue's type color for highlighting
+    const selectedType = selectedIssue ? getCategoryType(selectedIssue.category) : null;
+    const selectedTypeColor = selectedType ? typeConfig[selectedType].color : selectionColor.highlight;
 
     // Highlight the quoted text within the paragraph
     const renderTextWithHighlight = (text: string) => {
@@ -170,10 +172,10 @@ export function ManuscriptView({
             className="text-white font-medium"
             style={{
               textDecoration: 'underline',
-              textDecorationColor: selectionColor.highlight,
+              textDecorationColor: selectedTypeColor,
               textDecorationThickness: '2px',
               textUnderlineOffset: '3px',
-              backgroundColor: 'rgba(83, 164, 164, 0.15)',
+              backgroundColor: `${selectedTypeColor}20`,
               padding: '1px 2px',
               borderRadius: '2px'
             }}
@@ -235,9 +237,9 @@ export function ManuscriptView({
       }
       if (isSelected) {
         return {
-          backgroundColor: selectionColor.bg,
-          border: `1px solid ${selectionColor.border}`,
-          borderLeft: `5px solid ${selectionColor.accent}`
+          backgroundColor: `${selectedTypeColor}08`,
+          border: `1px solid ${selectedTypeColor}30`,
+          borderLeft: `5px solid ${selectedTypeColor}`
         };
       }
       return {
