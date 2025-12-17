@@ -150,9 +150,8 @@ export function ManuscriptView({
     const issueTypes = getIssueTypes(activeIssues);
     const isEditing = editingParagraphId === paragraph.paragraph_id;
 
-    // Get the selected issue's type color for highlighting
-    const selectedType = selectedIssue ? getCategoryType(selectedIssue.category) : null;
-    const selectedTypeColor = selectedType ? typeConfig[selectedType].color : selectionColor.highlight;
+    // Use universal #88CACA for all selection highlighting
+    const selectedTypeColor = '#88CACA';
 
     // Highlight the quoted text within the paragraph
     const renderTextWithHighlight = (text: string) => {
