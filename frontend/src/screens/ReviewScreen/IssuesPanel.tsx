@@ -217,9 +217,9 @@ export function IssuesPanel({
           ${isResolved ? 'opacity-50' : ''}
         `}
         style={{
-          backgroundColor: isSelected ? selectionColor.bg : 'rgba(255, 255, 255, 0.04)',
-          border: isSelected ? `2px solid ${selectionColor.border}` : '1px solid rgba(255, 255, 255, 0.06)',
-          borderLeft: isSelected ? `3px solid ${selectionColor.accent}` : `2px solid ${config.color}`
+          backgroundColor: isSelected ? `${config.color}08` : 'rgba(255, 255, 255, 0.04)',
+          border: isSelected ? `2px solid ${config.color}40` : '1px solid rgba(255, 255, 255, 0.06)',
+          borderLeft: isSelected ? `4px solid ${config.color}` : `2px solid ${config.color}40`
         }}
         onClick={() => onSelectIssue(issue.id)}
       >
