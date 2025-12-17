@@ -502,31 +502,20 @@ export function ManuscriptView({
                       onSelectIssue(issue.id);
                     }
                   }}
-                  className={`flex items-center gap-0.5 rounded-full cursor-pointer transition-all hover:scale-110 hover:brightness-110 pointer-events-auto ${
-                    isMajor ? 'px-1.5 py-1' : 'px-1 py-0.5'
+                  className={`flex items-center gap-1 rounded-full cursor-pointer transition-all hover:scale-110 hover:brightness-110 pointer-events-auto ${
+                    isMajor ? 'px-2 py-1' : 'px-1.5 py-0.5'
                   }`}
                   style={{
-                    backgroundColor: isThisSelected ? config.color : 'rgba(30, 30, 35, 0.95)',
-                    border: isMajor ? `3px solid ${config.color}` : `2px solid ${config.color}`,
-                    boxShadow: isMajor ? `0 0 8px ${config.color}40` : 'none'
+                    backgroundColor: sevPill.bg,
+                    border: isMajor ? `3px solid ${sevPill.bg}` : `2px solid ${sevPill.bg}`,
+                    boxShadow: isMajor ? `0 0 8px ${sevPill.bg}40` : 'none'
                   }}
                 >
-                  <div
-                    className={`rounded-full flex items-center justify-center font-bold pointer-events-none ${
-                      isMajor ? 'w-6 h-6 text-[11px]' : 'w-5 h-5 text-[10px]'
-                    }`}
-                    style={{
-                      backgroundColor: sevPill.bg,
-                      color: sevPill.text
-                    }}
-                  >
-                    {isMajor ? '!' : 'i'}
-                  </div>
                   <span
-                    className={`font-bold px-1 pointer-events-none ${
+                    className={`font-bold pointer-events-none ${
                       isMajor ? 'text-[12px]' : 'text-[11px]'
                     }`}
-                    style={{ color: isThisSelected ? '#000' : config.color }}
+                    style={{ color: '#fff' }}
                   >
                     {config.letter}
                   </span>
