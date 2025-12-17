@@ -100,13 +100,13 @@ export function IssuesPanel({
 
         setExpandedIssueId(selectedIssueId);
 
-        // Scroll the card into view
+        // Scroll the card into view - need longer delay for DOM to update
         setTimeout(() => {
           const element = document.getElementById(`issue-${selectedIssueId}`);
           if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
           }
-        }, 100);
+        }, 200);
       };
 
       if (selectedIssue) {
@@ -115,7 +115,7 @@ export function IssuesPanel({
         if (categoryFilter && categoryFilter !== issueType) {
           setCategoryFilter(null);
           // Need longer delay when filter changes to allow re-render
-          setTimeout(expandAndScroll, 100);
+          setTimeout(expandAndScroll, 150);
           return;
         }
       }
