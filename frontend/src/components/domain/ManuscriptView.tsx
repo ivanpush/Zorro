@@ -24,9 +24,9 @@ interface ManuscriptViewProps {
 type IssueType = 'critical' | 'argument' | 'writing';
 
 const getCategoryType = (category: string): IssueType => {
-  if (category.includes('adversarial') || category.includes('scope')) return 'critical';
+  if (category.includes('adversarial') || category.includes('counterpoint')) return 'critical';
   if (category.includes('rigor')) return 'argument';
-  return 'writing';
+  return 'writing'; // clarity and others
 };
 
 // Category type colors for pills

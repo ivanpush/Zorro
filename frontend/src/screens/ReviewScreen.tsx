@@ -162,30 +162,42 @@ export function ReviewScreen() {
           doc.sections = Array.from(sectionMap.values());
           doc.paragraphs = Array.from(paragraphMap.values());
 
-          const mappedFindings: Finding[] = data.issues.map((issue: any) => ({
-            id: issue.id,
-            agentId: issue.persona || 'reviewer',
-            category: issue.issue_type || 'general',
-            severity: issue.severity || 'minor',
-            confidence: 0.8,
-            title: issue.title,
-            description: issue.message,
-            anchors: issue.paragraph_id ? [{
-              paragraph_id: issue.paragraph_id,
-              sentence_id: issue.sentence_ids?.[0],
-              quoted_text: issue.original_text || ''
-            }] : [],
-            proposedEdit: issue.suggested_rewrite ? {
-              type: 'replace',
-              anchor: {
+          const mappedFindings: Finding[] = data.issues.map((issue: any) => {
+            // Handle different field names for different issue types
+            // Counterpoint uses 'critique' instead of 'message'
+            // Counterpoint uses 'suggested_revision' instead of 'suggested_rewrite'
+            const description = issue.message || issue.critique || '';
+            const rewriteText = issue.suggested_rewrite || issue.suggested_revision;
+
+            // Use scope for categorization (rigor, clarity, counterpoint)
+            // Fall back to issue_type if scope not available
+            const category = issue.scope || issue.issue_type || 'general';
+
+            return {
+              id: issue.id,
+              agentId: issue.persona || 'reviewer',
+              category,
+              severity: issue.severity || 'minor',
+              confidence: 0.8,
+              title: issue.title,
+              description,
+              anchors: issue.paragraph_id ? [{
                 paragraph_id: issue.paragraph_id,
+                sentence_id: issue.sentence_ids?.[0],
                 quoted_text: issue.original_text || ''
-              },
-              newText: issue.suggested_rewrite,
-              rationale: issue.rationale || ''
-            } : undefined,
-            createdAt: new Date().toISOString()
-          }));
+              }] : [],
+              proposedEdit: rewriteText ? {
+                type: 'replace',
+                anchor: {
+                  paragraph_id: issue.paragraph_id,
+                  quoted_text: issue.original_text || ''
+                },
+                newText: rewriteText,
+                rationale: issue.rationale || ''
+              } : undefined,
+              createdAt: new Date().toISOString()
+            };
+          });
 
           setCurrentDocument(doc);
           setFindings(mappedFindings);
@@ -265,13 +277,14 @@ export function ReviewScreen() {
     });
   }, []);
 
-  const handleAcceptRewrite = useCallback((issueId: string) => {
+  const handleAcceptRewrite = useCallback((issueId: string, editedText?: string) => {
     const issue = findings.find(f => f.id === issueId);
-    if (!issue || !issue.proposedEdit?.newText || !issue.anchors[0]?.paragraph_id) return;
+    // Allow if we have editedText OR if the issue has proposedEdit.newText
+    if (!issue || (!editedText && !issue.proposedEdit?.newText) || !issue.anchors[0]?.paragraph_id) return;
 
     const paragraphId = issue.anchors[0].paragraph_id;
     const quotedText = issue.anchors[0].quoted_text;
-    const replacementText = issue.proposedEdit.newText;
+    const replacementText = editedText || issue.proposedEdit!.newText!;
 
     // Get original paragraph text
     const paragraph = currentDocument?.paragraphs.find(p => p.paragraph_id === paragraphId);
@@ -468,9 +481,9 @@ export function ReviewScreen() {
   const activeIssuesCount = findings.length - acceptedIssueIds.size - dismissedIssueIds.size;
 
   return (
-    <div className="h-screen flex flex-col bg-[#131316]">
+    <div className="h-screen flex flex-col bg-[#131316] overscroll-none">
       {/* Header - Refined minimal design */}
-      <header className="flex items-center justify-between px-5 py-3 border-b border-gray-700/50 bg-[#131316]">
+      <header className="sticky top-0 z-10 flex items-center justify-between px-5 py-3 border-b border-gray-700/50 bg-[#131316]">
         {/* Left: Logo + Document info */}
         <div className="flex items-center gap-4">
           <h1
@@ -528,7 +541,7 @@ export function ReviewScreen() {
           className="flex-1 overflow-hidden"
           style={{ flexBasis: '65%' }}
         >
-          <div className="h-full overflow-y-auto overflow-x-visible scrollbar-thin scrollbar-thumb-gray-800 scrollbar-track-transparent">
+          <div className="h-full overflow-y-auto overflow-x-visible overscroll-contain scrollbar-thin scrollbar-thumb-gray-800 scrollbar-track-transparent">
             <div className="max-w-7xl mx-auto pr-8">
               <ManuscriptView
                 document={currentDocument}

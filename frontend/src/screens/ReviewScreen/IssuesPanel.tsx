@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Check, X, ChevronDown, ChevronRight, ChevronUp, Undo2, Sparkles, Edit3, Pencil, ArrowRight } from 'lucide-react';
+import { Check, X, ChevronDown, ChevronRight, ChevronUp, Undo2, Sparkles, Edit3, Pencil, ArrowRight, HelpCircle } from 'lucide-react';
 import type { Finding, DocObj } from '@/types';
 
 interface UserEdit {
@@ -21,7 +21,7 @@ interface IssuesPanelProps {
   onSelectIssue: (issueId: string) => void;
   selectIssueRef?: React.MutableRefObject<((issue: Finding) => void) | null>;
   onAcceptIssue: (issueId: string) => void;
-  onAcceptRewrite: (issueId: string) => void;
+  onAcceptRewrite: (issueId: string, editedText?: string) => void;
   onDismissIssue: (issueId: string) => void;
   onUndoIssue: (issueId: string) => void;
   onGotoEdit?: (paragraphId: string) => void;
@@ -31,9 +31,9 @@ interface IssuesPanelProps {
 type IssueType = 'critical' | 'argument' | 'writing';
 
 const getCategoryType = (category: string): IssueType => {
-  if (category.includes('adversarial') || category.includes('scope')) return 'critical';
+  if (category.includes('adversarial') || category.includes('counterpoint')) return 'critical';
   if (category.includes('rigor')) return 'argument';
-  return 'writing';
+  return 'writing'; // clarity and others
 };
 
 // Type configuration
@@ -273,7 +273,7 @@ export function IssuesPanel({
   };
 
   const handleSaveEdit = (issueId: string) => {
-    onAcceptRewrite(issueId);
+    onAcceptRewrite(issueId, editText);
     setEditingIssueId(null);
     setEditText('');
   };
@@ -290,7 +290,7 @@ export function IssuesPanel({
     // Check if the paragraph for this issue has been user-edited
     const paragraphId = issue.anchors[0]?.paragraph_id;
     const isParagraphUserEdited = paragraphId ? userEditedParagraphs.has(paragraphId) : false;
-    const isRewriteDisabled = isParagraphUserEdited && issue.proposedEdit?.newText;
+    const isRewriteDisabled = isParagraphUserEdited && !!issue.proposedEdit?.newText;
 
     return (
       <div
@@ -422,24 +422,41 @@ export function IssuesPanel({
               )}
 
               {/* Critique - plain text, no decoration */}
-              <p className="text-sm text-gray-300 leading-relaxed">
-                {issue.description}
-              </p>
+              {issue.description && (
+                <p className="text-sm text-gray-300 leading-relaxed">
+                  {issue.description}
+                </p>
+              )}
 
-              {/* SUGGESTED REWRITE section */}
+              {/* SUGGESTED REWRITE or SUGGESTION section */}
               {issue.proposedEdit?.newText && !isEditing && (
                 <div
                   className={`p-3 rounded-md ${isRewriteDisabled ? 'opacity-60' : ''}`}
                   style={{ backgroundColor: 'rgba(136, 202, 202, 0.08)' }}
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <h5 className="text-[11px] font-bold uppercase tracking-wider" style={{ color: '#88CACA' }}>
-                      Suggested Rewrite
-                      {isRewriteDisabled && (
-                        <span className="ml-2 text-amber-400/80 normal-case font-normal">(disabled)</span>
+                    <div className="flex items-center gap-2">
+                      <h5 className="text-[11px] font-bold uppercase tracking-wider" style={{ color: '#88CACA' }}>
+                        {issue.proposedEdit.type === 'suggestion' ? 'Suggestion' : 'Suggested Rewrite'}
+                      </h5>
+                      {/* Rationale tooltip with ? icon */}
+                      {issue.proposedEdit.rationale && (
+                        <div className="relative group/tooltip">
+                          <HelpCircle
+                            className="w-3.5 h-3.5 cursor-help"
+                            style={{ color: '#88CACA' }}
+                          />
+                          <div className="absolute left-0 bottom-full mb-2 w-64 p-2 rounded-md bg-gray-800 border border-gray-700 text-xs text-gray-300 opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all duration-200 delay-500 z-50 shadow-lg">
+                            <div className="font-semibold text-gray-200 mb-1">Rationale</div>
+                            {issue.proposedEdit.rationale}
+                          </div>
+                        </div>
                       )}
-                    </h5>
-                    {!isResolved && !isRewriteDisabled && (
+                      {isRewriteDisabled && (
+                        <span className="text-[11px] text-amber-400/80 font-normal">(disabled)</span>
+                      )}
+                    </div>
+                    {!isResolved && !isRewriteDisabled && issue.proposedEdit.type !== 'suggestion' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -521,8 +538,8 @@ export function IssuesPanel({
                     </div>
                   )}
                   <div className="flex items-center gap-3 flex-wrap">
-                    {/* Accept Rewrite - teal filled button */}
-                    {issue.proposedEdit?.newText && (
+                    {/* Accept Rewrite - teal filled button (hidden for suggestions) */}
+                    {issue.proposedEdit?.newText && issue.proposedEdit.type !== 'suggestion' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -646,7 +663,7 @@ export function IssuesPanel({
       </div>
 
       {/* Issues list */}
-      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto overscroll-contain">
         {/* Needs Attention Section */}
         {needsAttentionTotal > 0 && (
           <div className="border-b border-gray-700/30 py-2">

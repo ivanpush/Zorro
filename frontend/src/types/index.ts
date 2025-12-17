@@ -155,9 +155,9 @@ export interface Anchor {
 }
 
 export interface ProposedEdit {
-  type: 'replace' | 'delete' | 'insert_before' | 'insert_after';
+  type: 'replace' | 'delete' | 'insert_before' | 'insert_after' | 'suggestion';
   anchor: Anchor;                  // What to modify
-  newText?: string;                // For replace/insert
+  newText?: string;                // For replace/insert, or advisory text for suggestion
   rationale: string;               // Why this change
 }
 

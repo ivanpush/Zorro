@@ -66,6 +66,25 @@ export async function loadDemoFindings(id: DemoDocumentId): Promise<Finding[]> {
         }
 
         // Map issue to Finding format
+        // Handle different field names across issue types
+        const description = issue.message || issue.critique || '';
+
+        // Map all suggestion types into proposedEdit.newText
+        // - suggested_rewrite/proposed_rewrite: actual text replacements
+        // - suggested_revision: actionable advice (counterpoint)
+        // - outline_suggestion: structural recommendations
+        const rewriteText = issue.suggested_rewrite || issue.proposed_rewrite;
+        const suggestionText = issue.suggested_revision ||
+          (issue.outline_suggestion && Array.isArray(issue.outline_suggestion)
+            ? issue.outline_suggestion.map((s: string) => `• ${s}`).join('\n')
+            : null);
+
+        // Use rewrite if available, otherwise use suggestion
+        const proposedText = rewriteText || suggestionText;
+
+        // Determine if this is a suggestion (not a direct rewrite)
+        const isSuggestion = !rewriteText && !!suggestionText;
+
         const finding: Finding = {
           id: issue.id || `finding_${Date.now()}_${Math.random()}`,
           agentId: mapScopeToAgent(issue.scope),
@@ -73,23 +92,23 @@ export async function loadDemoFindings(id: DemoDocumentId): Promise<Finding[]> {
           severity: issue.severity || 'minor',
           confidence: issue.confidence || 0.8,
           title: issue.title || 'Untitled Issue',
-          description: issue.message || '',
+          description,
           anchors: [
             {
               paragraph_id: issue.paragraph_id,
               sentence_id: issue.sentence_ids?.[0],
-              quoted_text: issue.original_text || issue.quoted_text || issue.message || '',
+              quoted_text: issue.original_text || issue.quoted_text || '',
             }
           ],
           createdAt: new Date().toISOString(),
         };
 
-        // Add proposed edit if available
-        if (issue.suggested_rewrite || issue.proposed_rewrite) {
+        // Add proposed edit if available (rewrite or suggestion)
+        if (proposedText) {
           finding.proposedEdit = {
-            type: 'replace',
+            type: isSuggestion ? 'suggestion' : 'replace',
             anchor: finding.anchors[0],
-            newText: issue.suggested_rewrite || issue.proposed_rewrite,
+            newText: proposedText,
             rationale: issue.rationale || '',
           };
         }
