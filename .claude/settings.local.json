@@ -23,7 +23,10 @@
       "Bash(cat:*)",
       "Bash(python3:*)",
       "Bash(kill:*)",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)",
+      "Bash(git stash:*)"
     ],
     "deny": [],
     "ask": []

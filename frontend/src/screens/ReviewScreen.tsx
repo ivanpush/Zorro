@@ -502,7 +502,7 @@ export function ReviewScreen() {
           style={{ flexBasis: '65%' }}
         >
           <div className="h-full overflow-y-auto overflow-x-visible scrollbar-thin scrollbar-thumb-gray-800 scrollbar-track-transparent">
-            <div className="max-w-5xl mx-auto pr-8">
+            <div className="max-w-5xl mx-auto pr-4">
               <ManuscriptView
                 document={currentDocument}
                 selectedIssueId={selectedIssueId}

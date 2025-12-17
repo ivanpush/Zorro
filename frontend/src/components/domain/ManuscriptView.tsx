@@ -340,13 +340,13 @@ export function ManuscriptView({
                   : paragraph.text;
               startEditing(paragraph.paragraph_id, currentText);
             }}
-            className="absolute top-2 right-2 opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-opacity p-1.5 rounded text-gray-500 hover:text-gray-300 z-20"
+            className="absolute top-2 right-2 opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-colors p-1.5 rounded text-gray-500 hover:text-yellow-400 z-20"
           >
             <Pencil className="w-3 h-3" />
           </button>
         )}
 
-        <div className="py-4 px-4 pr-12">
+        <div className="py-4 px-4 pr-6">
           {/* Edit mode */}
           {isEditing ? (
             <div className="space-y-3">
@@ -539,7 +539,7 @@ export function ManuscriptView({
   };
 
   return (
-    <div className="py-8 px-6 overflow-visible">
+    <div className="py-8 px-4 overflow-visible">
       {/* Document Title */}
       <header className="mb-10 pb-6 border-b border-gray-700/30">
         <h1 className="text-2xl font-semibold text-white tracking-tight">
