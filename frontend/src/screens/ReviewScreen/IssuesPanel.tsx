@@ -601,7 +601,7 @@ export function IssuesPanel({
                   return (
                     <div
                       key={issue.id}
-                      className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/[0.02] border border-gray-700/50 opacity-60 hover:opacity-80 transition-opacity"
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/[0.02] border border-emerald-500/30 opacity-70 hover:opacity-90 transition-opacity"
                     >
                       {/* Severity icon */}
                       <span
