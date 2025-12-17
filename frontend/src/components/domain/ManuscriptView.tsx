@@ -480,10 +480,10 @@ export function ManuscriptView({
           )}
         </div>
 
-        {/* Issue indicator pills - vertical stack near top right */}
+        {/* Issue indicator pills - vertical stack, below edit button */}
         {hasActiveIssues && !isRewritten && (
           <div
-            className="absolute right-0 top-3 flex flex-col gap-0.5 z-50 pointer-events-auto"
+            className="absolute right-0 top-10 flex flex-col gap-0.5 z-50 pointer-events-auto"
             style={{ transform: 'translateX(50%)' }}
           >
             {activeIssues.map((issue) => {
