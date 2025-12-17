@@ -256,7 +256,7 @@ export function IssuesPanel({
                     e.stopPropagation();
                     onAcceptIssue(issue.id);
                   }}
-                  className="p-1.5 rounded-md border border-teal-500/50 hover:border-teal-400 text-teal-400 transition-colors"
+                  className="p-1.5 rounded-md border border-transparent hover:border-teal-400 text-teal-400 transition-colors"
                   title="Accept Issue"
                 >
                   <Check className="w-4 h-4" />
