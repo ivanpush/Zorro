@@ -173,7 +173,7 @@ export function ManuscriptView({
               textDecorationColor: selectionColor.highlight,
               textDecorationThickness: '2px',
               textUnderlineOffset: '3px',
-              backgroundColor: 'rgba(83, 164, 164, 0.08)',
+              backgroundColor: 'rgba(83, 164, 164, 0.15)',
               padding: '1px 2px',
               borderRadius: '2px'
             }}
