@@ -505,8 +505,8 @@ export function ManuscriptView({
                   className="flex items-center gap-0.5 px-1 py-0.5 rounded-full cursor-pointer transition-all hover:scale-105 pointer-events-auto"
                   style={{
                     backgroundColor: 'rgba(30, 30, 35, 0.95)',
-                    border: isThisSelected ? '2px solid #53A4A4' : '1px solid rgba(255,255,255,0.15)',
-                    boxShadow: isThisSelected ? '0 0 8px rgba(83, 164, 164, 0.4)' : 'none'
+                    border: isThisSelected ? `2px solid ${config.color}` : '1px solid rgba(255,255,255,0.15)',
+                    boxShadow: isThisSelected ? `0 0 8px ${config.color}50` : 'none'
                   }}
                 >
                   {/* Severity icon */}
