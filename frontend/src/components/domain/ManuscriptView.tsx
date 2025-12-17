@@ -502,19 +502,19 @@ export function ManuscriptView({
                       onSelectIssue(issue.id);
                     }
                   }}
-                  className="flex items-center gap-0.5 px-1 py-0.5 rounded-full cursor-pointer transition-all hover:scale-105 pointer-events-auto"
+                  className="flex items-center gap-1 px-2 py-1 rounded-full cursor-pointer transition-all hover:scale-105 pointer-events-auto"
                   style={{
                     backgroundColor: 'rgba(30, 30, 35, 0.95)',
-                    border: isThisSelected ? `2px solid ${config.color}` : '1px solid rgba(255,255,255,0.15)',
-                    boxShadow: isThisSelected ? `0 0 8px ${config.color}50` : 'none'
+                    border: isThisSelected ? `2px solid ${config.color}` : '1px solid rgba(255,255,255,0.2)',
+                    boxShadow: isThisSelected ? `0 0 10px ${config.color}60` : 'none'
                   }}
                 >
                   {/* Severity icon */}
                   <span
-                    className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
+                    className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold"
                     style={{
                       backgroundColor: isMajor ? 'rgba(249, 115, 22, 0.15)' : 'rgba(156, 163, 175, 0.1)',
-                      border: isMajor ? '1.5px solid #f97316' : '1.5px solid #9ca3af',
+                      border: isMajor ? '2px solid #f97316' : '2px solid #9ca3af',
                       color: isMajor ? '#f97316' : '#9ca3af'
                     }}
                   >
@@ -522,7 +522,7 @@ export function ManuscriptView({
                   </span>
                   {/* Type letter */}
                   <span
-                    className="text-[10px] font-bold px-0.5"
+                    className="text-[12px] font-bold px-0.5"
                     style={{ color: config.color }}
                   >
                     {config.letter}

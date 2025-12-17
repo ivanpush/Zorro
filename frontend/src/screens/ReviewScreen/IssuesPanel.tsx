@@ -81,6 +81,13 @@ export function IssuesPanel({
   useEffect(() => {
     if (selectedIssueId) {
       setExpandedIssueId(selectedIssueId);
+      // Scroll the card into view
+      setTimeout(() => {
+        const element = document.getElementById(`issue-${selectedIssueId}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 50);
     }
   }, [selectedIssueId]);
 
