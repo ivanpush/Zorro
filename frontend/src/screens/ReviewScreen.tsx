@@ -79,6 +79,7 @@ export function ReviewScreen() {
   const [acceptedIssueIds, setAcceptedIssueIds] = useState<Set<string>>(new Set());
   const [dismissedIssueIds, setDismissedIssueIds] = useState<Set<string>>(new Set());
   const [rewrittenParagraphs, setRewrittenParagraphs] = useState<Map<string, string>>(new Map());
+  const [userEditedParagraphs, setUserEditedParagraphs] = useState<Map<string, string>>(new Map());
   const [isLoading, setIsLoading] = useState(false);
   const [filterSeverity, setFilterSeverity] = useState<string | null>(null);
 
@@ -299,6 +300,24 @@ export function ReviewScreen() {
     }
   }, [findings, acceptedIssueIds]);
 
+  // Handle user direct edit of a paragraph
+  const handleUserEdit = useCallback((paragraphId: string, newText: string) => {
+    setUserEditedParagraphs(prev => {
+      const next = new Map(prev);
+      next.set(paragraphId, newText);
+      return next;
+    });
+  }, []);
+
+  // Revert user edit
+  const handleRevertUserEdit = useCallback((paragraphId: string) => {
+    setUserEditedParagraphs(prev => {
+      const next = new Map(prev);
+      next.delete(paragraphId);
+      return next;
+    });
+  }, []);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-[#131316]">
@@ -417,11 +436,14 @@ export function ReviewScreen() {
                 selectedIssueId={selectedIssueId}
                 findings={findings}
                 rewrittenParagraphs={rewrittenParagraphs}
+                userEditedParagraphs={userEditedParagraphs}
                 acceptedIssueIds={acceptedIssueIds}
                 dismissedIssueIds={dismissedIssueIds}
                 onParagraphClick={handleParagraphClick}
                 onSelectIssue={handleIssueSelect}
                 onRevertRewrite={handleRevertRewrite}
+                onUserEdit={handleUserEdit}
+                onRevertUserEdit={handleRevertUserEdit}
               />
             </div>
           </div>
@@ -444,10 +466,12 @@ export function ReviewScreen() {
         >
           <IssuesPanel
             issues={findings}
+            document={currentDocument}
             selectedIssueId={selectedIssueId}
             acceptedIssueIds={acceptedIssueIds}
             dismissedIssueIds={dismissedIssueIds}
             rewrittenParagraphs={rewrittenParagraphs}
+            userEditedParagraphs={userEditedParagraphs}
             filterSeverity={filterSeverity}
             onFilterChange={setFilterSeverity}
             onSelectIssue={handleIssueSelect}
@@ -455,6 +479,12 @@ export function ReviewScreen() {
             onAcceptRewrite={handleAcceptRewrite}
             onDismissIssue={handleDismissIssue}
             onUndoIssue={handleUndoIssue}
+            onGotoEdit={(paragraphId) => {
+              const element = document.getElementById(paragraphId);
+              if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+            }}
           />
         </div>
       </div>

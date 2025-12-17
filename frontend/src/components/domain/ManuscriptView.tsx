@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { CheckCircle, Eye, RotateCcw, ArrowLeftRight } from 'lucide-react';
+import { CheckCircle, Eye, RotateCcw, ArrowLeftRight, Pencil, X } from 'lucide-react';
 import type { DocObj, Finding } from '@/types';
 
 interface ManuscriptViewProps {
@@ -7,11 +7,14 @@ interface ManuscriptViewProps {
   selectedIssueId: string | null;
   findings: Finding[];
   rewrittenParagraphs: Map<string, string>;
+  userEditedParagraphs: Map<string, string>;
   acceptedIssueIds: Set<string>;
   dismissedIssueIds: Set<string>;
   onParagraphClick: (paragraphId: string) => void;
   onSelectIssue?: (issueId: string) => void;
   onRevertRewrite?: (paragraphId: string) => void;
+  onUserEdit?: (paragraphId: string, newText: string) => void;
+  onRevertUserEdit?: (paragraphId: string) => void;
 }
 
 // Category type mapping
@@ -57,14 +60,20 @@ export function ManuscriptView({
   selectedIssueId,
   findings,
   rewrittenParagraphs,
+  userEditedParagraphs,
   acceptedIssueIds,
   dismissedIssueIds,
   onParagraphClick,
   onSelectIssue,
-  onRevertRewrite
+  onRevertRewrite,
+  onUserEdit,
+  onRevertUserEdit
 }: ManuscriptViewProps) {
-  // Track which paragraphs are showing diff vs final
-  const [showingDiff, setShowingDiff] = useState<Set<string>>(new Set());
+  // Track which paragraphs are showing final (diff is default)
+  const [showingFinal, setShowingFinal] = useState<Set<string>>(new Set());
+  // Track which paragraph is being edited by user
+  const [editingParagraphId, setEditingParagraphId] = useState<string | null>(null);
+  const [editText, setEditText] = useState<string>('');
 
   // Map paragraphs to their active issues (not resolved)
   const paragraphIssuesMap = useMemo(() => {
@@ -93,8 +102,8 @@ export function ManuscriptView({
 
   const selectedParagraphId = selectedIssue?.anchors[0]?.paragraph_id || null;
 
-  const toggleDiffView = (paragraphId: string) => {
-    setShowingDiff(prev => {
+  const toggleFinalView = (paragraphId: string) => {
+    setShowingFinal(prev => {
       const next = new Set(prev);
       if (next.has(paragraphId)) {
         next.delete(paragraphId);
@@ -114,6 +123,27 @@ export function ManuscriptView({
     return Array.from(types);
   };
 
+  // Start editing a paragraph
+  const startEditing = (paragraphId: string, currentText: string) => {
+    setEditingParagraphId(paragraphId);
+    setEditText(currentText);
+  };
+
+  // Save user edit
+  const saveUserEdit = (paragraphId: string) => {
+    if (onUserEdit && editText.trim()) {
+      onUserEdit(paragraphId, editText);
+    }
+    setEditingParagraphId(null);
+    setEditText('');
+  };
+
+  // Cancel editing
+  const cancelEditing = () => {
+    setEditingParagraphId(null);
+    setEditText('');
+  };
+
   // Render paragraph
   const renderParagraph = (paragraph: any, index: number) => {
     const activeIssues = paragraphIssuesMap.get(paragraph.paragraph_id) || [];
@@ -121,9 +151,12 @@ export function ManuscriptView({
     const isSelected = paragraph.paragraph_id === selectedParagraphId;
     const isRewritten = rewrittenParagraphs.has(paragraph.paragraph_id);
     const rewrittenText = rewrittenParagraphs.get(paragraph.paragraph_id);
+    const isUserEdited = userEditedParagraphs.has(paragraph.paragraph_id);
+    const userEditedText = userEditedParagraphs.get(paragraph.paragraph_id);
     const originalText = paragraph.text;
-    const isDiffView = showingDiff.has(paragraph.paragraph_id);
+    const isShowingFinal = showingFinal.has(paragraph.paragraph_id);
     const issueTypes = getIssueTypes(activeIssues);
+    const isEditing = editingParagraphId === paragraph.paragraph_id;
 
     // Get severity for selection styling
     const selectedSeverity = selectedIssue?.severity === 'critical' || selectedIssue?.severity === 'major' ? 'major' : 'minor';
@@ -171,23 +204,120 @@ export function ManuscriptView({
     // Render diff view - show paragraph with inline diff for the changed snippet
     const renderDiffView = () => {
       const originalSnippet = getOriginalSnippet();
-      if (!originalSnippet) {
-        return <span className="text-emerald-400">{rewrittenText}</span>;
+      if (!originalSnippet || !rewrittenText) {
+        return <span className="text-emerald-400 bg-emerald-400/10 px-0.5">{rewrittenText}</span>;
       }
 
       const idx = originalText.indexOf(originalSnippet);
       if (idx === -1) {
-        return <span className="text-emerald-400">{rewrittenText}</span>;
+        return <span className="text-emerald-400 bg-emerald-400/10 px-0.5">{rewrittenText}</span>;
       }
 
       return (
         <>
           <span className="text-gray-200">{originalText.substring(0, idx)}</span>
-          <span className="text-red-400/70 line-through">{originalSnippet}</span>
-          <span className="text-emerald-400 font-medium"> {rewrittenText} </span>
+          <span className="text-red-400 bg-red-400/10 px-0.5 line-through">{originalSnippet}</span>
+          <span className="text-emerald-400 bg-emerald-400/10 px-0.5">{rewrittenText}</span>
           <span className="text-gray-200">{originalText.substring(idx + originalSnippet.length)}</span>
         </>
       );
+    };
+
+    // Determine paragraph styling based on state
+    const getParagraphStyle = () => {
+      // User edited paragraphs - subtle bg, same as regular
+      if (isUserEdited) {
+        return {
+          backgroundColor: 'rgba(255, 255, 255, 0.015)',
+          border: '1px solid rgba(255, 255, 255, 0.06)',
+          borderLeft: '1px solid rgba(255, 255, 255, 0.06)'
+        };
+      }
+      if (isRewritten) {
+        return {
+          backgroundColor: 'rgba(255, 255, 255, 0.015)',
+          border: '1px solid rgba(255, 255, 255, 0.06)',
+          borderLeft: '1px solid rgba(255, 255, 255, 0.06)'
+        };
+      }
+      if (isSelected) {
+        return {
+          backgroundColor: selectionColors.bg,
+          border: `1px solid ${selectionColors.border}`,
+          borderLeft: `4px solid ${selectionColors.accent}`
+        };
+      }
+      return {
+        backgroundColor: 'rgba(255, 255, 255, 0.015)',
+        border: '1px solid rgba(255, 255, 255, 0.06)',
+        borderLeft: '1px solid rgba(255, 255, 255, 0.06)'
+      };
+    };
+
+    // Compute inline diff between original and edited text
+    // Find the longest common prefix and suffix to show only what actually changed
+    const computeInlineDiff = (original: string, edited: string) => {
+      // Find common prefix
+      let prefixEnd = 0;
+      while (prefixEnd < original.length && prefixEnd < edited.length && original[prefixEnd] === edited[prefixEnd]) {
+        prefixEnd++;
+      }
+
+      // Find common suffix (but don't overlap with prefix)
+      let suffixStart = 0;
+      while (
+        suffixStart < (original.length - prefixEnd) &&
+        suffixStart < (edited.length - prefixEnd) &&
+        original[original.length - 1 - suffixStart] === edited[edited.length - 1 - suffixStart]
+      ) {
+        suffixStart++;
+      }
+
+      const prefix = original.substring(0, prefixEnd);
+      const suffix = original.substring(original.length - suffixStart);
+      const removedPart = original.substring(prefixEnd, original.length - suffixStart);
+      const addedPart = edited.substring(prefixEnd, edited.length - suffixStart);
+
+      return { prefix, suffix, removedPart, addedPart };
+    };
+
+    // Render user edit diff view - inline, only showing actual changes
+    const renderUserEditDiffView = () => {
+      const { prefix, suffix, removedPart, addedPart } = computeInlineDiff(originalText, userEditedText || '');
+
+      return (
+        <>
+          <span className="text-gray-200">{prefix}</span>
+          {removedPart && <span className="text-red-400 bg-red-400/10 px-0.5 line-through">{removedPart}</span>}
+          {addedPart && <span className="text-emerald-400 bg-emerald-400/10 px-0.5">{addedPart}</span>}
+          <span className="text-gray-200">{suffix}</span>
+        </>
+      );
+    };
+
+    // Get displayed text based on state (diff is default, final on toggle)
+    const getDisplayedText = () => {
+      if (isEditing) return null; // Edit mode shows textarea instead
+      if (isUserEdited) {
+        // Diff is default, show final only when toggled
+        return isShowingFinal ? <span>{userEditedText}</span> : renderUserEditDiffView();
+      }
+      if (isRewritten) {
+        // Diff is default, show final only when toggled
+        if (!isShowingFinal) return renderDiffView();
+        const originalSnippet = getOriginalSnippet();
+        if (!originalSnippet) return <span>{rewrittenText}</span>;
+        const idx = originalText.indexOf(originalSnippet);
+        if (idx === -1) return <span>{rewrittenText}</span>;
+        return (
+          <>
+            <span>{originalText.substring(0, idx)}</span>
+            <span>{rewrittenText}</span>
+            <span>{originalText.substring(idx + originalSnippet.length)}</span>
+          </>
+        );
+      }
+      return renderTextWithHighlight(paragraph.text);
     };
 
     return (
@@ -196,98 +326,162 @@ export function ManuscriptView({
         id={paragraph.paragraph_id}
         className={`
           relative group transition-all duration-200 rounded-lg overflow-visible
-          ${hasActiveIssues && !isRewritten ? 'cursor-pointer' : ''}
+          ${hasActiveIssues && !isRewritten && !isUserEdited ? 'cursor-pointer' : ''}
         `}
-        style={{
-          backgroundColor: isSelected ? selectionColors.bg : isRewritten ? 'rgba(52, 211, 153, 0.04)' : 'transparent',
-          border: isSelected
-            ? `1px solid ${selectionColors.border}`
-            : isRewritten
-              ? '1px solid rgba(52, 211, 153, 0.2)'
-              : '1px solid rgba(255, 255, 255, 0.06)',
-          borderLeft: isSelected
-            ? `4px solid ${selectionColors.accent}`
-            : isRewritten
-              ? '4px solid rgba(52, 211, 153, 0.4)'
-              : '1px solid rgba(255, 255, 255, 0.06)'
-        }}
-        onClick={() => hasActiveIssues && !isRewritten && onParagraphClick(paragraph.paragraph_id)}
+        style={getParagraphStyle()}
+        onClick={() => hasActiveIssues && !isRewritten && !isUserEdited && !isEditing && onParagraphClick(paragraph.paragraph_id)}
       >
-        <div className="py-4 px-4 pr-12">
-          {/* Paragraph text */}
-          <p className="text-[15px] leading-[1.85] text-gray-200">
-            {isRewritten
-              ? isDiffView
-                ? renderDiffView()
-                : (() => {
-                    const originalSnippet = getOriginalSnippet();
-                    if (!originalSnippet) {
-                      return <span>{rewrittenText}</span>;
-                    }
-                    const idx = originalText.indexOf(originalSnippet);
-                    if (idx === -1) {
-                      return <span>{rewrittenText}</span>;
-                    }
-                    return (
-                      <>
-                        <span>{originalText.substring(0, idx)}</span>
-                        <span>{rewrittenText}</span>
-                        <span>{originalText.substring(idx + originalSnippet.length)}</span>
-                      </>
-                    );
-                  })()
-              : renderTextWithHighlight(paragraph.text)
-            }
-          </p>
+        {/* Edit button - top right, subtle, visible on hover */}
+        {!isEditing && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              // For edited/rewritten paragraphs, start with the current displayed text
+              const currentText = isUserEdited
+                ? (userEditedText || paragraph.text)
+                : isRewritten
+                  ? (rewrittenText || paragraph.text)
+                  : paragraph.text;
+              startEditing(paragraph.paragraph_id, currentText);
+            }}
+            className="absolute top-2 right-2 opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-opacity p-1.5 rounded text-gray-500 hover:text-gray-300 z-20"
+          >
+            <Pencil className="w-3 h-3" />
+          </button>
+        )}
 
-          {/* Rewritten controls - shown below text */}
-          {isRewritten && (
-            <div className="flex items-center gap-3 mt-3">
-              <div className="flex items-center gap-1.5">
-                <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="text-[10px] font-medium text-emerald-400 uppercase tracking-wide">
-                  Rewritten
-                </span>
-              </div>
-              {/* Hover-only controls */}
-              <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                <div className="h-3 w-px bg-gray-600" />
+        <div className="py-4 px-4 pr-12">
+          {/* Edit mode */}
+          {isEditing ? (
+            <div className="space-y-3">
+              <textarea
+                value={editText}
+                onChange={(e) => setEditText(e.target.value)}
+                className="w-full p-3 text-[15px] leading-[1.85] text-gray-100 bg-gray-800/50 border border-yellow-500/30 rounded-lg resize-y focus:outline-none focus:border-yellow-500/50"
+                style={{ minHeight: Math.max(120, Math.ceil(editText.length / 80) * 28 + 40) }}
+                autoFocus
+              />
+              <div className="flex items-center gap-2">
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleDiffView(paragraph.paragraph_id);
-                  }}
-                  className="flex items-center gap-1 text-[10px] text-gray-400 hover:text-gray-200 transition-colors"
+                  onClick={() => saveUserEdit(paragraph.paragraph_id)}
+                  className="px-3 py-1.5 text-xs font-medium rounded-md bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30 transition-colors"
                 >
-                  {isDiffView ? (
-                    <>
-                      <Eye className="w-3 h-3" />
-                      See Final
-                    </>
-                  ) : (
-                    <>
-                      <ArrowLeftRight className="w-3 h-3" />
-                      See Diff
-                    </>
-                  )}
+                  Save
                 </button>
-                {onRevertRewrite && (
-                  <>
+                <button
+                  onClick={cancelEditing}
+                  className="px-3 py-1.5 text-xs font-medium rounded-md text-gray-400 hover:text-gray-200 hover:bg-gray-700/50 transition-colors flex items-center gap-1"
+                >
+                  <X className="w-3 h-3" />
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Paragraph text */}
+              <p className="text-[15px] leading-[1.85] text-gray-200">
+                {getDisplayedText()}
+              </p>
+
+              {/* User edited badge + controls (same pattern as rewritten) */}
+              {isUserEdited && (
+                <div className="flex items-center gap-3 mt-3">
+                  <div className="flex items-center gap-1.5">
+                    <Pencil className="w-3.5 h-3.5 text-yellow-400" />
+                    <span className="text-[10px] font-medium text-yellow-400 uppercase tracking-wide">
+                      Edited
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
                     <div className="h-3 w-px bg-gray-600" />
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        onRevertRewrite(paragraph.paragraph_id);
+                        toggleFinalView(paragraph.paragraph_id);
                       }}
-                      className="flex items-center gap-1 text-[10px] text-gray-400 hover:text-red-400 transition-colors"
+                      className="flex items-center gap-1 text-[10px] text-gray-400 hover:text-gray-200 transition-colors"
                     >
-                      <RotateCcw className="w-3 h-3" />
-                      Revert
+                      {isShowingFinal ? (
+                        <>
+                          <ArrowLeftRight className="w-3 h-3" />
+                          Diff
+                        </>
+                      ) : (
+                        <>
+                          <Eye className="w-3 h-3" />
+                          Final
+                        </>
+                      )}
                     </button>
-                  </>
-                )}
-              </div>
-            </div>
+                    {onRevertUserEdit && (
+                      <>
+                        <div className="h-3 w-px bg-gray-600" />
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onRevertUserEdit(paragraph.paragraph_id);
+                          }}
+                          className="flex items-center gap-1 text-[10px] text-gray-400 hover:text-red-400 transition-colors"
+                        >
+                          <RotateCcw className="w-3 h-3" />
+                          Revert
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Rewritten controls - green styling */}
+              {isRewritten && (
+                <div className="flex items-center gap-3 mt-3">
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-[10px] font-medium text-emerald-400 uppercase tracking-wide">
+                      REWRITE APPLIED
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="h-3 w-px bg-gray-600" />
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFinalView(paragraph.paragraph_id);
+                      }}
+                      className="flex items-center gap-1 text-[10px] text-gray-400 hover:text-gray-200 transition-colors"
+                    >
+                      {isShowingFinal ? (
+                        <>
+                          <ArrowLeftRight className="w-3 h-3" />
+                          Diff
+                        </>
+                      ) : (
+                        <>
+                          <Eye className="w-3 h-3" />
+                          Final
+                        </>
+                      )}
+                    </button>
+                    {onRevertRewrite && (
+                      <>
+                        <div className="h-3 w-px bg-gray-600" />
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onRevertRewrite(paragraph.paragraph_id);
+                          }}
+                          className="flex items-center gap-1 text-[10px] text-gray-400 hover:text-red-400 transition-colors"
+                        >
+                          <RotateCcw className="w-3 h-3" />
+                          Revert
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
 

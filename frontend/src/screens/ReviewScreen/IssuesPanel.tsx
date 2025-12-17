@@ -1,13 +1,21 @@
-import { useState, useMemo } from 'react';
-import { Check, X, ChevronDown, ChevronRight, ChevronUp, Undo2, Sparkles, Edit3 } from 'lucide-react';
-import type { Finding } from '@/types';
+import { useState, useMemo, useEffect } from 'react';
+import { Check, X, ChevronDown, ChevronRight, ChevronUp, Undo2, Sparkles, Edit3, Pencil, ArrowRight } from 'lucide-react';
+import type { Finding, DocObj } from '@/types';
+
+interface UserEdit {
+  paragraphId: string;
+  originalText: string;
+  editedText: string;
+}
 
 interface IssuesPanelProps {
   issues: Finding[];
+  document: DocObj;
   selectedIssueId: string | null;
   acceptedIssueIds: Set<string>;
   dismissedIssueIds: Set<string>;
   rewrittenParagraphs: Map<string, string>;
+  userEditedParagraphs: Map<string, string>;
   filterSeverity: string | null;
   onFilterChange: (severity: string | null) => void;
   onSelectIssue: (issueId: string) => void;
@@ -15,6 +23,7 @@ interface IssuesPanelProps {
   onAcceptRewrite: (issueId: string) => void;
   onDismissIssue: (issueId: string) => void;
   onUndoIssue: (issueId: string) => void;
+  onGotoEdit?: (paragraphId: string) => void;
 }
 
 // Category type mapping
@@ -39,23 +48,86 @@ const severityConfig = {
   minor: { label: 'Minor', color: '#fbbf24', bg: 'rgba(251, 191, 36, 0.15)' }
 };
 
+// Severity selection colors (matching ManuscriptView)
+const severitySelectionColors = {
+  major: {
+    bg: 'rgba(249, 115, 22, 0.06)',
+    border: 'rgba(249, 115, 22, 0.4)',
+    accent: '#f97316'
+  },
+  minor: {
+    bg: 'rgba(251, 191, 36, 0.06)',
+    border: 'rgba(251, 191, 36, 0.4)',
+    accent: '#fbbf24'
+  }
+};
+
 export function IssuesPanel({
   issues,
+  document,
   selectedIssueId,
   acceptedIssueIds,
   dismissedIssueIds,
   rewrittenParagraphs,
+  userEditedParagraphs,
   onSelectIssue,
   onAcceptIssue,
   onAcceptRewrite,
   onDismissIssue,
-  onUndoIssue
+  onUndoIssue,
+  onGotoEdit
 }: IssuesPanelProps) {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['needs-attention', 'major']));
   const [expandedIssueId, setExpandedIssueId] = useState<string | null>(null);
+  const [expandedEditId, setExpandedEditId] = useState<string | null>(null);
   const [editingIssueId, setEditingIssueId] = useState<string | null>(null);
   const [editText, setEditText] = useState<string>('');
   const [categoryFilter, setCategoryFilter] = useState<IssueType | null>(null);
+
+  // Auto-expand issue when selected (e.g., from clicking bubble in manuscript)
+  useEffect(() => {
+    if (selectedIssueId) {
+      setExpandedIssueId(selectedIssueId);
+    }
+  }, [selectedIssueId]);
+
+  // Build user edits list with original text
+  const userEdits = useMemo(() => {
+    const edits: UserEdit[] = [];
+    userEditedParagraphs.forEach((editedText, paragraphId) => {
+      const paragraph = document.paragraphs.find(p => p.paragraph_id === paragraphId);
+      if (paragraph) {
+        edits.push({
+          paragraphId,
+          originalText: paragraph.text,
+          editedText
+        });
+      }
+    });
+    return edits;
+  }, [userEditedParagraphs, document.paragraphs]);
+
+  // Compute inline diff
+  const computeInlineDiff = (original: string, edited: string) => {
+    let prefixEnd = 0;
+    while (prefixEnd < original.length && prefixEnd < edited.length && original[prefixEnd] === edited[prefixEnd]) {
+      prefixEnd++;
+    }
+    let suffixStart = 0;
+    while (
+      suffixStart < (original.length - prefixEnd) &&
+      suffixStart < (edited.length - prefixEnd) &&
+      original[original.length - 1 - suffixStart] === edited[edited.length - 1 - suffixStart]
+    ) {
+      suffixStart++;
+    }
+    return {
+      prefix: original.substring(0, prefixEnd),
+      suffix: original.substring(original.length - suffixStart),
+      removedPart: original.substring(prefixEnd, original.length - suffixStart),
+      addedPart: edited.substring(prefixEnd, edited.length - suffixStart)
+    };
+  };
 
   // Organize issues into groups
   const organizedIssues = useMemo(() => {
@@ -64,7 +136,6 @@ export function IssuesPanel({
       minor: [] as Finding[]
     };
     const accepted: Finding[] = [];
-    const userEdits: Finding[] = [];
     const dismissed: Finding[] = [];
 
     issues.forEach(issue => {
@@ -74,11 +145,7 @@ export function IssuesPanel({
       }
 
       if (acceptedIssueIds.has(issue.id)) {
-        if (rewrittenParagraphs.has(issue.anchors[0]?.paragraph_id || '')) {
-          userEdits.push(issue);
-        } else {
-          accepted.push(issue);
-        }
+        accepted.push(issue);
       } else if (dismissedIssueIds.has(issue.id)) {
         dismissed.push(issue);
       } else {
@@ -87,8 +154,8 @@ export function IssuesPanel({
       }
     });
 
-    return { needsAttention, accepted, userEdits, dismissed };
-  }, [issues, acceptedIssueIds, dismissedIssueIds, rewrittenParagraphs, categoryFilter]);
+    return { needsAttention, accepted, dismissed };
+  }, [issues, acceptedIssueIds, dismissedIssueIds, categoryFilter]);
 
   // Count issues by category (unfiltered, for filter badges)
   const categoryCounts = useMemo(() => {
@@ -135,6 +202,7 @@ export function IssuesPanel({
     const config = typeConfig[type];
     const severity = issue.severity === 'critical' || issue.severity === 'major' ? 'major' : 'minor';
     const sevConfig = severityConfig[severity];
+    const selColors = severitySelectionColors[severity];
 
     return (
       <div
@@ -145,9 +213,9 @@ export function IssuesPanel({
           ${isResolved ? 'opacity-50' : ''}
         `}
         style={{
-          backgroundColor: isSelected ? 'rgba(232, 152, 85, 0.08)' : 'rgba(255, 255, 255, 0.04)',
-          border: isSelected ? '2px solid rgba(232, 152, 85, 0.5)' : '1px solid rgba(255, 255, 255, 0.06)',
-          borderLeft: isSelected ? '2px solid rgba(232, 152, 85, 0.5)' : `2px solid ${config.color}`
+          backgroundColor: isSelected ? selColors.bg : 'rgba(255, 255, 255, 0.04)',
+          border: isSelected ? `2px solid ${selColors.border}` : '1px solid rgba(255, 255, 255, 0.06)',
+          borderLeft: isSelected ? `2px solid ${selColors.accent}` : `2px solid ${config.color}`
         }}
         onClick={() => onSelectIssue(issue.id)}
       >
@@ -155,10 +223,13 @@ export function IssuesPanel({
           {/* Header with badges */}
           <div className="flex items-start justify-between gap-3 mb-3">
             <div className="flex items-center gap-2 flex-wrap">
-              {/* Severity badge */}
+              {/* Severity badge - more prominent when selected */}
               <span
                 className="px-2 py-0.5 text-[11px] font-semibold rounded"
-                style={{ backgroundColor: sevConfig.bg, color: sevConfig.color }}
+                style={{
+                  backgroundColor: isSelected ? sevConfig.color : sevConfig.bg,
+                  color: isSelected ? '#000' : sevConfig.color
+                }}
               >
                 {sevConfig.label}
               </span>
@@ -182,17 +253,14 @@ export function IssuesPanel({
                 flex items-center gap-1 transition-opacity
                 ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}
               `}>
+                {/* Accept Issue button - outline style */}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (issue.proposedEdit) {
-                      onAcceptRewrite(issue.id);
-                    } else {
-                      onAcceptIssue(issue.id);
-                    }
+                    onAcceptIssue(issue.id);
                   }}
-                  className="p-1.5 rounded-md bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 transition-colors"
-                  title="Accept"
+                  className="p-1.5 rounded-md border border-teal-500/50 hover:border-teal-400 text-teal-400 transition-colors"
+                  title="Accept Issue"
                 >
                   <Check className="w-4 h-4" />
                 </button>
@@ -201,7 +269,7 @@ export function IssuesPanel({
                     e.stopPropagation();
                     onDismissIssue(issue.id);
                   }}
-                  className="p-1.5 rounded-md hover:bg-gray-600/50 text-gray-400 hover:text-gray-300 transition-colors"
+                  className="p-1.5 rounded-md text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
                   title="Dismiss"
                 >
                   <X className="w-4 h-4" />
@@ -328,15 +396,23 @@ export function IssuesPanel({
 
               {/* Action buttons */}
               {!isResolved && !isEditing && (
-                <div className="flex items-center gap-3 pt-2">
+                <div className="flex items-center gap-3 pt-2 flex-wrap">
+                  {/* Accept Rewrite - only if has proposed edit */}
+                  {issue.proposedEdit?.newText && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onAcceptRewrite(issue.id);
+                      }}
+                      className="px-4 py-2 text-sm font-medium rounded-md bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors border border-emerald-500/30"
+                    >
+                      Accept Rewrite
+                    </button>
+                  )}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (issue.proposedEdit?.newText) {
-                        onAcceptRewrite(issue.id);
-                      } else {
-                        onAcceptIssue(issue.id);
-                      }
+                      onAcceptIssue(issue.id);
                     }}
                     className="px-4 py-2 text-sm font-medium rounded-md bg-teal-500/20 text-teal-400 hover:bg-teal-500/30 transition-colors border border-teal-500/30"
                   >
@@ -432,7 +508,7 @@ export function IssuesPanel({
 
             {/* Major subsection */}
             {organizedIssues.needsAttention.major.length > 0 && (
-              <div>
+              <div className="ml-3">
                 <button
                   onClick={() => toggleSection('major')}
                   className="w-full px-4 py-2 flex items-center gap-2 hover:bg-white/[0.02] transition-colors"
@@ -447,7 +523,7 @@ export function IssuesPanel({
                   </span>
                 </button>
                 {expandedSections.has('major') && (
-                  <div className="px-4 pb-2">
+                  <div className="px-4 py-3">
                     {organizedIssues.needsAttention.major.map(issue => renderIssueCard(issue))}
                   </div>
                 )}
@@ -456,7 +532,7 @@ export function IssuesPanel({
 
             {/* Minor subsection */}
             {organizedIssues.needsAttention.minor.length > 0 && (
-              <div>
+              <div className="ml-3">
                 <button
                   onClick={() => toggleSection('minor')}
                   className="w-full px-4 py-2 flex items-center gap-2 hover:bg-white/[0.02] transition-colors"
@@ -471,7 +547,7 @@ export function IssuesPanel({
                   </span>
                 </button>
                 {expandedSections.has('minor') && (
-                  <div className="px-4 pb-2">
+                  <div className="px-4 py-3">
                     {organizedIssues.needsAttention.minor.map(issue => renderIssueCard(issue))}
                   </div>
                 )}
@@ -480,7 +556,7 @@ export function IssuesPanel({
           </div>
         )}
 
-        {/* Accepted Section */}
+        {/* Accepted Section - compact one-liner rows */}
         {organizedIssues.accepted.length > 0 && (
           <div className="border-b border-gray-700/30">
             <button
@@ -499,40 +575,63 @@ export function IssuesPanel({
             </button>
 
             {expandedSections.has('accepted') && (
-              <div className="px-4 pb-2">
-                {organizedIssues.accepted.map(issue => renderIssueCard(issue, true))}
+              <div className="px-4 py-3 space-y-1">
+                {organizedIssues.accepted.map(issue => {
+                  const type = getCategoryType(issue.category);
+                  const config = typeConfig[type];
+                  const severity = issue.severity === 'critical' || issue.severity === 'major' ? 'major' : 'minor';
+                  const sevConfig = severityConfig[severity];
+                  const isRewritten = rewrittenParagraphs.has(issue.anchors[0]?.paragraph_id || '');
+                  return (
+                    <div
+                      key={issue.id}
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/[0.02] border border-gray-700/50 opacity-60 hover:opacity-80 transition-opacity"
+                    >
+                      {/* Severity icon */}
+                      <span
+                        className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
+                        style={{ backgroundColor: sevConfig.color, color: severity === 'major' ? '#fff' : '#000' }}
+                      >
+                        {severity === 'major' ? '!' : 'i'}
+                      </span>
+                      {/* Type badge */}
+                      <span
+                        className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
+                        style={{ backgroundColor: config.bg, color: config.color }}
+                      >
+                        {config.letter}
+                      </span>
+                      {/* Status label - bright for rewrite, dull for accepted */}
+                      <span className={`text-[9px] font-medium flex-shrink-0 ${isRewritten ? 'text-emerald-400' : 'text-gray-500'}`}>
+                        {isRewritten ? 'REWRITE APPLIED' : 'ACCEPTED'}
+                      </span>
+                      <span className="text-xs text-gray-400 truncate flex-1">{issue.title}</span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onUndoIssue(issue.id);
+                          // Select, expand, and scroll to the issue after undo
+                          setTimeout(() => {
+                            onSelectIssue(issue.id);
+                            const element = document.getElementById(`issue-${issue.id}`);
+                            if (element) {
+                              element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+                          }, 100);
+                        }}
+                        className="flex items-center gap-1 px-2 py-0.5 text-[10px] text-gray-500 hover:text-teal-400 border border-gray-600 hover:border-teal-400/50 rounded transition-colors flex-shrink-0"
+                      >
+                        <Undo2 className="w-3 h-3" /> Undo
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
         )}
 
-        {/* User Edits Section */}
-        {organizedIssues.userEdits.length > 0 && (
-          <div className="border-b border-gray-700/30">
-            <button
-              onClick={() => toggleSection('userEdits')}
-              className="w-full px-4 py-2.5 flex items-center gap-2 hover:bg-white/[0.02] transition-colors"
-            >
-              {expandedSections.has('userEdits') ? (
-                <ChevronDown className="w-4 h-4 text-emerald-400" />
-              ) : (
-                <ChevronRight className="w-4 h-4 text-emerald-400" />
-              )}
-              <Edit3 className="w-4 h-4 text-emerald-400" />
-              <span className="text-xs font-bold text-emerald-400 uppercase tracking-wide">
-                User Edits ({organizedIssues.userEdits.length})
-              </span>
-            </button>
-
-            {expandedSections.has('userEdits') && (
-              <div className="px-4 pb-2">
-                {organizedIssues.userEdits.map(issue => renderIssueCard(issue, true))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Dismissed Section */}
+        {/* Dismissed Section - compact one-liner rows */}
         {organizedIssues.dismissed.length > 0 && (
           <div className="border-b border-gray-700/30">
             <button
@@ -551,8 +650,146 @@ export function IssuesPanel({
             </button>
 
             {expandedSections.has('dismissed') && (
-              <div className="px-4 pb-2">
-                {organizedIssues.dismissed.map(issue => renderIssueCard(issue, true))}
+              <div className="px-4 py-3 space-y-1">
+                {organizedIssues.dismissed.map(issue => {
+                  const type = getCategoryType(issue.category);
+                  const config = typeConfig[type];
+                  const severity = issue.severity === 'critical' || issue.severity === 'major' ? 'major' : 'minor';
+                  const sevConfig = severityConfig[severity];
+                  return (
+                    <div
+                      key={issue.id}
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/[0.02] border border-gray-700/50 opacity-40 hover:opacity-60 transition-opacity"
+                    >
+                      {/* Severity icon */}
+                      <span
+                        className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
+                        style={{ backgroundColor: sevConfig.color, color: severity === 'major' ? '#fff' : '#000' }}
+                      >
+                        {severity === 'major' ? '!' : 'i'}
+                      </span>
+                      {/* Type badge */}
+                      <span
+                        className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
+                        style={{ backgroundColor: config.bg, color: config.color }}
+                      >
+                        {config.letter}
+                      </span>
+                      {/* Status label */}
+                      <span className="text-[9px] font-medium text-gray-500 flex-shrink-0">
+                        DISMISSED
+                      </span>
+                      <span className="text-xs text-gray-500 truncate flex-1">{issue.title}</span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onUndoIssue(issue.id);
+                          // Select, expand, and scroll to the issue after undo
+                          setTimeout(() => {
+                            onSelectIssue(issue.id);
+                            const element = document.getElementById(`issue-${issue.id}`);
+                            if (element) {
+                              element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+                          }, 100);
+                        }}
+                        className="flex items-center gap-1 px-2 py-0.5 text-[10px] text-gray-500 hover:text-gray-300 border border-gray-600 hover:border-gray-500 rounded transition-colors flex-shrink-0"
+                      >
+                        <Undo2 className="w-3 h-3" /> Undo
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* User Edits Section */}
+        {userEdits.length > 0 && (
+          <div className="border-b border-gray-700/30">
+            <button
+              onClick={() => toggleSection('user-edits')}
+              className="w-full px-4 py-2.5 flex items-center gap-2 hover:bg-white/[0.02] transition-colors"
+            >
+              {expandedSections.has('user-edits') ? (
+                <ChevronDown className="w-4 h-4 text-yellow-400" />
+              ) : (
+                <ChevronRight className="w-4 h-4 text-yellow-400" />
+              )}
+              <Pencil className="w-4 h-4 text-yellow-400" />
+              <span className="text-xs font-bold text-yellow-400 uppercase tracking-wide">
+                User Edits ({userEdits.length})
+              </span>
+            </button>
+
+            {expandedSections.has('user-edits') && (
+              <div className="px-4 py-3 space-y-2">
+                {userEdits.map((edit) => {
+                  const isExpanded = expandedEditId === edit.paragraphId;
+                  const section = document.sections.find(s =>
+                    s.paragraph_ids?.includes(edit.paragraphId)
+                  );
+                  const locationText = section?.section_title || edit.paragraphId;
+
+                  return (
+                    <div
+                      key={edit.paragraphId}
+                      className="rounded-lg bg-white/[0.02] border border-gray-700/50"
+                    >
+                      {/* Collapsed row */}
+                      <div
+                        className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-white/[0.02]"
+                        onClick={() => setExpandedEditId(isExpanded ? null : edit.paragraphId)}
+                      >
+                        <ChevronRight
+                          className={`w-3 h-3 text-gray-500 transition-transform flex-shrink-0 ${isExpanded ? 'rotate-90' : ''}`}
+                        />
+                        {/* Paragraph ID pill */}
+                        <span className="px-2 py-0.5 text-[9px] font-medium text-yellow-400 bg-yellow-400/10 rounded flex-shrink-0">
+                          {edit.paragraphId}
+                        </span>
+                        <span className="text-xs text-gray-400 truncate flex-1">
+                          {edit.editedText}
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (onGotoEdit) {
+                              onGotoEdit(edit.paragraphId);
+                            }
+                          }}
+                          className="flex items-center gap-1 px-2 py-0.5 text-[10px] text-gray-500 hover:text-yellow-400 border border-gray-600 hover:border-yellow-400/50 rounded transition-colors flex-shrink-0"
+                        >
+                          Go to <ArrowRight className="w-3 h-3" />
+                        </button>
+                      </div>
+
+                      {/* Expanded diff view */}
+                      {isExpanded && (
+                        <div className="px-3 pb-3 pt-2 border-t border-gray-700/30">
+                          <p className="text-sm leading-relaxed text-gray-400">
+                            {(() => {
+                              const diff = computeInlineDiff(edit.originalText, edit.editedText);
+                              return (
+                                <>
+                                  <span>{diff.prefix}</span>
+                                  {diff.removedPart && (
+                                    <span className="text-red-400 bg-red-400/10 px-0.5 line-through">{diff.removedPart}</span>
+                                  )}
+                                  {diff.addedPart && (
+                                    <span className="text-emerald-400 bg-emerald-400/10 px-0.5">{diff.addedPart}</span>
+                                  )}
+                                  <span>{diff.suffix}</span>
+                                </>
+                              );
+                            })()}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -566,7 +803,7 @@ export function IssuesPanel({
         )}
 
         {/* Filtered empty state */}
-        {issues.length > 0 && needsAttentionTotal === 0 && organizedIssues.accepted.length === 0 && organizedIssues.userEdits.length === 0 && organizedIssues.dismissed.length === 0 && (
+        {issues.length > 0 && needsAttentionTotal === 0 && organizedIssues.accepted.length === 0 && organizedIssues.dismissed.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500 text-sm">No {categoryFilter ? typeConfig[categoryFilter].label.toLowerCase() : ''} issues</p>
           </div>
