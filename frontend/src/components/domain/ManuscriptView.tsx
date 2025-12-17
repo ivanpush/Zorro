@@ -502,20 +502,22 @@ export function ManuscriptView({
                       onSelectIssue(issue.id);
                     }
                   }}
-                  className={`flex items-center gap-1 rounded-full cursor-pointer transition-all hover:scale-110 hover:brightness-110 pointer-events-auto ${
-                    isMajor ? 'px-2 py-1' : 'px-1.5 py-0.5'
+                  className={`flex items-center justify-center rounded-full cursor-pointer transition-all hover:scale-110 pointer-events-auto ${
+                    isMajor ? 'w-7 h-7' : 'w-6 h-6'
                   }`}
                   style={{
-                    backgroundColor: sevPill.bg,
-                    border: isMajor ? `3px solid ${sevPill.bg}` : `2px solid ${sevPill.bg}`,
-                    boxShadow: isMajor ? `0 0 8px ${sevPill.bg}40` : 'none'
+                    backgroundColor: isMajor ? '#f97316' : 'transparent',
+                    border: isMajor
+                      ? (isThisSelected ? '3px solid #f97316' : '2px solid #f97316')
+                      : (isThisSelected ? '3px solid #9ca3af' : '2px solid #9ca3af'),
+                    boxShadow: isThisSelected ? (isMajor ? '0 0 8px rgba(249, 115, 22, 0.5)' : '0 0 8px rgba(156, 163, 175, 0.4)') : 'none'
                   }}
                 >
                   <span
                     className={`font-bold pointer-events-none ${
                       isMajor ? 'text-[12px]' : 'text-[11px]'
                     }`}
-                    style={{ color: sevPill.text }}
+                    style={{ color: isMajor ? '#fff' : '#9ca3af' }}
                   >
                     {config.letter}
                   </span>
