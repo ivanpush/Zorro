@@ -502,22 +502,28 @@ export function ManuscriptView({
                       onSelectIssue(issue.id);
                     }
                   }}
-                  className={`flex items-center justify-center rounded-full cursor-pointer transition-all hover:scale-110 pointer-events-auto ${
-                    isMajor ? 'w-7 h-7' : 'w-6 h-6'
-                  }`}
+                  className="flex items-center gap-0.5 px-1 py-0.5 rounded-full cursor-pointer transition-all hover:scale-105 pointer-events-auto"
                   style={{
-                    backgroundColor: isMajor ? '#f97316' : 'transparent',
-                    border: isMajor
-                      ? (isThisSelected ? '3px solid #f97316' : '2px solid #f97316')
-                      : (isThisSelected ? '3px solid #9ca3af' : '2px solid #9ca3af'),
-                    boxShadow: isThisSelected ? (isMajor ? '0 0 8px rgba(249, 115, 22, 0.5)' : '0 0 8px rgba(156, 163, 175, 0.4)') : 'none'
+                    backgroundColor: 'rgba(30, 30, 35, 0.95)',
+                    border: isThisSelected ? '2px solid #53A4A4' : '1px solid rgba(255,255,255,0.15)',
+                    boxShadow: isThisSelected ? '0 0 8px rgba(83, 164, 164, 0.4)' : 'none'
                   }}
                 >
+                  {/* Severity icon */}
                   <span
-                    className={`font-bold pointer-events-none ${
-                      isMajor ? 'text-[12px]' : 'text-[11px]'
-                    }`}
-                    style={{ color: isMajor ? '#fff' : '#9ca3af' }}
+                    className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
+                    style={{
+                      backgroundColor: isMajor ? 'rgba(249, 115, 22, 0.15)' : 'rgba(156, 163, 175, 0.1)',
+                      border: isMajor ? '1.5px solid #f97316' : '1.5px solid #9ca3af',
+                      color: isMajor ? '#f97316' : '#9ca3af'
+                    }}
+                  >
+                    {isMajor ? '!' : 'i'}
+                  </span>
+                  {/* Type letter */}
+                  <span
+                    className="text-[10px] font-bold px-0.5"
+                    style={{ color: config.color }}
                   >
                     {config.letter}
                   </span>
