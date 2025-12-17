@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Check, X, ChevronDown, ChevronRight, ChevronUp, Undo2, Sparkles, Edit3, Pencil, ArrowRight } from 'lucide-react';
 import type { Finding, DocObj } from '@/types';
 
@@ -48,11 +48,11 @@ const severityConfig = {
   minor: { label: 'Minor', color: '#E6E6E6', bg: 'rgba(230, 230, 230, 0.15)' }
 };
 
-// Universal selection color - #53A4A4 (teal, matching ManuscriptView)
+// Universal selection color - #88CACA (cyan/teal, matching ManuscriptView)
 const selectionColor = {
-  bg: 'rgba(83, 164, 164, 0.06)',
-  border: 'rgba(83, 164, 164, 0.4)',
-  accent: '#53A4A4'
+  bg: 'rgba(136, 202, 202, 0.06)',
+  border: 'rgba(136, 202, 202, 0.4)',
+  accent: '#88CACA'
 };
 
 export function IssuesPanel({
@@ -76,6 +76,7 @@ export function IssuesPanel({
   const [editingIssueId, setEditingIssueId] = useState<string | null>(null);
   const [editText, setEditText] = useState<string>('');
   const [categoryFilter, setCategoryFilter] = useState<IssueType | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Auto-expand issue when selected (e.g., from clicking bubble in manuscript)
   useEffect(() => {
@@ -100,11 +101,15 @@ export function IssuesPanel({
 
         setExpandedIssueId(selectedIssueId);
 
-        // Scroll the card into view - need longer delay for DOM to update
+        // Scroll the card into view - use container ref for reliable scrolling
         setTimeout(() => {
           const element = document.getElementById(`issue-${selectedIssueId}`);
-          if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          const container = scrollContainerRef.current;
+          if (element && container) {
+            const elementRect = element.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            const scrollTop = container.scrollTop + (elementRect.top - containerRect.top) - (containerRect.height / 3);
+            container.scrollTo({ top: scrollTop, behavior: 'smooth' });
           }
         }, 200);
       };
@@ -552,7 +557,7 @@ export function IssuesPanel({
       </div>
 
       {/* Issues list */}
-      <div className="flex-1 overflow-y-auto">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
         {/* Needs Attention Section */}
         {needsAttentionTotal > 0 && (
           <div className="border-b border-gray-700/30">

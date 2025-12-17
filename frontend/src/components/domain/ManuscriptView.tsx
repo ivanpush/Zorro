@@ -33,12 +33,12 @@ const typeConfig: Record<IssueType, { color: string; bg: string; letter: string 
   writing: { color: '#c084fc', bg: 'rgba(192, 132, 252, 0.2)', letter: 'W' }
 };
 
-// Universal selection color - #53A4A4 (teal)
+// Universal selection color - #88CACA (cyan/teal)
 const selectionColor = {
-  accent: '#53A4A4',
-  border: 'rgba(83, 164, 164, 0.3)',
-  bg: 'rgba(83, 164, 164, 0.04)',
-  highlight: '#53A4A4'
+  accent: '#88CACA',
+  border: 'rgba(136, 202, 202, 0.3)',
+  bg: 'rgba(136, 202, 202, 0.04)',
+  highlight: '#88CACA'
 };
 
 // Severity pill colors
