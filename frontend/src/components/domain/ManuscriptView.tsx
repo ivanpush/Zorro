@@ -197,24 +197,80 @@ export function ManuscriptView({
       return relatedFinding?.anchors[0]?.quoted_text || '';
     };
 
-    // Render diff view - show paragraph with inline diff for the changed snippet
-    const renderDiffView = () => {
-      const originalSnippet = getOriginalSnippet();
-      if (!originalSnippet || !rewrittenText) {
-        return <span className="text-emerald-400 bg-emerald-400/10 px-0.5">{rewrittenText}</span>;
+    // Word-level diff using Longest Common Subsequence (LCS)
+    // Returns array of { text, type } where type is 'same', 'added', or 'removed'
+    const computeWordDiff = (original: string, edited: string): Array<{ text: string; type: 'same' | 'added' | 'removed' }> => {
+      // Split into words while preserving whitespace
+      const tokenize = (str: string) => str.split(/(\s+)/).filter(t => t.length > 0);
+      const originalTokens = tokenize(original);
+      const editedTokens = tokenize(edited);
+
+      // Build LCS table
+      const m = originalTokens.length;
+      const n = editedTokens.length;
+      const dp: number[][] = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
+
+      for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+          if (originalTokens[i - 1] === editedTokens[j - 1]) {
+            dp[i][j] = dp[i - 1][j - 1] + 1;
+          } else {
+            dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+          }
+        }
       }
 
-      const idx = originalText.indexOf(originalSnippet);
-      if (idx === -1) {
-        return <span className="text-emerald-400 bg-emerald-400/10 px-0.5">{rewrittenText}</span>;
+      // Backtrack to build diff
+      const result: Array<{ text: string; type: 'same' | 'added' | 'removed' }> = [];
+      let i = m, j = n;
+
+      const tempResult: Array<{ text: string; type: 'same' | 'added' | 'removed' }> = [];
+      while (i > 0 || j > 0) {
+        if (i > 0 && j > 0 && originalTokens[i - 1] === editedTokens[j - 1]) {
+          tempResult.push({ text: originalTokens[i - 1], type: 'same' });
+          i--; j--;
+        } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+          tempResult.push({ text: editedTokens[j - 1], type: 'added' });
+          j--;
+        } else {
+          tempResult.push({ text: originalTokens[i - 1], type: 'removed' });
+          i--;
+        }
       }
+
+      // Reverse to get correct order and merge consecutive same-type tokens
+      for (let k = tempResult.length - 1; k >= 0; k--) {
+        const item = tempResult[k];
+        if (result.length > 0 && result[result.length - 1].type === item.type) {
+          result[result.length - 1].text += item.text;
+        } else {
+          result.push({ ...item });
+        }
+      }
+
+      return result;
+    };
+
+    // Render diff view for AI rewrites - compare full original with full rewritten text
+    const renderDiffView = () => {
+      if (!rewrittenText) {
+        return <span className="text-gray-200">{originalText}</span>;
+      }
+
+      // Use word-level diff to compare original paragraph with rewritten paragraph
+      const diffParts = computeWordDiff(originalText, rewrittenText);
 
       return (
         <>
-          <span className="text-gray-200">{originalText.substring(0, idx)}</span>
-          <span className="text-red-400 bg-red-400/10 px-0.5 line-through">{originalSnippet}</span>
-          <span className="text-emerald-400 bg-emerald-400/10 px-0.5">{rewrittenText}</span>
-          <span className="text-gray-200">{originalText.substring(idx + originalSnippet.length)}</span>
+          {diffParts.map((part, i) => {
+            if (part.type === 'same') {
+              return <span key={i} className="text-gray-200">{part.text}</span>;
+            } else if (part.type === 'removed') {
+              return <span key={i} className="text-red-400 bg-red-400/10 px-0.5 line-through">{part.text}</span>;
+            } else {
+              return <span key={i} className="text-emerald-400 bg-emerald-400/10 px-0.5">{part.text}</span>;
+            }
+          })}
         </>
       );
     };
@@ -250,43 +306,21 @@ export function ManuscriptView({
       };
     };
 
-    // Compute inline diff between original and edited text
-    // Find the longest common prefix and suffix to show only what actually changed
-    const computeInlineDiff = (original: string, edited: string) => {
-      // Find common prefix
-      let prefixEnd = 0;
-      while (prefixEnd < original.length && prefixEnd < edited.length && original[prefixEnd] === edited[prefixEnd]) {
-        prefixEnd++;
-      }
-
-      // Find common suffix (but don't overlap with prefix)
-      let suffixStart = 0;
-      while (
-        suffixStart < (original.length - prefixEnd) &&
-        suffixStart < (edited.length - prefixEnd) &&
-        original[original.length - 1 - suffixStart] === edited[edited.length - 1 - suffixStart]
-      ) {
-        suffixStart++;
-      }
-
-      const prefix = original.substring(0, prefixEnd);
-      const suffix = original.substring(original.length - suffixStart);
-      const removedPart = original.substring(prefixEnd, original.length - suffixStart);
-      const addedPart = edited.substring(prefixEnd, edited.length - suffixStart);
-
-      return { prefix, suffix, removedPart, addedPart };
-    };
-
-    // Render user edit diff view - inline, only showing actual changes
+    // Render user edit diff view - word-level diff
     const renderUserEditDiffView = () => {
-      const { prefix, suffix, removedPart, addedPart } = computeInlineDiff(originalText, userEditedText || '');
+      const diffParts = computeWordDiff(originalText, userEditedText || '');
 
       return (
         <>
-          <span className="text-gray-200">{prefix}</span>
-          {removedPart && <span className="text-red-400 bg-red-400/10 px-0.5 line-through">{removedPart}</span>}
-          {addedPart && <span className="text-emerald-400 bg-emerald-400/10 px-0.5">{addedPart}</span>}
-          <span className="text-gray-200">{suffix}</span>
+          {diffParts.map((part, i) => {
+            if (part.type === 'same') {
+              return <span key={i} className="text-gray-200">{part.text}</span>;
+            } else if (part.type === 'removed') {
+              return <span key={i} className="text-red-400 bg-red-400/10 px-0.5 line-through">{part.text}</span>;
+            } else {
+              return <span key={i} className="text-emerald-400 bg-emerald-400/10 px-0.5">{part.text}</span>;
+            }
+          })}
         </>
       );
     };
@@ -301,17 +335,8 @@ export function ManuscriptView({
       if (isRewritten) {
         // Diff is default, show final only when toggled
         if (!isShowingFinal) return renderDiffView();
-        const originalSnippet = getOriginalSnippet();
-        if (!originalSnippet) return <span>{rewrittenText}</span>;
-        const idx = originalText.indexOf(originalSnippet);
-        if (idx === -1) return <span>{rewrittenText}</span>;
-        return (
-          <>
-            <span>{originalText.substring(0, idx)}</span>
-            <span>{rewrittenText}</span>
-            <span>{originalText.substring(idx + originalSnippet.length)}</span>
-          </>
-        );
+        // rewrittenText is now the full paragraph text
+        return <span>{rewrittenText}</span>;
       }
       return renderTextWithHighlight(paragraph.text);
     };
@@ -333,6 +358,7 @@ export function ManuscriptView({
             onClick={(e) => {
               e.stopPropagation();
               // For edited/rewritten paragraphs, start with the current displayed text
+              // rewrittenText is now the full paragraph text (not just a snippet)
               const currentText = isUserEdited
                 ? (userEditedText || paragraph.text)
                 : isRewritten
@@ -380,17 +406,22 @@ export function ManuscriptView({
                 {getDisplayedText()}
               </p>
 
-              {/* User edited badge + controls (same pattern as rewritten) */}
+              {/* User edited badge + controls */}
               {isUserEdited && (
-                <div className="flex items-center gap-3 mt-3">
-                  <div className="flex items-center gap-1.5">
-                    <Pencil className="w-3.5 h-3.5 text-yellow-400" />
-                    <span className="text-[10px] font-medium text-yellow-400 uppercase tracking-wide">
-                      Edited
-                    </span>
-                  </div>
+                <div className="flex items-center justify-between mt-3">
+                  {/* Badge - bottom left */}
+                  {isShowingFinal ? (
+                    <div className="flex items-center gap-1.5">
+                      <Pencil className="w-3.5 h-3.5 text-yellow-400" />
+                      <span className="text-[10px] font-medium text-yellow-400 uppercase tracking-wide">
+                        Edited
+                      </span>
+                    </div>
+                  ) : (
+                    <div />
+                  )}
+                  {/* Controls - bottom right */}
                   <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div className="h-3 w-px bg-gray-600" />
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -431,15 +462,20 @@ export function ManuscriptView({
 
               {/* Rewritten controls - green styling */}
               {isRewritten && (
-                <div className="flex items-center gap-3 mt-3">
-                  <div className="flex items-center gap-1.5">
-                    <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
-                    <span className="text-[10px] font-medium text-emerald-400 uppercase tracking-wide">
-                      REWRITE APPLIED
-                    </span>
-                  </div>
+                <div className="flex items-center justify-between mt-3">
+                  {/* Badge - bottom left */}
+                  {isShowingFinal ? (
+                    <div className="flex items-center gap-1.5">
+                      <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+                      <span className="text-[10px] font-medium text-emerald-400 uppercase tracking-wide">
+                        REWRITE APPLIED
+                      </span>
+                    </div>
+                  ) : (
+                    <div />
+                  )}
+                  {/* Controls - bottom right */}
                   <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div className="h-3 w-px bg-gray-600" />
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -482,7 +518,7 @@ export function ManuscriptView({
         </div>
 
         {/* Issue indicator pills - vertical stack, below edit button */}
-        {hasActiveIssues && !isRewritten && (
+        {hasActiveIssues && (
           <div
             className="absolute right-0 top-10 flex flex-col gap-1 z-50 pointer-events-auto"
             style={{ transform: 'translateX(100%)' }}

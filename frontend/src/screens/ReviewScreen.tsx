@@ -266,11 +266,34 @@ export function ReviewScreen() {
   const handleAcceptRewrite = useCallback((issueId: string) => {
     const issue = findings.find(f => f.id === issueId);
     if (!issue || !issue.proposedEdit?.newText || !issue.anchors[0]?.paragraph_id) return;
+
     const paragraphId = issue.anchors[0].paragraph_id;
-    const newText = issue.proposedEdit.newText;
-    setRewrittenParagraphs(prev => new Map(prev).set(paragraphId, newText));
+    const quotedText = issue.anchors[0].quoted_text;
+    const replacementText = issue.proposedEdit.newText;
+
+    // Get original paragraph text
+    const paragraph = currentDocument?.paragraphs.find(p => p.paragraph_id === paragraphId);
+    if (!paragraph) return;
+
+    setRewrittenParagraphs(prev => {
+      const next = new Map(prev);
+      // Get current text (with any previous rewrites applied) or original
+      const currentText = next.get(paragraphId) || paragraph.text;
+
+      // Find and replace the quoted text
+      const idx = currentText.indexOf(quotedText);
+      if (idx !== -1) {
+        const fullNewText = currentText.substring(0, idx) + replacementText + currentText.substring(idx + quotedText.length);
+        next.set(paragraphId, fullNewText);
+      } else {
+        // Fallback if quoted text not found (shouldn't happen normally)
+        next.set(paragraphId, replacementText);
+      }
+      return next;
+    });
+
     handleAcceptIssue(issueId);
-  }, [findings, handleAcceptIssue]);
+  }, [findings, currentDocument, handleAcceptIssue]);
 
   const handleDismissIssue = useCallback((issueId: string) => {
     setDismissedIssueIds(prev => new Set([...prev, issueId]));
@@ -301,14 +324,16 @@ export function ReviewScreen() {
       next.delete(paragraphId);
       return next;
     });
-    // Find and un-accept the related issue
-    const relatedIssue = findings.find(f =>
-      f.anchors[0]?.paragraph_id === paragraphId && acceptedIssueIds.has(f.id)
+    // Find and un-accept ALL related issues with rewrites on this paragraph
+    const relatedIssues = findings.filter(f =>
+      f.anchors[0]?.paragraph_id === paragraphId &&
+      acceptedIssueIds.has(f.id) &&
+      f.proposedEdit?.newText
     );
-    if (relatedIssue) {
+    if (relatedIssues.length > 0) {
       setAcceptedIssueIds(prev => {
         const next = new Set(prev);
-        next.delete(relatedIssue.id);
+        relatedIssues.forEach(issue => next.delete(issue.id));
         return next;
       });
     }

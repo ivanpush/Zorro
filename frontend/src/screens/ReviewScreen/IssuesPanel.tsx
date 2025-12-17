@@ -420,18 +420,10 @@ export function IssuesPanel({
                 </div>
               )}
 
-              {/* CRITIQUE section */}
-              <div
-                className="pl-3 py-1"
-                style={{ borderLeft: '3px solid rgba(156, 163, 175, 0.4)' }}
-              >
-                <h5 className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">
-                  Critique
-                </h5>
-                <p className="text-sm text-gray-300 leading-relaxed">
-                  {issue.description}
-                </p>
-              </div>
+              {/* Critique - plain text, no decoration */}
+              <p className="text-sm text-gray-300 leading-relaxed">
+                {issue.description}
+              </p>
 
               {/* SUGGESTED REWRITE section */}
               {issue.proposedEdit?.newText && !isEditing && (
@@ -503,7 +495,7 @@ export function IssuesPanel({
                       onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(136, 202, 202, 0.3)'}
                       onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(136, 202, 202, 0.2)'}
                     >
-                      Save & Accept
+                      Apply Now
                     </button>
                     <button
                       onClick={(e) => {
