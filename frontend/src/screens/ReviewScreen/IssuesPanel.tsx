@@ -87,19 +87,30 @@ export function IssuesPanel({
         // If there's a filter active and it doesn't match, clear the filter
         if (categoryFilter && categoryFilter !== issueType) {
           setCategoryFilter(null);
+          // Need longer delay when filter changes to allow re-render
+          setTimeout(() => {
+            setExpandedIssueId(selectedIssueId);
+            setTimeout(() => {
+              const element = document.getElementById(`issue-${selectedIssueId}`);
+              if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+            }, 50);
+          }, 50);
+          return;
         }
       }
 
       setExpandedIssueId(selectedIssueId);
-      // Scroll the card into view (slight delay to allow filter change to render)
+      // Scroll the card into view
       setTimeout(() => {
         const element = document.getElementById(`issue-${selectedIssueId}`);
         if (element) {
           element.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
-      }, 100);
+      }, 50);
     }
-  }, [selectedIssueId, issues, categoryFilter]);
+  }, [selectedIssueId, issues]);
 
   // Build user edits list with original text
   const userEdits = useMemo(() => {
