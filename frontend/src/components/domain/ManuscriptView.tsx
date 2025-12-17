@@ -10,12 +10,14 @@ interface ManuscriptViewProps {
   userEditedParagraphs: Map<string, string>;
   acceptedIssueIds: Set<string>;
   dismissedIssueIds: Set<string>;
+  highlightedParagraphId?: string | null;
   onParagraphClick: (paragraphId: string) => void;
   onSelectIssue?: (issueId: string) => void;
   onBubbleSelect?: (issue: Finding) => void;
   onRevertRewrite?: (paragraphId: string) => void;
   onUserEdit?: (paragraphId: string, newText: string) => void;
   onRevertUserEdit?: (paragraphId: string) => void;
+  onClearHighlight?: () => void;
 }
 
 // Category type mapping
@@ -56,12 +58,14 @@ export function ManuscriptView({
   userEditedParagraphs,
   acceptedIssueIds,
   dismissedIssueIds,
+  highlightedParagraphId,
   onParagraphClick,
   onSelectIssue,
   onBubbleSelect,
   onRevertRewrite,
   onUserEdit,
-  onRevertUserEdit
+  onRevertUserEdit,
+  onClearHighlight
 }: ManuscriptViewProps) {
   // Track which paragraphs are showing final (diff is default)
   const [showingFinal, setShowingFinal] = useState<Set<string>>(new Set());
@@ -151,6 +155,7 @@ export function ManuscriptView({
     const isShowingFinal = showingFinal.has(paragraph.paragraph_id);
     const issueTypes = getIssueTypes(activeIssues);
     const isEditing = editingParagraphId === paragraph.paragraph_id;
+    const isHighlighted = paragraph.paragraph_id === highlightedParagraphId;
 
     // Use universal #88CACA for all selection highlighting
     const selectedTypeColor = '#88CACA';
@@ -277,6 +282,14 @@ export function ManuscriptView({
 
     // Determine paragraph styling based on state
     const getParagraphStyle = () => {
+      // Highlighted user edit (from goto)
+      if (isHighlighted && isUserEdited) {
+        return {
+          backgroundColor: 'rgba(250, 204, 21, 0.08)',
+          border: '2px solid rgba(250, 204, 21, 0.4)',
+          borderLeft: '6px solid #facc15'
+        };
+      }
       // User edited paragraphs - subtle bg, same as regular
       if (isUserEdited) {
         return {
@@ -350,7 +363,15 @@ export function ManuscriptView({
           ${hasActiveIssues && !isRewritten && !isUserEdited ? 'cursor-pointer' : ''}
         `}
         style={getParagraphStyle()}
-        onClick={() => hasActiveIssues && !isRewritten && !isUserEdited && !isEditing && onParagraphClick(paragraph.paragraph_id)}
+        onClick={() => {
+          // Clear highlight when clicking any paragraph
+          if (highlightedParagraphId && onClearHighlight) {
+            onClearHighlight();
+          }
+          if (hasActiveIssues && !isRewritten && !isUserEdited && !isEditing) {
+            onParagraphClick(paragraph.paragraph_id);
+          }
+        }}
       >
         {/* Edit button - top right, subtle, visible on hover */}
         {!isEditing && (
@@ -447,6 +468,7 @@ export function ManuscriptView({
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
+                            if (onClearHighlight) onClearHighlight();
                             onRevertUserEdit(paragraph.paragraph_id);
                           }}
                           className="flex items-center gap-1 text-[10px] text-gray-400 hover:text-red-400 transition-colors"
@@ -543,7 +565,7 @@ export function ManuscriptView({
                   className="w-7 h-7 rounded-full flex items-center justify-center cursor-pointer transition-all hover:scale-110 pointer-events-auto"
                   style={{
                     backgroundColor: isThisSelected ? `${config.color}30` : `${config.color}15`,
-                    border: isThisSelected ? `2.5px solid ${config.color}` : `1.5px solid ${config.color}`,
+                    border: isThisSelected ? `3px solid ${config.color}` : `1px solid ${config.color}`,
                     boxShadow: isThisSelected ? `0 0 8px ${config.color}40` : 'none'
                   }}
                 >

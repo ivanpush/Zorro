@@ -303,7 +303,8 @@ export function IssuesPanel({
         style={{
           backgroundColor: isSelected ? 'rgba(136, 202, 202, 0.06)' : 'rgba(255, 255, 255, 0.04)',
           border: isSelected ? '2px solid rgba(136, 202, 202, 0.4)' : '1px solid rgba(255, 255, 255, 0.06)',
-          borderLeft: isSelected ? '4px solid #88CACA' : `4px solid ${config.color}40`
+          borderLeft: isSelected ? '4px solid #88CACA' : `4px solid ${config.color}40`,
+          boxShadow: isSelected ? '0 0 16px 3px rgba(232, 152, 85, 0.25)' : 'none'
         }}
         onClick={() => onSelectIssue(issue.id)}
       >

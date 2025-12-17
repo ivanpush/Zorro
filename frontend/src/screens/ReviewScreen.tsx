@@ -84,6 +84,8 @@ export function ReviewScreen() {
   const [userEditDismissedIssues, setUserEditDismissedIssues] = useState<Map<string, Set<string>>>(new Map());
   const [isLoading, setIsLoading] = useState(false);
   const [filterSeverity, setFilterSeverity] = useState<string | null>(null);
+  // Highlighted paragraph (for user edit goto)
+  const [highlightedParagraphId, setHighlightedParagraphId] = useState<string | null>(null);
 
   // Refs for scrolling
   const manuscriptRef = useRef<HTMLDivElement>(null);
@@ -536,12 +538,14 @@ export function ReviewScreen() {
                 userEditedParagraphs={userEditedParagraphs}
                 acceptedIssueIds={acceptedIssueIds}
                 dismissedIssueIds={dismissedIssueIds}
+                highlightedParagraphId={highlightedParagraphId}
                 onParagraphClick={handleParagraphClick}
                 onSelectIssue={handleIssueSelect}
                 onBubbleSelect={handleBubbleSelect}
                 onRevertRewrite={handleRevertRewrite}
                 onUserEdit={handleUserEdit}
                 onRevertUserEdit={handleRevertUserEdit}
+                onClearHighlight={() => setHighlightedParagraphId(null)}
               />
             </div>
           </div>
@@ -579,7 +583,8 @@ export function ReviewScreen() {
             onDismissIssue={handleDismissIssue}
             onUndoIssue={handleUndoIssue}
             onGotoEdit={(paragraphId) => {
-              const element = document.getElementById(paragraphId);
+              setHighlightedParagraphId(paragraphId);
+              const element = window.document.getElementById(paragraphId);
               if (element) {
                 element.scrollIntoView({ behavior: 'smooth', block: 'center' });
               }
