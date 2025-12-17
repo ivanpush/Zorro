@@ -82,35 +82,47 @@ export function IssuesPanel({
     if (selectedIssueId) {
       // Find the selected issue to check its category
       const selectedIssue = issues.find(i => i.id === selectedIssueId);
+
+      const expandAndScroll = () => {
+        if (selectedIssue) {
+          // Expand the section containing this issue (major/minor)
+          const severity = selectedIssue.severity === 'critical' || selectedIssue.severity === 'major' ? 'major' : 'minor';
+          setExpandedSections(prev => {
+            const next = new Set(prev);
+            next.add(severity);
+            next.add('needs-attention');
+            // Also expand accepted/dismissed if the issue is there
+            if (acceptedIssueIds.has(selectedIssueId)) next.add('accepted');
+            if (dismissedIssueIds.has(selectedIssueId)) next.add('dismissed');
+            return next;
+          });
+        }
+
+        setExpandedIssueId(selectedIssueId);
+
+        // Scroll the card into view
+        setTimeout(() => {
+          const element = document.getElementById(`issue-${selectedIssueId}`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100);
+      };
+
       if (selectedIssue) {
         const issueType = getCategoryType(selectedIssue.category);
         // If there's a filter active and it doesn't match, clear the filter
         if (categoryFilter && categoryFilter !== issueType) {
           setCategoryFilter(null);
           // Need longer delay when filter changes to allow re-render
-          setTimeout(() => {
-            setExpandedIssueId(selectedIssueId);
-            setTimeout(() => {
-              const element = document.getElementById(`issue-${selectedIssueId}`);
-              if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }
-            }, 50);
-          }, 50);
+          setTimeout(expandAndScroll, 100);
           return;
         }
       }
 
-      setExpandedIssueId(selectedIssueId);
-      // Scroll the card into view
-      setTimeout(() => {
-        const element = document.getElementById(`issue-${selectedIssueId}`);
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      }, 50);
+      expandAndScroll();
     }
-  }, [selectedIssueId, issues]);
+  }, [selectedIssueId, issues, acceptedIssueIds, dismissedIssueIds]);
 
   // Build user edits list with original text
   const userEdits = useMemo(() => {
