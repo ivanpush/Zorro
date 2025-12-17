@@ -303,7 +303,7 @@ export function IssuesPanel({
         style={{
           backgroundColor: isSelected ? 'rgba(136, 202, 202, 0.06)' : 'rgba(255, 255, 255, 0.04)',
           border: isSelected ? '2px solid rgba(136, 202, 202, 0.4)' : '1px solid rgba(255, 255, 255, 0.06)',
-          borderLeft: isSelected ? '5px solid #88CACA' : `2px solid ${config.color}40`
+          borderLeft: isSelected ? '4px solid #88CACA' : `4px solid ${config.color}40`
         }}
         onClick={() => onSelectIssue(issue.id)}
       >
@@ -620,10 +620,10 @@ export function IssuesPanel({
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
         {/* Needs Attention Section */}
         {needsAttentionTotal > 0 && (
-          <div className="border-b border-gray-700/30">
+          <div className="border-b border-gray-700/30 py-2">
             {/* Section header */}
-            <div className="px-4 py-2 bg-gray-800/30">
-              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+            <div className="px-4 py-2">
+              <span className="text-[11px] font-bold text-white uppercase tracking-wider">
                 Needs Attention — Accept to include in export
               </span>
             </div>
@@ -640,7 +640,7 @@ export function IssuesPanel({
                   ) : (
                     <ChevronRight className="w-4 h-4 text-orange-400" />
                   )}
-                  <span className="text-xs font-bold text-orange-400 uppercase tracking-wide">
+                  <span className="text-[11px] font-bold text-orange-400 uppercase tracking-wide">
                     Major Issues ({organizedIssues.needsAttention.major.length})
                   </span>
                 </button>
@@ -664,7 +664,7 @@ export function IssuesPanel({
                   ) : (
                     <ChevronRight className="w-4 h-4 text-gray-400" />
                   )}
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">
+                  <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">
                     Minor Issues ({organizedIssues.needsAttention.minor.length})
                   </span>
                 </button>
@@ -680,7 +680,7 @@ export function IssuesPanel({
 
         {/* Accepted Section - compact one-liner rows */}
         {organizedIssues.accepted.length > 0 && (
-          <div className="border-b border-gray-700/30">
+          <div className="border-b border-gray-700/30 py-2">
             <button
               onClick={() => toggleSection('accepted')}
               className="w-full px-4 py-2.5 flex items-center gap-2 hover:bg-white/[0.02] transition-colors"
@@ -759,7 +759,7 @@ export function IssuesPanel({
 
         {/* Dismissed Section - compact one-liner rows */}
         {organizedIssues.dismissed.length > 0 && (
-          <div className="border-b border-gray-700/30">
+          <div className="border-b border-gray-700/30 py-2">
             <button
               onClick={() => toggleSection('dismissed')}
               className="w-full px-4 py-2.5 flex items-center gap-2 hover:bg-white/[0.02] transition-colors"
@@ -837,7 +837,7 @@ export function IssuesPanel({
 
         {/* User Edits Section */}
         {userEdits.length > 0 && (
-          <div className="border-b border-gray-700/30">
+          <div className="border-b border-gray-700/30 py-2">
             <button
               onClick={() => toggleSection('user-edits')}
               className="w-full px-4 py-2.5 flex items-center gap-2 hover:bg-white/[0.02] transition-colors"

@@ -502,7 +502,7 @@ export function ReviewScreen() {
           style={{ flexBasis: '65%' }}
         >
           <div className="h-full overflow-y-auto overflow-x-visible scrollbar-thin scrollbar-thumb-gray-800 scrollbar-track-transparent">
-            <div className="max-w-5xl mx-auto pr-4">
+            <div className="max-w-7xl mx-auto pr-8">
               <ManuscriptView
                 document={currentDocument}
                 selectedIssueId={selectedIssueId}
@@ -531,11 +531,11 @@ export function ReviewScreen() {
           }}
         />
 
-        {/* Issues Panel - 35% */}
+        {/* Issues Panel - 34% */}
         <div
           ref={issuesPanelRef}
           className="overflow-hidden bg-[#16161a]"
-          style={{ flexBasis: '35%' }}
+          style={{ flexBasis: '34%' }}
         >
           <IssuesPanel
             issues={findings}

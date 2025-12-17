@@ -240,7 +240,7 @@ export function ManuscriptView({
         return {
           backgroundColor: 'rgba(255, 255, 255, 0.015)',
           border: '2px solid rgba(136, 202, 202, 0.4)',
-          borderLeft: '5px solid #88CACA'
+          borderLeft: '6px solid #88CACA'
         };
       }
       return {
@@ -346,7 +346,7 @@ export function ManuscriptView({
           </button>
         )}
 
-        <div className="py-4 px-4 pr-6">
+        <div className="py-4 px-4 pr-4">
           {/* Edit mode */}
           {isEditing ? (
             <div className="space-y-3">
@@ -484,8 +484,8 @@ export function ManuscriptView({
         {/* Issue indicator pills - vertical stack, below edit button */}
         {hasActiveIssues && !isRewritten && (
           <div
-            className="absolute right-0 top-10 flex flex-col gap-0.5 z-50 pointer-events-auto"
-            style={{ transform: 'translateX(50%)' }}
+            className="absolute right-0 top-10 flex flex-col gap-1 z-50 pointer-events-auto"
+            style={{ transform: 'translateX(100%)' }}
           >
             {activeIssues.map((issue) => {
               const type = getCategoryType(issue.category);
@@ -504,30 +504,18 @@ export function ManuscriptView({
                       onBubbleSelect(issue);
                     }
                   }}
-                  className="flex items-center gap-0.5 px-1 py-0.5 rounded-full cursor-pointer transition-all hover:scale-105 pointer-events-auto"
+                  className="w-7 h-7 rounded-full flex items-center justify-center cursor-pointer transition-all hover:scale-110 pointer-events-auto"
                   style={{
-                    backgroundColor: isThisSelected ? `${config.color}25` : `${config.color}10`,
-                    border: isThisSelected ? `2px solid ${config.color}` : `1px solid ${config.color}30`,
+                    backgroundColor: isThisSelected ? `${config.color}30` : `${config.color}15`,
+                    border: isThisSelected ? `2.5px solid ${config.color}` : `1.5px solid ${config.color}`,
                     boxShadow: isThisSelected ? `0 0 8px ${config.color}40` : 'none'
                   }}
                 >
-                  {/* Severity icon */}
                   <span
-                    className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
-                    style={{
-                      backgroundColor: isMajor ? 'rgba(249, 115, 22, 0.15)' : 'rgba(156, 163, 175, 0.1)',
-                      border: isMajor ? '1.5px solid #f97316' : '1.5px solid #9ca3af',
-                      color: isMajor ? '#f97316' : '#9ca3af'
-                    }}
+                    className="text-[12px] font-bold"
+                    style={{ color: isMajor ? '#f97316' : '#9ca3af' }}
                   >
                     {isMajor ? '!' : 'i'}
-                  </span>
-                  {/* Type letter */}
-                  <span
-                    className="w-3 text-center text-[10px] font-bold"
-                    style={{ color: config.color }}
-                  >
-                    {config.letter}
                   </span>
                 </button>
               );
@@ -558,7 +546,7 @@ export function ManuscriptView({
               {/* Section title */}
               {section.section_title && (
                 <h2 className={`
-                  font-semibold text-white mb-5 tracking-tight px-4
+                  font-semibold text-white mb-5 mt-8 tracking-tight px-4
                   ${section.level === 1 ? 'text-xl' : ''}
                   ${section.level === 2 ? 'text-lg' : ''}
                   ${section.level >= 3 ? 'text-base' : ''}
