@@ -80,54 +80,57 @@ export function IssuesPanel({
 
   // Auto-expand issue when selected (e.g., from clicking bubble in manuscript)
   useEffect(() => {
-    if (selectedIssueId) {
-      // Find the selected issue to check its category
-      const selectedIssue = issues.find(i => i.id === selectedIssueId);
+    if (!selectedIssueId) return;
 
-      const expandAndScroll = () => {
-        if (selectedIssue) {
-          // Expand the section containing this issue (major/minor)
-          const severity = selectedIssue.severity === 'critical' || selectedIssue.severity === 'major' ? 'major' : 'minor';
-          setExpandedSections(prev => {
-            const next = new Set(prev);
-            next.add(severity);
-            next.add('needs-attention');
-            // Also expand accepted/dismissed if the issue is there
-            if (acceptedIssueIds.has(selectedIssueId)) next.add('accepted');
-            if (dismissedIssueIds.has(selectedIssueId)) next.add('dismissed');
-            return next;
-          });
-        }
+    const selectedIssue = issues.find(i => i.id === selectedIssueId);
+    if (!selectedIssue) return;
 
-        setExpandedIssueId(selectedIssueId);
+    const issueType = getCategoryType(selectedIssue.category);
+    const severity = selectedIssue.severity === 'critical' || selectedIssue.severity === 'major' ? 'major' : 'minor';
 
-        // Scroll the card into view - use container ref for reliable scrolling
-        setTimeout(() => {
-          const element = document.getElementById(`issue-${selectedIssueId}`);
-          const container = scrollContainerRef.current;
-          if (element && container) {
-            const elementRect = element.getBoundingClientRect();
-            const containerRect = container.getBoundingClientRect();
-            const scrollTop = container.scrollTop + (elementRect.top - containerRect.top) - (containerRect.height / 3);
-            container.scrollTo({ top: scrollTop, behavior: 'smooth' });
-          }
-        }, 200);
-      };
-
-      if (selectedIssue) {
-        const issueType = getCategoryType(selectedIssue.category);
-        // If there's a filter active and it doesn't match, clear the filter
-        if (categoryFilter && categoryFilter !== issueType) {
-          setCategoryFilter(null);
-          // Need longer delay when filter changes to allow re-render
-          setTimeout(expandAndScroll, 150);
-          return;
-        }
-      }
-
-      expandAndScroll();
+    // Clear filter if it would hide this issue
+    if (categoryFilter && categoryFilter !== issueType) {
+      setCategoryFilter(null);
     }
-  }, [selectedIssueId, issues, acceptedIssueIds, dismissedIssueIds]);
+
+    // Expand the relevant sections
+    setExpandedSections(prev => {
+      const next = new Set(prev);
+      next.add(severity);
+      next.add('needs-attention');
+      if (acceptedIssueIds.has(selectedIssueId)) next.add('accepted');
+      if (dismissedIssueIds.has(selectedIssueId)) next.add('dismissed');
+      return next;
+    });
+
+    // Expand the card
+    setExpandedIssueId(selectedIssueId);
+
+  }, [selectedIssueId, issues, acceptedIssueIds, dismissedIssueIds, categoryFilter]);
+
+  // Separate effect for scrolling - runs after DOM updates
+  useEffect(() => {
+    if (!selectedIssueId) return;
+
+    const scrollToCard = () => {
+      const element = document.getElementById(`issue-${selectedIssueId}`);
+      const container = scrollContainerRef.current;
+      if (element && container) {
+        const elementRect = element.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        const scrollTop = container.scrollTop + (elementRect.top - containerRect.top) - 100;
+        container.scrollTo({ top: Math.max(0, scrollTop), behavior: 'smooth' });
+      } else {
+        // Element not found yet, try again
+        requestAnimationFrame(scrollToCard);
+      }
+    };
+
+    // Wait for React to flush updates, then scroll
+    requestAnimationFrame(() => {
+      requestAnimationFrame(scrollToCard);
+    });
+  }, [selectedIssueId, expandedIssueId]);
 
   // Build user edits list with original text
   const userEdits = useMemo(() => {
