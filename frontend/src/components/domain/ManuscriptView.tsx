@@ -175,7 +175,7 @@ export function ManuscriptView({
               textDecorationColor: selectedTypeColor,
               textDecorationThickness: '2px',
               textUnderlineOffset: '3px',
-              backgroundColor: `${selectedTypeColor}20`,
+              backgroundColor: `${selectedTypeColor}12`,
               padding: '1px 2px',
               borderRadius: '2px'
             }}
@@ -237,9 +237,9 @@ export function ManuscriptView({
       }
       if (isSelected) {
         return {
-          backgroundColor: `${selectedTypeColor}08`,
-          border: `1px solid ${selectedTypeColor}30`,
-          borderLeft: `5px solid ${selectedTypeColor}`
+          backgroundColor: `${selectedTypeColor}05`,
+          border: `1px solid ${selectedTypeColor}15`,
+          borderLeft: `4px solid ${selectedTypeColor}`
         };
       }
       return {
@@ -480,17 +480,16 @@ export function ManuscriptView({
           )}
         </div>
 
-        {/* Issue indicator pills - vertical stack on right edge */}
+        {/* Issue indicator pills - vertical stack near top right */}
         {hasActiveIssues && !isRewritten && (
           <div
-            className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col gap-1 z-50 pointer-events-auto"
-            style={{ transform: 'translateY(-50%) translateX(50%)' }}
+            className="absolute right-0 top-3 flex flex-col gap-0.5 z-50 pointer-events-auto"
+            style={{ transform: 'translateX(50%)' }}
           >
             {activeIssues.map((issue) => {
               const type = getCategoryType(issue.category);
               const config = typeConfig[type];
               const isMajor = issue.severity === 'critical' || issue.severity === 'major';
-              const sevPill = isMajor ? severityPillColors.major : severityPillColors.minor;
               const isThisSelected = selectedIssueId === issue.id;
 
               return (
@@ -504,27 +503,27 @@ export function ManuscriptView({
                       onSelectIssue(issue.id);
                     }
                   }}
-                  className="flex items-center gap-1 px-2 py-1 rounded-full cursor-pointer transition-all hover:scale-105 pointer-events-auto"
+                  className="flex items-center gap-0.5 px-1 py-0.5 rounded-full cursor-pointer transition-all hover:scale-105 pointer-events-auto"
                   style={{
-                    backgroundColor: isThisSelected ? 'rgba(30, 30, 35, 0.95)' : `${config.color}10`,
+                    backgroundColor: isThisSelected ? `${config.color}25` : `${config.color}10`,
                     border: isThisSelected ? `2px solid ${config.color}` : `1px solid ${config.color}30`,
-                    boxShadow: isThisSelected ? `0 0 10px ${config.color}60` : 'none'
+                    boxShadow: isThisSelected ? `0 0 8px ${config.color}40` : 'none'
                   }}
                 >
                   {/* Severity icon */}
                   <span
-                    className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold"
+                    className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
                     style={{
                       backgroundColor: isMajor ? 'rgba(249, 115, 22, 0.15)' : 'rgba(156, 163, 175, 0.1)',
-                      border: isMajor ? '2px solid #f97316' : '2px solid #9ca3af',
+                      border: isMajor ? '1.5px solid #f97316' : '1.5px solid #9ca3af',
                       color: isMajor ? '#f97316' : '#9ca3af'
                     }}
                   >
                     {isMajor ? '!' : 'i'}
                   </span>
-                  {/* Type letter - fixed width for consistency */}
+                  {/* Type letter */}
                   <span
-                    className="w-4 text-center text-[12px] font-bold"
+                    className="w-3 text-center text-[10px] font-bold"
                     style={{ color: config.color }}
                   >
                     {config.letter}
