@@ -72,7 +72,7 @@ export function IssuesPanel({
   onUndoIssue,
   onGotoEdit
 }: IssuesPanelProps) {
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['needs-attention', 'major']));
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [expandedIssueId, setExpandedIssueId] = useState<string | null>(null);
   const [expandedEditId, setExpandedEditId] = useState<string | null>(null);
   const [editingIssueId, setEditingIssueId] = useState<string | null>(null);

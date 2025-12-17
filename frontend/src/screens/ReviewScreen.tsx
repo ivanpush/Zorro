@@ -585,11 +585,11 @@ export function ReviewScreen() {
 
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Manuscript Panel - 65% */}
+        {/* Manuscript Panel - dynamic width (adjusts to issues panel) */}
         <div
           ref={manuscriptRef}
           className="flex-1 overflow-hidden"
-          style={{ flexBasis: '65%' }}
+          style={{ flexBasis: `${100 - issuesPanelWidth}%` }}
         >
           <div className="h-full overflow-y-auto overflow-x-visible overscroll-contain scrollbar-thin scrollbar-thumb-gray-800 scrollbar-track-transparent">
             <div className="max-w-7xl mx-auto pr-8">
@@ -614,20 +614,21 @@ export function ReviewScreen() {
           </div>
         </div>
 
-        {/* Divider with glow effect when issue selected */}
+        {/* Divider with glow effect when issue selected - draggable */}
         <div
-          className="w-px transition-all duration-300"
+          onMouseDown={handleDragStart}
+          className="w-px transition-all duration-300 cursor-col-resize hover:w-1"
           style={{
-            backgroundColor: selectedIssueId ? 'rgba(232, 152, 85, 0.3)' : 'rgba(55, 65, 81, 0.5)',
+            backgroundColor: 'rgba(232, 152, 85, 0.3)',
             boxShadow: selectedIssueId ? '0 0 20px rgba(232, 152, 85, 0.2)' : 'none'
           }}
         />
 
-        {/* Issues Panel - 34% */}
+        {/* Issues Panel - dynamic width (34-55%) */}
         <div
           ref={issuesPanelRef}
           className="overflow-hidden bg-[#16161a]"
-          style={{ flexBasis: '34%' }}
+          style={{ flexBasis: `${issuesPanelWidth}%` }}
         >
           <IssuesPanel
             issues={findings}
