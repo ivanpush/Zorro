@@ -33,20 +33,12 @@ const typeConfig: Record<IssueType, { color: string; bg: string; letter: string 
   writing: { color: '#c084fc', bg: 'rgba(192, 132, 252, 0.2)', letter: 'W' }
 };
 
-// Selection colors - distinct for major vs minor
-const severitySelectionColors = {
-  major: {
-    accent: '#f97316',
-    border: 'rgba(249, 115, 22, 0.25)',
-    bg: 'rgba(249, 115, 22, 0.03)',
-    highlight: '#f97316'
-  },
-  minor: {
-    accent: '#fbbf24',
-    border: 'rgba(251, 191, 36, 0.25)',
-    bg: 'rgba(251, 191, 36, 0.03)',
-    highlight: '#fbbf24'
-  }
+// Universal selection color - #736ABA (muted purple/violet)
+const selectionColor = {
+  accent: '#736ABA',
+  border: 'rgba(115, 106, 186, 0.3)',
+  bg: 'rgba(115, 106, 186, 0.04)',
+  highlight: '#736ABA'
 };
 
 // Severity pill colors
@@ -158,9 +150,7 @@ export function ManuscriptView({
     const issueTypes = getIssueTypes(activeIssues);
     const isEditing = editingParagraphId === paragraph.paragraph_id;
 
-    // Get severity for selection styling
-    const selectedSeverity = selectedIssue?.severity === 'critical' || selectedIssue?.severity === 'major' ? 'major' : 'minor';
-    const selectionColors = severitySelectionColors[selectedSeverity];
+    // Universal selection styling (no longer severity-dependent)
 
     // Highlight the quoted text within the paragraph
     const renderTextWithHighlight = (text: string) => {
@@ -180,7 +170,7 @@ export function ManuscriptView({
             className="text-white font-medium"
             style={{
               textDecoration: 'underline',
-              textDecorationColor: selectionColors.highlight,
+              textDecorationColor: selectionColor.highlight,
               textDecorationThickness: '2px',
               textUnderlineOffset: '3px'
             }}
@@ -242,9 +232,9 @@ export function ManuscriptView({
       }
       if (isSelected) {
         return {
-          backgroundColor: selectionColors.bg,
-          border: `1px solid ${selectionColors.border}`,
-          borderLeft: `5px solid ${selectionColors.accent}`
+          backgroundColor: selectionColor.bg,
+          border: `1px solid ${selectionColor.border}`,
+          borderLeft: `5px solid ${selectionColor.accent}`
         };
       }
       return {

@@ -48,18 +48,11 @@ const severityConfig = {
   minor: { label: 'Minor', color: '#fbbf24', bg: 'rgba(251, 191, 36, 0.15)' }
 };
 
-// Severity selection colors (matching ManuscriptView)
-const severitySelectionColors = {
-  major: {
-    bg: 'rgba(249, 115, 22, 0.06)',
-    border: 'rgba(249, 115, 22, 0.4)',
-    accent: '#f97316'
-  },
-  minor: {
-    bg: 'rgba(251, 191, 36, 0.06)',
-    border: 'rgba(251, 191, 36, 0.4)',
-    accent: '#fbbf24'
-  }
+// Universal selection color - #736ABA (matching ManuscriptView)
+const selectionColor = {
+  bg: 'rgba(115, 106, 186, 0.06)',
+  border: 'rgba(115, 106, 186, 0.4)',
+  accent: '#736ABA'
 };
 
 export function IssuesPanel({
@@ -202,7 +195,6 @@ export function IssuesPanel({
     const config = typeConfig[type];
     const severity = issue.severity === 'critical' || issue.severity === 'major' ? 'major' : 'minor';
     const sevConfig = severityConfig[severity];
-    const selColors = severitySelectionColors[severity];
 
     // Check if the paragraph for this issue has been user-edited
     const paragraphId = issue.anchors[0]?.paragraph_id;
@@ -218,9 +210,9 @@ export function IssuesPanel({
           ${isResolved ? 'opacity-50' : ''}
         `}
         style={{
-          backgroundColor: isSelected ? selColors.bg : 'rgba(255, 255, 255, 0.04)',
-          border: isSelected ? `2px solid ${selColors.border}` : '1px solid rgba(255, 255, 255, 0.06)',
-          borderLeft: isSelected ? `2px solid ${selColors.accent}` : `2px solid ${config.color}`
+          backgroundColor: isSelected ? selectionColor.bg : 'rgba(255, 255, 255, 0.04)',
+          border: isSelected ? `2px solid ${selectionColor.border}` : '1px solid rgba(255, 255, 255, 0.06)',
+          borderLeft: isSelected ? `3px solid ${selectionColor.accent}` : `2px solid ${config.color}`
         }}
         onClick={() => onSelectIssue(issue.id)}
       >
