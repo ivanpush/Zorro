@@ -236,7 +236,7 @@ export function ManuscriptView({
       }
       if (isSelected) {
         return {
-          backgroundColor: 'rgba(136, 202, 202, 0.06)',
+          backgroundColor: 'rgba(255, 255, 255, 0.015)',
           border: '2px solid rgba(136, 202, 202, 0.4)',
           borderLeft: '5px solid #88CACA'
         };
