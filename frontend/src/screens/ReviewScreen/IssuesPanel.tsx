@@ -204,6 +204,11 @@ export function IssuesPanel({
     const sevConfig = severityConfig[severity];
     const selColors = severitySelectionColors[severity];
 
+    // Check if the paragraph for this issue has been user-edited
+    const paragraphId = issue.anchors[0]?.paragraph_id;
+    const isParagraphUserEdited = paragraphId ? userEditedParagraphs.has(paragraphId) : false;
+    const isRewriteDisabled = isParagraphUserEdited && issue.proposedEdit?.newText;
+
     return (
       <div
         key={issue.id}
@@ -331,14 +336,17 @@ export function IssuesPanel({
               {/* STRATEGIC SOLUTION section */}
               {issue.proposedEdit?.newText && !isEditing && (
                 <div
-                  className="p-3 rounded-md"
+                  className={`p-3 rounded-md ${isRewriteDisabled ? 'opacity-60' : ''}`}
                   style={{ backgroundColor: 'rgba(52, 211, 153, 0.08)' }}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <h5 className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">
                       Strategic Solution
+                      {isRewriteDisabled && (
+                        <span className="ml-2 text-amber-400/80 normal-case font-normal">(disabled)</span>
+                      )}
                     </h5>
-                    {!isResolved && (
+                    {!isResolved && !isRewriteDisabled && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -396,37 +404,53 @@ export function IssuesPanel({
 
               {/* Action buttons */}
               {!isResolved && !isEditing && (
-                <div className="flex items-center gap-3 pt-2 flex-wrap">
-                  {/* Accept Rewrite - only if has proposed edit */}
-                  {issue.proposedEdit?.newText && (
+                <div className="space-y-2 pt-2">
+                  {/* Disabled rewrite notice */}
+                  {isRewriteDisabled && (
+                    <div className="text-xs text-amber-400/80 bg-amber-400/10 px-3 py-1.5 rounded-md border border-amber-400/20">
+                      Paragraph edited — rewrite disabled
+                    </div>
+                  )}
+                  <div className="flex items-center gap-3 flex-wrap">
+                    {/* Accept Rewrite - only if has proposed edit and not disabled */}
+                    {issue.proposedEdit?.newText && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!isRewriteDisabled) {
+                            onAcceptRewrite(issue.id);
+                          }
+                        }}
+                        disabled={isRewriteDisabled}
+                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors border ${
+                          isRewriteDisabled
+                            ? 'bg-gray-700/30 text-gray-500 border-gray-600/30 cursor-not-allowed'
+                            : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border-emerald-500/30'
+                        }`}
+                        title={isRewriteDisabled ? 'Rewrite disabled because paragraph was edited' : 'Accept the AI-suggested rewrite'}
+                      >
+                        Accept Rewrite
+                      </button>
+                    )}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        onAcceptRewrite(issue.id);
+                        onAcceptIssue(issue.id);
                       }}
-                      className="px-4 py-2 text-sm font-medium rounded-md bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors border border-emerald-500/30"
+                      className="px-4 py-2 text-sm font-medium rounded-md bg-teal-500/20 text-teal-400 hover:bg-teal-500/30 transition-colors border border-teal-500/30"
                     >
-                      Accept Rewrite
+                      Accept Issue
                     </button>
-                  )}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onAcceptIssue(issue.id);
-                    }}
-                    className="px-4 py-2 text-sm font-medium rounded-md bg-teal-500/20 text-teal-400 hover:bg-teal-500/30 transition-colors border border-teal-500/30"
-                  >
-                    Accept Issue
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDismissIssue(issue.id);
-                    }}
-                    className="px-4 py-2 text-sm font-medium rounded-md text-gray-400 hover:text-gray-200 hover:bg-gray-700/50 transition-colors"
-                  >
-                    Dismiss
-                  </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDismissIssue(issue.id);
+                      }}
+                      className="px-4 py-2 text-sm font-medium rounded-md text-gray-400 hover:text-gray-200 hover:bg-gray-700/50 transition-colors"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

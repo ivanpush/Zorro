@@ -80,6 +80,8 @@ export function ReviewScreen() {
   const [dismissedIssueIds, setDismissedIssueIds] = useState<Set<string>>(new Set());
   const [rewrittenParagraphs, setRewrittenParagraphs] = useState<Map<string, string>>(new Map());
   const [userEditedParagraphs, setUserEditedParagraphs] = useState<Map<string, string>>(new Map());
+  // Track issues that were auto-dismissed when user edited a paragraph (so they can be restored on revert)
+  const [userEditDismissedIssues, setUserEditDismissedIssues] = useState<Map<string, Set<string>>>(new Map());
   const [isLoading, setIsLoading] = useState(false);
   const [filterSeverity, setFilterSeverity] = useState<string | null>(null);
 
@@ -301,22 +303,80 @@ export function ReviewScreen() {
   }, [findings, acceptedIssueIds]);
 
   // Handle user direct edit of a paragraph
+  // When user edits, auto-dismiss any applied AI rewrites on that paragraph
   const handleUserEdit = useCallback((paragraphId: string, newText: string) => {
+    // Find all accepted issues with rewrites applied to this paragraph
+    const issuesToAutoDismiss = findings.filter(f =>
+      f.anchors[0]?.paragraph_id === paragraphId &&
+      acceptedIssueIds.has(f.id) &&
+      f.proposedEdit?.newText
+    );
+
+    if (issuesToAutoDismiss.length > 0) {
+      // Track these issues so we can restore them if user reverts their edit
+      setUserEditDismissedIssues(prev => {
+        const next = new Map(prev);
+        const existingIds = next.get(paragraphId) || new Set<string>();
+        issuesToAutoDismiss.forEach(issue => existingIds.add(issue.id));
+        next.set(paragraphId, existingIds);
+        return next;
+      });
+
+      // Move issues from accepted to dismissed
+      setAcceptedIssueIds(prev => {
+        const next = new Set(prev);
+        issuesToAutoDismiss.forEach(issue => next.delete(issue.id));
+        return next;
+      });
+      setDismissedIssueIds(prev => {
+        const next = new Set(prev);
+        issuesToAutoDismiss.forEach(issue => next.add(issue.id));
+        return next;
+      });
+
+      // Remove the AI rewrite since user edit takes over
+      setRewrittenParagraphs(prev => {
+        const next = new Map(prev);
+        next.delete(paragraphId);
+        return next;
+      });
+    }
+
+    // Set the user's edit
     setUserEditedParagraphs(prev => {
       const next = new Map(prev);
       next.set(paragraphId, newText);
       return next;
     });
-  }, []);
+  }, [findings, acceptedIssueIds]);
 
-  // Revert user edit
+  // Revert user edit - restore auto-dismissed issues back to active
   const handleRevertUserEdit = useCallback((paragraphId: string) => {
+    // Restore any issues that were auto-dismissed when user edited this paragraph
+    const autoDismissedIds = userEditDismissedIssues.get(paragraphId);
+    if (autoDismissedIds && autoDismissedIds.size > 0) {
+      // Remove from dismissed (make them active again)
+      setDismissedIssueIds(prev => {
+        const next = new Set(prev);
+        autoDismissedIds.forEach(id => next.delete(id));
+        return next;
+      });
+
+      // Clear the tracking for this paragraph
+      setUserEditDismissedIssues(prev => {
+        const next = new Map(prev);
+        next.delete(paragraphId);
+        return next;
+      });
+    }
+
+    // Remove the user edit
     setUserEditedParagraphs(prev => {
       const next = new Map(prev);
       next.delete(paragraphId);
       return next;
     });
-  }, []);
+  }, [userEditDismissedIssues]);
 
   if (isLoading) {
     return (
