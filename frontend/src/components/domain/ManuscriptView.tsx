@@ -172,7 +172,7 @@ export function ManuscriptView({
             style={{
               textDecoration: 'underline',
               textDecorationColor: selectedTypeColor,
-              textDecorationThickness: '2px',
+              textDecorationThickness: '3px',
               textUnderlineOffset: '3px',
               backgroundColor: `${selectedTypeColor}12`,
               padding: '1px 2px',
