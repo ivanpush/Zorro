@@ -504,8 +504,8 @@ export function ManuscriptView({
                   }}
                   className="flex items-center gap-1 px-2 py-1 rounded-full cursor-pointer transition-all hover:scale-105 pointer-events-auto"
                   style={{
-                    backgroundColor: 'rgba(30, 30, 35, 0.95)',
-                    border: isThisSelected ? `2px solid ${config.color}` : '1px solid rgba(255,255,255,0.2)',
+                    backgroundColor: isThisSelected ? 'rgba(30, 30, 35, 0.95)' : `${config.color}10`,
+                    border: isThisSelected ? `2px solid ${config.color}` : `1px solid ${config.color}30`,
                     boxShadow: isThisSelected ? `0 0 10px ${config.color}60` : 'none'
                   }}
                 >
@@ -520,9 +520,9 @@ export function ManuscriptView({
                   >
                     {isMajor ? '!' : 'i'}
                   </span>
-                  {/* Type letter */}
+                  {/* Type letter - fixed width for consistency */}
                   <span
-                    className="text-[12px] font-bold px-0.5"
+                    className="w-4 text-center text-[12px] font-bold"
                     style={{ color: config.color }}
                   >
                     {config.letter}
