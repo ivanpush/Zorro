@@ -220,6 +220,16 @@ export function IssuesPanel({
           {/* Header with badges */}
           <div className="flex items-start justify-between gap-3 mb-3">
             <div className="flex items-center gap-2 flex-wrap">
+              {/* Severity icon - ! for major, i for minor */}
+              <span
+                className="w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold"
+                style={{
+                  backgroundColor: sevConfig.color,
+                  color: severity === 'major' ? '#fff' : '#000'
+                }}
+              >
+                {severity === 'major' ? '!' : 'i'}
+              </span>
               {/* Type badge */}
               <span
                 className="px-2 py-0.5 text-[11px] font-semibold rounded"
@@ -276,11 +286,8 @@ export function IssuesPanel({
             )}
           </div>
 
-          {/* Title - colored by severity */}
-          <h4
-            className="text-[15px] font-semibold leading-snug mb-2"
-            style={{ color: sevConfig.color }}
-          >
+          {/* Title */}
+          <h4 className="text-[15px] font-semibold text-white leading-snug mb-2">
             {issue.title}
           </h4>
 
