@@ -37,14 +37,14 @@ const typeConfig: Record<IssueType, { color: string; bg: string; letter: string 
 const severitySelectionColors = {
   major: {
     accent: '#f97316',
-    border: 'rgba(249, 115, 22, 0.4)',
-    bg: 'rgba(249, 115, 22, 0.06)',
+    border: 'rgba(249, 115, 22, 0.25)',
+    bg: 'rgba(249, 115, 22, 0.03)',
     highlight: '#f97316'
   },
   minor: {
     accent: '#fbbf24',
-    border: 'rgba(251, 191, 36, 0.4)',
-    bg: 'rgba(251, 191, 36, 0.06)',
+    border: 'rgba(251, 191, 36, 0.25)',
+    bg: 'rgba(251, 191, 36, 0.03)',
     highlight: '#fbbf24'
   }
 };
@@ -244,7 +244,7 @@ export function ManuscriptView({
         return {
           backgroundColor: selectionColors.bg,
           border: `1px solid ${selectionColors.border}`,
-          borderLeft: `4px solid ${selectionColors.accent}`
+          borderLeft: `5px solid ${selectionColors.accent}`
         };
       }
       return {
@@ -509,14 +509,19 @@ export function ManuscriptView({
                       onSelectIssue(issue.id);
                     }
                   }}
-                  className="flex items-center gap-0.5 px-1 py-0.5 rounded-full cursor-pointer transition-all hover:scale-110 hover:brightness-110 pointer-events-auto"
+                  className={`flex items-center gap-0.5 rounded-full cursor-pointer transition-all hover:scale-110 hover:brightness-110 pointer-events-auto ${
+                    isMajor ? 'px-1.5 py-1' : 'px-1 py-0.5'
+                  }`}
                   style={{
                     backgroundColor: isThisSelected ? config.color : 'rgba(30, 30, 35, 0.95)',
-                    border: `2px solid ${config.color}`
+                    border: isMajor ? `3px solid ${config.color}` : `2px solid ${config.color}`,
+                    boxShadow: isMajor ? `0 0 8px ${config.color}40` : 'none'
                   }}
                 >
                   <div
-                    className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold pointer-events-none"
+                    className={`rounded-full flex items-center justify-center font-bold pointer-events-none ${
+                      isMajor ? 'w-6 h-6 text-[11px]' : 'w-5 h-5 text-[10px]'
+                    }`}
                     style={{
                       backgroundColor: sevPill.bg,
                       color: sevPill.text
@@ -525,7 +530,9 @@ export function ManuscriptView({
                     {isMajor ? '!' : 'i'}
                   </div>
                   <span
-                    className="text-[11px] font-bold px-1 pointer-events-none"
+                    className={`font-bold px-1 pointer-events-none ${
+                      isMajor ? 'text-[12px]' : 'text-[11px]'
+                    }`}
                     style={{ color: isThisSelected ? '#000' : config.color }}
                   >
                     {config.letter}
