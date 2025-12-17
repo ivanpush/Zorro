@@ -44,7 +44,7 @@ const selectionColor = {
 // Severity pill colors
 const severityPillColors = {
   major: { bg: '#f97316', text: '#fff' },
-  minor: { bg: '#fbbf24', text: '#fff' }
+  minor: { bg: '#6b7280', text: '#fff' }
 };
 
 export function ManuscriptView({

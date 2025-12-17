@@ -45,7 +45,7 @@ const typeConfig: Record<IssueType, { label: string; color: string; bg: string; 
 // Severity configuration
 const severityConfig = {
   major: { label: 'Major', color: '#fb923c', bg: 'rgba(251, 146, 60, 0.15)' },
-  minor: { label: 'Minor', color: '#fbbf24', bg: 'rgba(251, 191, 36, 0.15)' }
+  minor: { label: 'Minor', color: '#6b7280', bg: 'rgba(107, 114, 128, 0.15)' }
 };
 
 // Universal selection color - #53A4A4 (teal, matching ManuscriptView)
