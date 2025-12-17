@@ -38,7 +38,7 @@ function ProgressRing({
           fill="none"
           stroke="currentColor"
           strokeWidth={strokeWidth}
-          className="text-gray-800"
+          className="text-gray-700"
         />
       </svg>
       {/* Progress circle */}
@@ -301,10 +301,10 @@ export function ReviewScreen() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-[#0a0a0b]">
+      <div className="flex items-center justify-center h-screen bg-[#131316]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-10 w-10 border-2 border-gray-700 border-t-amber-500 mx-auto"></div>
-          <p className="mt-4 text-gray-500 text-sm">Loading review...</p>
+          <div className="animate-spin rounded-full h-10 w-10 border-2 border-gray-600 border-t-amber-500 mx-auto"></div>
+          <p className="mt-4 text-gray-400 text-sm">Loading review...</p>
         </div>
       </div>
     );
@@ -312,10 +312,10 @@ export function ReviewScreen() {
 
   if (!currentDocument) {
     return (
-      <div className="flex items-center justify-center h-screen bg-[#0a0a0b]">
+      <div className="flex items-center justify-center h-screen bg-[#131316]">
         <div className="text-center">
-          <FileText className="w-12 h-12 text-gray-700 mx-auto mb-4" />
-          <p className="text-gray-500 mb-4">No document loaded</p>
+          <FileText className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+          <p className="text-gray-400 mb-4">No document loaded</p>
           <button
             onClick={() => navigate('/upload')}
             className="px-4 py-2 bg-amber-500/10 text-amber-500 rounded-lg hover:bg-amber-500/20 transition-colors text-sm font-medium"
@@ -350,9 +350,9 @@ export function ReviewScreen() {
   const activeIssuesCount = findings.length - acceptedIssueIds.size - dismissedIssueIds.size;
 
   return (
-    <div className="h-screen flex flex-col bg-[#0a0a0b]">
+    <div className="h-screen flex flex-col bg-[#131316]">
       {/* Header - Refined minimal design */}
-      <header className="flex items-center justify-between px-5 py-3 border-b border-gray-800/50 bg-[#0a0a0b]">
+      <header className="flex items-center justify-between px-5 py-3 border-b border-gray-700/50 bg-[#131316]">
         {/* Left: Logo + Document info */}
         <div className="flex items-center gap-4">
           <h1
@@ -361,10 +361,10 @@ export function ReviewScreen() {
           >
             ZORRO
           </h1>
-          <div className="h-4 w-px bg-gray-800"></div>
+          <div className="h-4 w-px bg-gray-600"></div>
           <div className="flex items-center gap-2">
-            <FileText className="w-4 h-4 text-gray-600" />
-            <span className="text-sm text-gray-400 truncate max-w-[200px]">
+            <FileText className="w-4 h-4 text-gray-400" />
+            <span className="text-sm text-gray-300 truncate max-w-[200px]">
               {currentDocument.title}
             </span>
           </div>
@@ -374,10 +374,10 @@ export function ReviewScreen() {
         <div className="flex items-center gap-3">
           <ProgressRing progress={progress} size={36} strokeWidth={3} />
           <div className="text-xs">
-            <div className="text-gray-400">
+            <div className="text-gray-300">
               <span className="text-white font-medium">{activeIssuesCount}</span> remaining
             </div>
-            <div className="text-gray-600">
+            <div className="text-gray-500">
               {acceptedIssueIds.size} accepted, {dismissedIssueIds.size} dismissed
             </div>
           </div>
@@ -404,14 +404,14 @@ export function ReviewScreen() {
 
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Manuscript Panel - 62% */}
+        {/* Manuscript Panel - 65% */}
         <div
           ref={manuscriptRef}
           className="flex-1 overflow-hidden"
-          style={{ flexBasis: '62%' }}
+          style={{ flexBasis: '65%' }}
         >
-          <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-800 scrollbar-track-transparent">
-            <div className="max-w-4xl mx-auto">
+          <div className="h-full overflow-y-auto overflow-x-visible scrollbar-thin scrollbar-thumb-gray-800 scrollbar-track-transparent">
+            <div className="max-w-5xl mx-auto pr-8">
               <ManuscriptView
                 document={currentDocument}
                 selectedIssueId={selectedIssueId}
@@ -420,6 +420,7 @@ export function ReviewScreen() {
                 acceptedIssueIds={acceptedIssueIds}
                 dismissedIssueIds={dismissedIssueIds}
                 onParagraphClick={handleParagraphClick}
+                onSelectIssue={handleIssueSelect}
                 onRevertRewrite={handleRevertRewrite}
               />
             </div>
@@ -435,11 +436,11 @@ export function ReviewScreen() {
           }}
         />
 
-        {/* Issues Panel - 38% */}
+        {/* Issues Panel - 35% */}
         <div
           ref={issuesPanelRef}
-          className="overflow-hidden bg-[#0c0c0d]"
-          style={{ flexBasis: '38%' }}
+          className="overflow-hidden bg-[#16161a]"
+          style={{ flexBasis: '35%' }}
         >
           <IssuesPanel
             issues={findings}
