@@ -480,7 +480,7 @@ export function IssuesPanel({
             className={`
               px-3 py-1.5 text-sm font-medium rounded-md transition-colors
               ${!categoryFilter
-                ? 'text-teal-400 border-b-2 border-teal-400'
+                ? 'text-white border-b-2 border-[#53A4A4]'
                 : 'text-gray-400 hover:text-gray-200'}
             `}
           >
