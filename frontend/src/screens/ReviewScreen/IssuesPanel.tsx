@@ -225,7 +225,7 @@ export function IssuesPanel({
                 className="w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold"
                 style={{
                   backgroundColor: sevConfig.color,
-                  color: severity === 'major' ? '#fff' : '#000'
+                  color: '#fff'
                 }}
               >
                 {severity === 'major' ? '!' : 'i'}
@@ -606,7 +606,7 @@ export function IssuesPanel({
                       {/* Severity icon */}
                       <span
                         className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
-                        style={{ backgroundColor: sevConfig.color, color: severity === 'major' ? '#fff' : '#000' }}
+                        style={{ backgroundColor: sevConfig.color, color: '#fff' }}
                       >
                         {severity === 'major' ? '!' : 'i'}
                       </span>
@@ -680,7 +680,7 @@ export function IssuesPanel({
                       {/* Severity icon */}
                       <span
                         className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
-                        style={{ backgroundColor: sevConfig.color, color: severity === 'major' ? '#fff' : '#000' }}
+                        style={{ backgroundColor: sevConfig.color, color: '#fff' }}
                       >
                         {severity === 'major' ? '!' : 'i'}
                       </span>
