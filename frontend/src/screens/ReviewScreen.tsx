@@ -211,7 +211,10 @@ export function ReviewScreen() {
     loadData();
   }, []);
 
-  // Handle issue selection
+  // Ref for IssuesPanel to register its select callback
+  const selectIssueRef = useRef<((issue: Finding) => void) | null>(null);
+
+  // Handle issue selection - called from IssuesPanel card clicks
   const handleIssueSelect = useCallback((issueId: string) => {
     setSelectedIssueId(issueId);
 
@@ -224,6 +227,15 @@ export function ReviewScreen() {
       }
     }
   }, [findings]);
+
+  // Handle bubble click from ManuscriptView - calls IssuesPanel's registered callback
+  const handleBubbleSelect = useCallback((issue: Finding) => {
+    setSelectedIssueId(issue.id);
+    // Call the IssuesPanel's registered callback to handle expansion/scroll
+    if (selectIssueRef.current) {
+      selectIssueRef.current(issue);
+    }
+  }, []);
 
   // Handle paragraph click
   const handleParagraphClick = useCallback((paragraphId: string) => {
@@ -501,6 +513,7 @@ export function ReviewScreen() {
                 dismissedIssueIds={dismissedIssueIds}
                 onParagraphClick={handleParagraphClick}
                 onSelectIssue={handleIssueSelect}
+                onBubbleSelect={handleBubbleSelect}
                 onRevertRewrite={handleRevertRewrite}
                 onUserEdit={handleUserEdit}
                 onRevertUserEdit={handleRevertUserEdit}
@@ -535,6 +548,7 @@ export function ReviewScreen() {
             filterSeverity={filterSeverity}
             onFilterChange={setFilterSeverity}
             onSelectIssue={handleIssueSelect}
+            selectIssueRef={selectIssueRef}
             onAcceptIssue={handleAcceptIssue}
             onAcceptRewrite={handleAcceptRewrite}
             onDismissIssue={handleDismissIssue}

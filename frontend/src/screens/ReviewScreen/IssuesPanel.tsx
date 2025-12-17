@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Check, X, ChevronDown, ChevronRight, ChevronUp, Undo2, Sparkles, Edit3, Pencil, ArrowRight } from 'lucide-react';
 import type { Finding, DocObj } from '@/types';
 
@@ -19,6 +19,7 @@ interface IssuesPanelProps {
   filterSeverity: string | null;
   onFilterChange: (severity: string | null) => void;
   onSelectIssue: (issueId: string) => void;
+  selectIssueRef?: React.MutableRefObject<((issue: Finding) => void) | null>;
   onAcceptIssue: (issueId: string) => void;
   onAcceptRewrite: (issueId: string) => void;
   onDismissIssue: (issueId: string) => void;
@@ -64,6 +65,7 @@ export function IssuesPanel({
   rewrittenParagraphs,
   userEditedParagraphs,
   onSelectIssue,
+  selectIssueRef,
   onAcceptIssue,
   onAcceptRewrite,
   onDismissIssue,
@@ -80,6 +82,52 @@ export function IssuesPanel({
 
   // Track previous selectedIssueId to detect actual changes
   const prevSelectedIssueIdRef = useRef<string | null>(null);
+
+  // Register callback for ManuscriptView bubble clicks
+  useEffect(() => {
+    if (selectIssueRef) {
+      selectIssueRef.current = (issue: Finding) => {
+        const issueType = getCategoryType(issue.category);
+        const severity = issue.severity === 'critical' || issue.severity === 'major' ? 'major' : 'minor';
+
+        // 1. Clear filter if it would hide this issue
+        if (categoryFilter && categoryFilter !== issueType) {
+          setCategoryFilter(null);
+        }
+
+        // 2. Expand the relevant sections
+        setExpandedSections(prev => {
+          const next = new Set(prev);
+          next.add(severity);
+          next.add('needs-attention');
+          if (acceptedIssueIds.has(issue.id)) next.add('accepted');
+          if (dismissedIssueIds.has(issue.id)) next.add('dismissed');
+          return next;
+        });
+
+        // 3. Expand the card
+        setExpandedIssueId(issue.id);
+
+        // 4. Scroll to the card after DOM updates
+        setTimeout(() => {
+          const element = window.document.getElementById(`issue-${issue.id}`);
+          const container = scrollContainerRef.current;
+          if (element && container) {
+            const elementRect = element.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            const scrollTop = container.scrollTop + (elementRect.top - containerRect.top) - 100;
+            container.scrollTo({ top: Math.max(0, scrollTop), behavior: 'smooth' });
+          }
+        }, 100);
+      };
+    }
+
+    return () => {
+      if (selectIssueRef) {
+        selectIssueRef.current = null;
+      }
+    };
+  }, [selectIssueRef, categoryFilter, acceptedIssueIds, dismissedIssueIds]);
 
   // Auto-expand issue when selected (e.g., from clicking bubble in manuscript)
   useEffect(() => {
@@ -115,7 +163,7 @@ export function IssuesPanel({
 
     // Scroll to the card after a delay for DOM to update
     setTimeout(() => {
-      const element = document.getElementById(`issue-${selectedIssueId}`);
+      const element = window.document.getElementById(`issue-${selectedIssueId}`);
       const container = scrollContainerRef.current;
       if (element && container) {
         const elementRect = element.getBoundingClientRect();
@@ -281,6 +329,20 @@ export function IssuesPanel({
               >
                 {config.label}
               </span>
+              {/* Location indicator - paragraph IDs */}
+              {issue.anchors.length > 0 && (
+                <>
+                  <span className="text-[10px] text-gray-500">in</span>
+                  {issue.anchors.map((anchor, idx) => (
+                    <span
+                      key={idx}
+                      className="px-1.5 py-0.5 text-[9px] font-medium rounded bg-gray-700/50 text-gray-400"
+                    >
+                      {anchor.paragraph_id}
+                    </span>
+                  ))}
+                </>
+              )}
               {isResolved && (
                 <span className="px-2 py-0.5 text-[10px] font-medium rounded bg-gray-600/50 text-gray-300">
                   {rewrittenParagraphs.has(issue.anchors[0]?.paragraph_id || '') ? 'EDITED' : 'RESOLVED'}
@@ -677,7 +739,7 @@ export function IssuesPanel({
                           // Select, expand, and scroll to the issue after undo
                           setTimeout(() => {
                             onSelectIssue(issue.id);
-                            const element = document.getElementById(`issue-${issue.id}`);
+                            const element = window.document.getElementById(`issue-${issue.id}`);
                             if (element) {
                               element.scrollIntoView({ behavior: 'smooth', block: 'center' });
                             }
@@ -755,7 +817,7 @@ export function IssuesPanel({
                           // Select, expand, and scroll to the issue after undo
                           setTimeout(() => {
                             onSelectIssue(issue.id);
-                            const element = document.getElementById(`issue-${issue.id}`);
+                            const element = window.document.getElementById(`issue-${issue.id}`);
                             if (element) {
                               element.scrollIntoView({ behavior: 'smooth', block: 'center' });
                             }

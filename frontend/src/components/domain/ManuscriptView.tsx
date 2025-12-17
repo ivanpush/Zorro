@@ -12,6 +12,7 @@ interface ManuscriptViewProps {
   dismissedIssueIds: Set<string>;
   onParagraphClick: (paragraphId: string) => void;
   onSelectIssue?: (issueId: string) => void;
+  onBubbleSelect?: (issue: Finding) => void;
   onRevertRewrite?: (paragraphId: string) => void;
   onUserEdit?: (paragraphId: string, newText: string) => void;
   onRevertUserEdit?: (paragraphId: string) => void;
@@ -57,6 +58,7 @@ export function ManuscriptView({
   dismissedIssueIds,
   onParagraphClick,
   onSelectIssue,
+  onBubbleSelect,
   onRevertRewrite,
   onUserEdit,
   onRevertUserEdit
@@ -498,8 +500,8 @@ export function ManuscriptView({
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    if (onSelectIssue) {
-                      onSelectIssue(issue.id);
+                    if (onBubbleSelect) {
+                      onBubbleSelect(issue);
                     }
                   }}
                   className="flex items-center gap-0.5 px-1 py-0.5 rounded-full cursor-pointer transition-all hover:scale-105 pointer-events-auto"
