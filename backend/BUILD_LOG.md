@@ -160,17 +160,17 @@
 - [x] Implementation: `app/services/orchestrator.py`
 - [x] Tests passed: 13/13
 - [x] All tests pass: 210/210
-- [x] Commit: `feat(services): add orchestrator pipeline`
+- [x] Commit: `feat(services): add orchestrator pipeline` (62e5f98)
 
 ---
 
 ## Phase 13: API Endpoints
-- [ ] Tests written: `tests/integration/test_api.py`
-- [ ] Tests failed (expected): ___ failures
-- [ ] Implementation: `app/api/routes/*.py`
-- [ ] Tests passed: ___/___
-- [ ] All tests pass: ___/___
-- [ ] Commit: `feat(api): add review endpoints`
+- [x] Tests written: `tests/integration/test_api.py`
+- [x] Tests failed (expected): 10 failures (ModuleNotFoundError: No module named 'app.api.routes.review')
+- [x] Implementation: `app/api/__init__.py`, `app/api/routes/__init__.py`, `app/api/routes/review.py`
+- [x] Tests passed: 10/10
+- [x] All tests pass: 220/220
+- [x] Commit: `feat(api): add review endpoints`
 
 ---
 

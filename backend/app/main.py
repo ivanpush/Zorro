@@ -5,6 +5,8 @@ ZORRO API - FastAPI application entry point.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api import review_router
+
 app = FastAPI(
     title="ZORRO API",
     description="Multi-agent document review system",
@@ -19,6 +21,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Register routers
+app.include_router(review_router)
 
 
 @app.get("/health")
