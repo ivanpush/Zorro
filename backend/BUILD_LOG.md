@@ -122,12 +122,14 @@
 ---
 
 ## Phase 11: Assembler
-- [ ] Tests written: `tests/unit/test_assembler.py`
-- [ ] Tests failed (expected): ___ failures
-- [ ] Implementation: `app/services/assembler.py`
-- [ ] Tests passed: ___/___
-- [ ] All tests pass: ___/___
-- [ ] Commit: `feat(services): add assembler with priority dedup`
+- [x] Tests written: `tests/unit/test_assembler.py`
+- [x] Tests failed (expected): 1 error (ModuleNotFoundError: No module named 'app.services.assembler')
+- [x] Implementation:
+  - `app/services/assembler.py` - Assembler class with priority dedup and presentation order
+  - `app/services/__init__.py` - Added Assembler export
+- [x] Tests passed: 16/16 (assembler tests)
+- [x] All tests pass: 123/123
+- [x] Commit: `feat(services): add assembler with priority dedup` (7dcbf77)
 
 ---
 
