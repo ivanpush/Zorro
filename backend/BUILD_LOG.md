@@ -128,12 +128,17 @@
 ---
 
 ## Phase 10: Adversary Agent
-- [ ] Tests written: `tests/integration/test_adversary.py`
-- [ ] Tests failed (expected): ___ failures
-- [ ] Implementation: `app/agents/adversary/*.py`
-- [ ] Tests passed: ___/___
-- [ ] All tests pass: ___/___
-- [ ] Commit: `feat(agents): add adversary with panel mode`
+- [x] Tests written: `tests/integration/test_adversary.py`
+- [x] Tests failed (expected): 1 error (ModuleNotFoundError: No module named 'app.agents.adversary')
+- [x] Implementation:
+  - `app/agents/adversary/__init__.py` - AdversaryAgent main interface
+  - `app/agents/adversary/single.py` - SingleAdversary (Claude Opus)
+  - `app/agents/adversary/panel.py` - PanelAdversary (3 models parallel)
+  - `app/agents/adversary/reconcile.py` - Reconciler (merges + votes)
+  - `app/models/finding.py` - Added panel agent IDs to AgentId type
+- [x] Tests passed: 19/19 (adversary tests)
+- [x] All tests pass: 197/197
+- [x] Commit: `feat(agents): add adversary with panel mode` (d337e0b)
 
 ---
 

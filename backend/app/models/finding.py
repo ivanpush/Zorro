@@ -16,6 +16,10 @@ AgentId = Literal[
     "rigor_rewrite",
     "adversary",
     "adversary_panel",
+    "adversary_panel_claude",
+    "adversary_panel_openai",
+    "adversary_panel_google",
+    "adversary_reconcile",
     "domain",
 ]
 
