@@ -28,16 +28,17 @@
 - [x] Implementation: `app/models/*.py` (document, finding, briefing, domain, chunks, metrics, review, events)
 - [x] Tests passed: 25/25
 - [x] All tests pass: 31/31
-- [ ] Commit: `feat(models): add Pydantic models with camelCase serialization`
+- [x] Commit: `feat(models): add Pydantic models with camelCase serialization` (a819045)
 
 ---
 
 ## Phase 3: Global Config
-- [ ] Tests written: `tests/unit/test_config.py` (extended)
-- [ ] Tests failed (expected): ___ failures
-- [ ] Implementation: `app/config/models.py`
-- [ ] Tests passed: ___/___
-- [ ] All tests pass: ___/___
+- [x] Tests written: `tests/unit/test_config.py`
+- [x] Tests failed (expected): 13 failures
+  - All tests: ImportError: cannot import name 'X' from 'app.config'
+- [x] Implementation: `app/config/models.py`, `app/config/__init__.py`
+- [x] Tests passed: 13/13
+- [x] All tests pass: 44/44
 - [ ] Commit: `feat(config): add model registry and cost tracking`
 
 ---
