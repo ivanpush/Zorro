@@ -1,6 +1,9 @@
 """ZORRO Models."""
 
-from .document import DocObj, Paragraph, Section, Sentence, DocumentMetadata
+from .document import (
+    DocObj, Paragraph, Section, Sentence, DocumentMetadata,
+    BoundingBox, Figure, Reference,
+)
 from .finding import (
     Finding, Anchor, ProposedEdit, AgentId, FindingCategory, Severity,
     AGENT_PRIORITY, PRESENTATION_ORDER
@@ -22,6 +25,7 @@ from .events import (
 __all__ = [
     # Document
     "DocObj", "Paragraph", "Section", "Sentence", "DocumentMetadata",
+    "BoundingBox", "Figure", "Reference",
     # Finding
     "Finding", "Anchor", "ProposedEdit", "AgentId", "FindingCategory", "Severity",
     "AGENT_PRIORITY", "PRESENTATION_ORDER",

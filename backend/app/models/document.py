@@ -9,6 +9,15 @@ from pydantic import BaseModel, Field
 import uuid
 
 
+class BoundingBox(BaseModel):
+    """For PDF export mapping - coordinates on page."""
+    x0: float
+    y0: float
+    x1: float
+    y1: float
+    page_number: int
+
+
 class Sentence(BaseModel):
     """Individual sentence within a paragraph."""
     sentence_id: str = Field(description="Format: p_XXX_s_YYY")
@@ -26,7 +35,13 @@ class Paragraph(BaseModel):
     paragraph_index: int = Field(ge=0)
     text: str
     sentences: list[Sentence] = Field(default_factory=list)
+
+    # Export mapping for PDF
+    bounding_box: BoundingBox | None = None
     page_number: int | None = None
+
+    # Export mapping for DOCX
+    xml_path: str | None = None
 
 
 class Section(BaseModel):
@@ -38,12 +53,37 @@ class Section(BaseModel):
     paragraph_ids: list[str] = Field(default_factory=list)
 
 
+class Figure(BaseModel):
+    """Figure/image in document."""
+    figure_id: str = Field(description="Format: fig_XXX")
+    figure_index: int = Field(ge=0)
+    caption: str | None = None
+    caption_paragraph_id: str | None = None
+
+    # Location info
+    page_number: int | None = None
+    after_paragraph_id: str | None = None
+
+    # Extraction metadata
+    extraction_method: Literal["inline", "textbox", "float", "unknown"] = "unknown"
+    bounding_box: BoundingBox | None = None
+
+
+class Reference(BaseModel):
+    """Bibliographic reference."""
+    reference_id: str = Field(description="Format: ref_XXX")
+    reference_index: int = Field(ge=0)
+    raw_text: str
+
+
 class DocumentMetadata(BaseModel):
     """Document-level metadata."""
     page_count: int | None = None
     word_count: int = 0
     character_count: int = 0
     author: str | None = None
+    created_date: datetime | None = None
+    modified_date: datetime | None = None
 
 
 class DocObj(BaseModel):
@@ -58,6 +98,8 @@ class DocObj(BaseModel):
 
     sections: list[Section] = Field(default_factory=list)
     paragraphs: list[Paragraph] = Field(default_factory=list)
+    figures: list["Figure"] = Field(default_factory=list)
+    references: list["Reference"] = Field(default_factory=list)
 
     metadata: DocumentMetadata = Field(default_factory=DocumentMetadata)
     created_at: datetime = Field(default_factory=datetime.utcnow)
