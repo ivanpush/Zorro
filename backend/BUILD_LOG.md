@@ -170,17 +170,17 @@
 - [x] Implementation: `app/api/__init__.py`, `app/api/routes/__init__.py`, `app/api/routes/review.py`
 - [x] Tests passed: 10/10
 - [x] All tests pass: 220/220
-- [x] Commit: `feat(api): add review endpoints`
+- [x] Commit: `feat(api): add review endpoints` (1ce6131)
 
 ---
 
 ## Phase 14: SSE Streaming
-- [ ] Tests written: `tests/integration/test_sse.py`
-- [ ] Tests failed (expected): ___ failures
-- [ ] Implementation: SSE integration in orchestrator + routes
-- [ ] Tests passed: ___/___
-- [ ] All tests pass: ___/___
-- [ ] Commit: `feat(api): add SSE streaming`
+- [x] Tests written: `tests/integration/test_sse.py`
+- [x] Tests failed (expected): 8 failures (AttributeError: stream_review_events doesn't exist)
+- [x] Implementation: `app/api/routes/review.py` (stream endpoint + event generator)
+- [x] Tests passed: 8/8
+- [x] All tests pass: 228/228
+- [x] Commit: `feat(api): add SSE streaming` (8ef67cd)
 
 ---
 

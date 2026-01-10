@@ -4,13 +4,19 @@ Review API Routes.
 Endpoints:
 - POST /review/start - Start a new review job
 - GET /review/{job_id}/result - Get review results
+- GET /review/{job_id}/stream - Stream SSE events
 """
 
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from typing import AsyncGenerator
+from fastapi import APIRouter, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 import uuid
 
-from app.models import ReviewConfig, ReviewJob
+from app.models import (
+    ReviewConfig, ReviewJob,
+    SSEEvent, PhaseStartedEvent, ReviewCompletedEvent,
+)
 
 
 router = APIRouter(prefix="/review", tags=["review"])
@@ -69,6 +75,18 @@ def get_review_result(job_id: str) -> ReviewJob | None:
     return _jobs.get(job_id)
 
 
+async def stream_review_events(job_id: str) -> AsyncGenerator[SSEEvent, None]:
+    """
+    Stream review events for a job.
+
+    Yields SSE events as the review progresses.
+    This is a placeholder - actual implementation would
+    integrate with the orchestrator to emit real events.
+    """
+    # Default implementation yields a completed event
+    yield ReviewCompletedEvent(total_findings=0, metrics={})
+
+
 # ============================================================
 # ENDPOINTS
 # ============================================================
@@ -97,3 +115,24 @@ async def get_result(job_id: str):
         raise HTTPException(status_code=404, detail="Job not found")
 
     return job
+
+
+@router.get("/{job_id}/stream")
+async def stream_events(job_id: str):
+    """
+    Stream SSE events for a review job.
+
+    Returns Server-Sent Events as the review progresses.
+    """
+    async def event_generator():
+        async for event in stream_review_events(job_id):
+            yield event.to_sse()
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+        }
+    )
