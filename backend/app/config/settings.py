@@ -22,6 +22,10 @@ class Settings(BaseSettings):
     # Concurrency
     max_concurrent_agents: int = 4
 
+    # Chunking
+    DEFAULT_CHUNK_WORDS: int = 1500
+    CONTEXT_OVERLAP_SENTENCES: int = 3
+
     model_config = {
         "env_file": ".env",
         "env_file_encoding": "utf-8",

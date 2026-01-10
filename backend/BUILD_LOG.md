@@ -44,12 +44,19 @@
 ---
 
 ## Phase 4: Core Infrastructure
-- [ ] Tests written: `tests/unit/test_chunker.py`
-- [ ] Tests failed (expected): ___ failures
-- [ ] Implementation: `app/core/llm.py`, `app/core/perplexity.py`, `app/services/chunker.py`
-- [ ] Tests passed: ___/___
-- [ ] All tests pass: ___/___
-- [ ] Commit: `feat(core): add LLM client with metrics, Perplexity client, chunker`
+- [x] Tests written: `tests/unit/test_chunker.py`
+- [x] Tests failed (expected): 1 error (ModuleNotFoundError: No module named 'app.services.chunker')
+- [x] Implementation:
+  - `app/core/__init__.py` - Core module exports
+  - `app/core/llm.py` - LLMClient with Instructor for structured outputs and metrics
+  - `app/core/perplexity.py` - PerplexityClient for domain searches
+  - `app/services/__init__.py` - Services module exports
+  - `app/services/chunker.py` - chunk_for_clarity, chunk_for_rigor, context overlap helpers
+  - `app/config/settings.py` - Added DEFAULT_CHUNK_WORDS, CONTEXT_OVERLAP_SENTENCES
+  - `app/config/__init__.py` - Added get_settings() function
+- [x] Tests passed: 23/23 (chunker tests)
+- [x] All tests pass: 107/107
+- [x] Commit: `feat(core): add LLM client, Perplexity client, chunker` (36106cd)
 
 ---
 
@@ -60,7 +67,7 @@
 - [x] Implementation: `app/composer/__init__.py`, `app/composer/library.py`, `app/composer/builder.py`
 - [x] Tests passed: 40/40
 - [x] All tests pass: 107/107
-- [x] Commit: `feat(composer): add prompt library and builder`
+- [x] Commit: `feat(composer): add prompt library and builder` (b3d8865)
 
 ---
 
