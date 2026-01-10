@@ -17,16 +17,17 @@
 - [x] Implementation: `app/main.py`, `app/config/settings.py`, `pyproject.toml`
 - [x] Tests passed: 6/6
 - [x] All tests pass: 6/6
-- [ ] Commit: `chore(backend): initialize project structure`
+- [x] Commit: `chore(backend): initialize project structure` (715fd3e)
 
 ---
 
 ## Phase 2: Pydantic Models
-- [ ] Tests written: `tests/unit/test_models.py`
-- [ ] Tests failed (expected): ___ failures
-- [ ] Implementation: `app/models/*.py`
-- [ ] Tests passed: ___/___
-- [ ] All tests pass: ___/___
+- [x] Tests written: `tests/unit/test_models.py`
+- [x] Tests failed (expected): 25 failures
+  - All tests: ImportError: cannot import name 'X' from 'app.models'
+- [x] Implementation: `app/models/*.py` (document, finding, briefing, domain, chunks, metrics, review, events)
+- [x] Tests passed: 25/25
+- [x] All tests pass: 31/31
 - [ ] Commit: `feat(models): add Pydantic models with camelCase serialization`
 
 ---
