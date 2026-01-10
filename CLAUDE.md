@@ -71,14 +71,14 @@ interface Anchor {
 ```
 
 ### Demo Mode vs Dynamic Mode
-- **Demo Mode**: Skips all API calls, uses fixtures from `apps/web/src/fixtures/`
+- **Demo Mode**: Skips all API calls, uses fixtures from `frontend/src/fixtures/`
 - **Dynamic Mode**: Runs live agents
 
 The toggle is on the Setup screen. Demo mode goes directly to Review screen with pre-built findings.
 
 ## File Structure Conventions
 
-### Frontend (`apps/web/`)
+### Frontend (`frontend/`)
 ```
 src/
 ├── components/          # Reusable UI components
@@ -103,25 +103,23 @@ src/
 └── lib/                # Utilities
 ```
 
-### Backend (`apps/api/`)
+### Backend (`backend/`)
 ```
-src/
+app/
 ├── main.py             # FastAPI app entry
-├── config.py           # Settings and env vars
-├── routers/            # API routes
-│   ├── document.py
+├── config/             # Settings and env vars
+├── api/routes/         # API routes
 │   └── review.py
 ├── services/           # Business logic
-│   ├── job_manager.py  # In-memory job state
 │   ├── orchestrator.py # Agent coordination
-│   └── synthesis.py    # Finding merge/dedup
+│   └── assembler.py    # Finding dedup/merge
 ├── agents/             # Individual agents
 │   ├── base.py         # Abstract agent class
-│   ├── context.py      # Context Builder
+│   ├── briefing.py     # Briefing Agent
 │   ├── clarity.py      # Clarity Inspector
-│   ├── rigor.py        # Rigor Inspector
-│   ├── adversarial.py  # Adversarial Critic
-│   └── domain.py       # Domain Validator (Perplexity)
+│   ├── rigor/          # Rigor (finder + rewriter)
+│   ├── adversary/      # Adversarial Critic
+│   └── domain/         # Domain Validator (Perplexity)
 ├── parsers/            # Document parsing
 │   ├── base.py
 │   ├── docx_parser.py  # python-docx
@@ -131,12 +129,12 @@ src/
 │   ├── finding.py      # Finding, Anchor, etc.
 │   ├── review.py       # ReviewConfig, ReviewJob
 │   └── events.py       # SSE event types
-├── clients/            # External API wrappers
-│   ├── anthropic.py
-│   └── perplexity.py
-└── export/             # Export generation
-    ├── docx_export.py
-    └── pdf_export.py
+├── core/               # Infrastructure
+│   ├── llm.py          # LLM client wrapper
+│   └── perplexity.py   # Perplexity client
+└── composer/           # Prompt management
+    ├── library.py      # Prompt templates
+    └── builder.py      # Prompt composition
 ```
 
 ## Coding Standards
@@ -217,16 +215,16 @@ class EventType(str, Enum):
 ## Common Tasks
 
 ### Adding a New Agent
-1. Create `apps/api/src/agents/new_agent.py`
+1. Create `backend/app/agents/new_agent.py`
 2. Extend `BaseAgent` class
 3. Implement `async def analyze(self, doc: DocObj, config: ReviewConfig) -> list[Finding]`
 4. Register in `orchestrator.py`
-5. Add tests in `apps/api/tests/agents/test_new_agent.py`
+5. Add tests in `backend/tests/agents/test_new_agent.py`
 6. Add prompt to `docs/PROMPTS.md`
 
 ### Adding a New Finding Category
-1. Add to `FindingCategory` enum in `apps/api/src/models/finding.py`
-2. Add to TypeScript types in `apps/web/src/types/index.ts`
+1. Add to `FindingCategory` enum in `backend/app/models/finding.py`
+2. Add to TypeScript types in `frontend/src/types/index.ts`
 3. Add filter option in `ReviewScreen.tsx`
 4. Add color/icon mapping in `FindingCard.tsx`
 
@@ -250,14 +248,14 @@ If you must change it:
 
 ```bash
 # Backend
-cd apps/api
+cd backend
 pytest                          # All tests
 pytest tests/parsers/           # Parser tests
 pytest tests/agents/            # Agent tests
 pytest -k "test_docx"          # Pattern match
 
 # Frontend
-cd apps/web
+cd frontend
 npm test                        # All tests
 npm test -- --watch            # Watch mode
 ```
