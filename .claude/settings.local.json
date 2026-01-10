@@ -26,7 +26,15 @@
       "mcp__ide__getDiagnostics",
       "Bash(git checkout:*)",
       "Bash(git merge:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(for commit in e17744f e678a7d 1565a0a f067832)",
+      "Bash(do echo '=== $commit ===')",
+      "Bash(done)",
+      "Bash(find:*)",
+      "Bash(git log:*)",
+      "Bash(pytest:*)",
+      "Bash(git reset:*)",
+      "Bash(python -m pytest:*)"
     ],
     "deny": [],
     "ask": []
