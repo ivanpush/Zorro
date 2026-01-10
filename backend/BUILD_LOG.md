@@ -71,13 +71,16 @@
 
 ---
 
-## Phase 6: Briefing Agent
-- [ ] Tests written: `tests/integration/test_briefing.py`
-- [ ] Tests failed (expected): ___ failures
-- [ ] Implementation: `app/agents/base.py`, `app/agents/briefing.py`
-- [ ] Tests passed: ___/___
-- [ ] All tests pass: ___/___
-- [ ] Commit: `feat(agents): add briefing agent`
+## Phase 6: Base Agent + Briefing Agent
+- [x] Tests written: `tests/integration/test_briefing.py`
+- [x] Tests failed (expected): 1 error (ModuleNotFoundError: No module named 'app.agents.briefing')
+- [x] Implementation:
+  - `app/agents/__init__.py` - Agents module exports
+  - `app/agents/base.py` - BaseAgent ABC with client and composer
+  - `app/agents/briefing.py` - BriefingAgent extracts document context
+- [x] Tests passed: 8/8 (briefing tests)
+- [x] All tests pass: 131/131
+- [x] Commit: `feat(agents): add base agent and briefing agent` (66f7c80)
 
 ---
 
