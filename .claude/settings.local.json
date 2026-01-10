@@ -35,7 +35,8 @@
       "Bash(pytest:*)",
       "Bash(git reset:*)",
       "Bash(python -m pytest:*)",
-      "WebFetch(domain:code.claude.com)"
+      "WebFetch(domain:code.claude.com)",
+      "Bash(python:*)"
     ],
     "deny": [],
     "ask": []

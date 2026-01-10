@@ -37,18 +37,8 @@ const typeConfig: Record<IssueType, { color: string; bg: string; letter: string 
 };
 
 // Universal selection color - #88CACA (cyan/teal)
-const selectionColor = {
-  accent: '#88CACA',
-  border: 'rgba(136, 202, 202, 0.3)',
-  bg: 'rgba(136, 202, 202, 0.04)',
-  highlight: '#88CACA'
-};
-
-// Severity pill colors
-const severityPillColors = {
-  major: { bg: '#f97316', text: '#fff' },
-  minor: { bg: '#E6E6E6', text: '#000' }
-};
+// const selectionColor = { accent: '#88CACA', border: 'rgba(136, 202, 202, 0.3)', bg: 'rgba(136, 202, 202, 0.04)', highlight: '#88CACA' };
+// const severityPillColors = { major: { bg: '#f97316', text: '#fff' }, minor: { bg: '#E6E6E6', text: '#000' } };
 
 export function ManuscriptView({
   document,
@@ -60,7 +50,7 @@ export function ManuscriptView({
   dismissedIssueIds,
   highlightedParagraphId,
   onParagraphClick,
-  onSelectIssue,
+  onSelectIssue: _onSelectIssue,
   onBubbleSelect,
   onRevertRewrite,
   onUserEdit,
@@ -112,15 +102,6 @@ export function ManuscriptView({
     });
   };
 
-  // Get unique issue types for a paragraph's active issues
-  const getIssueTypes = (issues: Finding[]): IssueType[] => {
-    const types = new Set<IssueType>();
-    issues.forEach(issue => {
-      types.add(getCategoryType(issue.category));
-    });
-    return Array.from(types);
-  };
-
   // Start editing a paragraph
   const startEditing = (paragraphId: string, currentText: string) => {
     setEditingParagraphId(paragraphId);
@@ -143,7 +124,7 @@ export function ManuscriptView({
   };
 
   // Render paragraph
-  const renderParagraph = (paragraph: any, index: number) => {
+  const renderParagraph = (paragraph: any, _index: number) => {
     const activeIssues = paragraphIssuesMap.get(paragraph.paragraph_id) || [];
     const hasActiveIssues = activeIssues.length > 0;
     const isSelected = paragraph.paragraph_id === selectedParagraphId;
@@ -153,7 +134,6 @@ export function ManuscriptView({
     const userEditedText = userEditedParagraphs.get(paragraph.paragraph_id);
     const originalText = paragraph.text;
     const isShowingFinal = showingFinal.has(paragraph.paragraph_id);
-    const issueTypes = getIssueTypes(activeIssues);
     const isEditing = editingParagraphId === paragraph.paragraph_id;
     const isHighlighted = paragraph.paragraph_id === highlightedParagraphId;
 
@@ -191,15 +171,6 @@ export function ManuscriptView({
           <span className="text-gray-200">{text.substring(idx + quotedText.length)}</span>
         </>
       );
-    };
-
-    // Find the original snippet that was replaced (from the finding)
-    const getOriginalSnippet = () => {
-      const relatedFinding = findings.find(f =>
-        f.anchors[0]?.paragraph_id === paragraph.paragraph_id &&
-        f.proposedEdit?.newText === rewrittenText
-      );
-      return relatedFinding?.anchors[0]?.quoted_text || '';
     };
 
     // Word-level diff using Longest Common Subsequence (LCS)

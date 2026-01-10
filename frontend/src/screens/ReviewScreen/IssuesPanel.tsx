@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Check, X, ChevronDown, ChevronRight, ChevronUp, Undo2, Sparkles, Edit3, Pencil, ArrowRight, HelpCircle } from 'lucide-react';
+import { Check, X, ChevronDown, ChevronRight, ChevronUp, Undo2, Edit3, Pencil, ArrowRight, HelpCircle } from 'lucide-react';
 import type { Finding, DocObj } from '@/types';
 
 interface UserEdit {
@@ -43,18 +43,11 @@ const typeConfig: Record<IssueType, { label: string; color: string; bg: string; 
   writing: { label: 'Writing', color: '#c084fc', bg: 'rgba(192, 132, 252, 0.15)', letter: 'W' }
 };
 
-// Severity configuration
-const severityConfig = {
-  major: { label: 'Major', color: '#fb923c', bg: 'rgba(251, 146, 60, 0.15)' },
-  minor: { label: 'Minor', color: '#E6E6E6', bg: 'rgba(230, 230, 230, 0.15)' }
-};
+// Severity configuration (kept for future use)
+// const severityConfig = { major: { label: 'Major', color: '#fb923c', bg: 'rgba(251, 146, 60, 0.15)' }, minor: { label: 'Minor', color: '#E6E6E6', bg: 'rgba(230, 230, 230, 0.15)' } };
 
 // Universal selection color - #88CACA (cyan/teal, matching ManuscriptView)
-const selectionColor = {
-  bg: 'rgba(136, 202, 202, 0.06)',
-  border: 'rgba(136, 202, 202, 0.4)',
-  accent: '#88CACA'
-};
+// const selectionColor = { bg: 'rgba(136, 202, 202, 0.06)', border: 'rgba(136, 202, 202, 0.4)', accent: '#88CACA' };
 
 export function IssuesPanel({
   issues,
@@ -241,18 +234,6 @@ export function IssuesPanel({
     return { needsAttention, accepted, dismissed };
   }, [issues, acceptedIssueIds, dismissedIssueIds, categoryFilter]);
 
-  // Count issues by category (unfiltered, for filter badges)
-  const categoryCounts = useMemo(() => {
-    const counts = { critical: 0, argument: 0, writing: 0 };
-    issues.forEach(issue => {
-      if (!acceptedIssueIds.has(issue.id) && !dismissedIssueIds.has(issue.id)) {
-        const type = getCategoryType(issue.category);
-        counts[type]++;
-      }
-    });
-    return counts;
-  }, [issues, acceptedIssueIds, dismissedIssueIds]);
-
   const totalUnresolved = issues.length - acceptedIssueIds.size - dismissedIssueIds.size;
 
   const toggleSection = (section: string) => {
@@ -285,7 +266,6 @@ export function IssuesPanel({
     const type = getCategoryType(issue.category);
     const config = typeConfig[type];
     const severity = issue.severity === 'critical' || issue.severity === 'major' ? 'major' : 'minor';
-    const sevConfig = severityConfig[severity];
 
     // Check if the paragraph for this issue has been user-edited
     const paragraphId = issue.anchors[0]?.paragraph_id;
@@ -639,7 +619,6 @@ export function IssuesPanel({
             All <span className="text-white">({totalUnresolved})</span>
           </button>
           {Object.entries(typeConfig).map(([type, config]) => {
-            const count = categoryCounts[type as IssueType];
             return (
               <button
                 key={type}
@@ -748,7 +727,6 @@ export function IssuesPanel({
                   const type = getCategoryType(issue.category);
                   const config = typeConfig[type];
                   const severity = issue.severity === 'critical' || issue.severity === 'major' ? 'major' : 'minor';
-                  const sevConfig = severityConfig[severity];
                   const isRewritten = rewrittenParagraphs.has(issue.anchors[0]?.paragraph_id || '');
                   return (
                     <div
@@ -827,7 +805,6 @@ export function IssuesPanel({
                   const type = getCategoryType(issue.category);
                   const config = typeConfig[type];
                   const severity = issue.severity === 'critical' || issue.severity === 'major' ? 'major' : 'minor';
-                  const sevConfig = severityConfig[severity];
                   return (
                     <div
                       key={issue.id}
@@ -903,11 +880,6 @@ export function IssuesPanel({
               <div className="px-4 py-3 space-y-2">
                 {userEdits.map((edit) => {
                   const isExpanded = expandedEditId === edit.paragraphId;
-                  const section = document.sections.find(s =>
-                    s.paragraph_ids?.includes(edit.paragraphId)
-                  );
-                  const locationText = section?.section_title || edit.paragraphId;
-
                   return (
                     <div
                       key={edit.paragraphId}
