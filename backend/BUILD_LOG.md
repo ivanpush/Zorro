@@ -39,7 +39,7 @@
 - [x] Implementation: `app/config/models.py`, `app/config/__init__.py`
 - [x] Tests passed: 13/13
 - [x] All tests pass: 44/44
-- [ ] Commit: `feat(config): add model registry and cost tracking`
+- [x] Commit: `feat(config): add model registry and cost tracking` (368892e)
 
 ---
 
@@ -54,12 +54,13 @@
 ---
 
 ## Phase 5: Composer
-- [ ] Tests written: `tests/unit/test_composer.py`
-- [ ] Tests failed (expected): ___ failures
-- [ ] Implementation: `app/composer/library.py`, `app/composer/builder.py`
-- [ ] Tests passed: ___/___
-- [ ] All tests pass: ___/___
-- [ ] Commit: `feat(composer): add prompt library and builder`
+- [x] Tests written: `tests/unit/test_composer.py`
+- [x] Tests failed (expected): 40 failures
+  - All tests: ImportError: cannot import name 'PromptLibrary' from 'app.composer'
+- [x] Implementation: `app/composer/__init__.py`, `app/composer/library.py`, `app/composer/builder.py`
+- [x] Tests passed: 40/40
+- [x] All tests pass: 107/107
+- [x] Commit: `feat(composer): add prompt library and builder`
 
 ---
 
