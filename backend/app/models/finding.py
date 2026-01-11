@@ -27,12 +27,21 @@ FindingCategory = Literal[
     # Clarity
     "clarity_sentence",
     "clarity_paragraph",
+    "clarity_section",
     "clarity_flow",
     # Rigor
     "rigor_methodology",
     "rigor_logic",
     "rigor_evidence",
     "rigor_statistics",
+    # Scope
+    "scope_overclaim",
+    "scope_underclaim",
+    "scope_missing",
+    # Domain
+    "domain_convention",
+    "domain_terminology",
+    "domain_factual",
     # Adversarial
     "adversarial_weakness",
     "adversarial_gap",

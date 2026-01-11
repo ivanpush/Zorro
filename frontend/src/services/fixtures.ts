@@ -146,18 +146,18 @@ export function getDemoDocuments() {
 function mapScopeToAgent(scope: string): AgentId {
   switch (scope?.toLowerCase()) {
     case 'rigor':
-      return 'rigor_inspector';
+      return 'rigor_find';
     case 'clarity':
-      return 'clarity_inspector';
+      return 'clarity';
     case 'counterpoint':
     case 'adversarial':
-      return 'adversarial_critic';
+      return 'adversary';
     case 'domain':
-      return 'domain_validator';
+      return 'domain';
     case 'context':
-      return 'context_builder';
+      return 'briefing';
     default:
-      return 'rigor_inspector';
+      return 'rigor_find';
   }
 }
 
@@ -449,7 +449,7 @@ function createSimpleDemoFindings(): Finding[] {
   return [
     {
       id: 'finding_001',
-      agentId: 'clarity_inspector',
+      agentId: 'clarity',
       category: 'clarity_sentence',
       severity: 'minor',
       confidence: 0.85,
@@ -476,7 +476,7 @@ function createSimpleDemoFindings(): Finding[] {
     },
     {
       id: 'finding_002',
-      agentId: 'rigor_inspector',
+      agentId: 'rigor_find',
       category: 'rigor_methodology',
       severity: 'major',
       confidence: 0.92,
@@ -503,7 +503,7 @@ function createSimpleDemoFindings(): Finding[] {
     },
     {
       id: 'finding_003',
-      agentId: 'adversarial_critic',
+      agentId: 'adversary',
       category: 'adversarial_weakness',
       severity: 'critical',
       confidence: 0.88,
@@ -520,7 +520,7 @@ function createSimpleDemoFindings(): Finding[] {
     },
     {
       id: 'finding_004',
-      agentId: 'clarity_inspector',
+      agentId: 'clarity',
       category: 'clarity_flow',
       severity: 'suggestion',
       confidence: 0.75,
@@ -536,7 +536,7 @@ function createSimpleDemoFindings(): Finding[] {
     },
     {
       id: 'finding_005',
-      agentId: 'rigor_inspector',
+      agentId: 'rigor_find',
       category: 'rigor_statistics',
       severity: 'major',
       confidence: 0.90,
@@ -563,7 +563,7 @@ function createSimpleDemoFindings(): Finding[] {
     },
     {
       id: 'finding_006',
-      agentId: 'domain_validator',
+      agentId: 'domain',
       category: 'domain_convention',
       severity: 'minor',
       confidence: 0.82,

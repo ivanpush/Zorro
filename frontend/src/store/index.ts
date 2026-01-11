@@ -9,6 +9,15 @@ import type {
   ReviewJob
 } from '@/types';
 
+// Metrics from review completion
+export interface ReviewMetrics {
+  total_time_ms: number;
+  total_cost_usd: number;
+  agents_run: number;
+  // Per-agent breakdown (optional)
+  agent_metrics?: Record<string, { time_ms: number; cost_usd: number; findings_count: number }>;
+}
+
 interface AppState {
   // Review mode
   reviewMode: ReviewMode;
@@ -31,6 +40,10 @@ interface AppState {
   setFindings: (findings: Finding[]) => void;
   addFinding: (finding: Finding) => void;
 
+  // Review metrics (for dev banner)
+  reviewMetrics: ReviewMetrics | null;
+  setReviewMetrics: (metrics: ReviewMetrics | null) => void;
+
   // Decisions
   decisions: Map<string, Decision>;
   addDecision: (decision: Decision) => void;
@@ -51,6 +64,7 @@ const initialState = {
   reviewConfig: null,
   currentJob: null,
   findings: [],
+  reviewMetrics: null as ReviewMetrics | null,
   decisions: new Map<string, Decision>(),
   selectedFindingId: null,
 };
@@ -72,6 +86,8 @@ export const useAppStore = create<AppState>()(
 
       addFinding: (finding) =>
         set((state) => ({ findings: [...state.findings, finding] })),
+
+      setReviewMetrics: (metrics) => set({ reviewMetrics: metrics }),
 
       addDecision: (decision) =>
         set((state) => {

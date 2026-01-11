@@ -119,11 +119,13 @@ export interface Finding {
 }
 
 export type AgentId =
-  | 'context_builder'
-  | 'clarity_inspector'
-  | 'rigor_inspector'
-  | 'adversarial_critic'
-  | 'domain_validator';
+  | 'briefing'
+  | 'clarity'
+  | 'rigor_find'
+  | 'rigor_rewrite'
+  | 'adversary'
+  | 'adversary_panel'
+  | 'domain';
 
 export type FindingCategory =
   | 'clarity_sentence'
@@ -311,6 +313,13 @@ export interface FindingDiscoveredEvent {
 export interface ReviewCompletedEvent {
   type: 'review_completed';
   totalFindings: number;
+  findings?: Finding[];  // Final deduplicated findings
+  metrics?: {
+    total_time_ms: number;
+    total_cost_usd: number;
+    agents_run: number;
+    agent_metrics?: Record<string, { time_ms: number; cost_usd: number; findings_count: number }>;
+  };
   timestamp: string;
 }
 
@@ -401,11 +410,13 @@ export type DocumentStats = {
 export const SEVERITY_LEVELS: Severity[] = ['critical', 'major', 'minor', 'suggestion'];
 
 export const AGENT_NAMES: Record<AgentId, string> = {
-  context_builder: 'Context Builder',
-  clarity_inspector: 'Clarity Inspector',
-  rigor_inspector: 'Rigor Inspector',
-  adversarial_critic: 'Adversarial Critic',
-  domain_validator: 'Domain Validator',
+  briefing: 'Briefing',
+  clarity: 'Clarity Inspector',
+  rigor_find: 'Rigor Analysis',
+  rigor_rewrite: 'Rigor Suggestions',
+  adversary: 'Adversarial Review',
+  adversary_panel: 'Panel Review',
+  domain: 'Domain Validation',
 };
 
 export const CATEGORY_GROUPS: Record<string, FindingCategory[]> = {

@@ -8,7 +8,9 @@ import type {
   PhaseStartedEvent,
   AgentStartedEvent,
   AgentCompletedEvent,
+  ChunkCompletedEvent,
   FindingDiscoveredEvent,
+  ReviewCompletedEvent,
 } from '@/types';
 
 // API base URL - use environment variable or default
@@ -29,11 +31,13 @@ interface ActiveAgent {
   id: string;
   title: string;
   subtitle: string;
+  chunksCompleted?: number;
+  totalChunks?: number;
 }
 
 export function ProcessScreen() {
   const navigate = useNavigate();
-  const { reviewMode, currentDocument, reviewConfig, setFindings } = useAppStore();
+  const { reviewMode, currentDocument, reviewConfig, setFindings, setReviewMetrics } = useAppStore();
 
   const [_jobId, setJobId] = useState<string | null>(null);
   const [currentPhase, setCurrentPhase] = useState<Phase>('researching');
@@ -178,6 +182,16 @@ export function ProcessScreen() {
         break;
       }
 
+      case 'chunk_completed': {
+        const e = event as ChunkCompletedEvent;
+        setActiveAgents(prev => prev.map(a =>
+          a.id === e.agent_id
+            ? { ...a, chunksCompleted: e.chunk_index + 1, totalChunks: e.total_chunks }
+            : a
+        ));
+        break;
+      }
+
       case 'finding_discovered': {
         const e = event as FindingDiscoveredEvent;
         setDiscoveredFindings(prev => [...prev, e.finding]);
@@ -185,8 +199,19 @@ export function ProcessScreen() {
       }
 
       case 'review_completed': {
-        // Store findings and navigate
-        setFindings(discoveredFindings);
+        const e = event as ReviewCompletedEvent;
+        // Store findings (prefer from event if available, fallback to accumulated)
+        const finalFindings = e.findings && e.findings.length > 0 ? e.findings : discoveredFindings;
+        setFindings(finalFindings);
+        // Store metrics for dev banner
+        if (e.metrics) {
+          setReviewMetrics({
+            total_time_ms: e.metrics.total_time_ms || 0,
+            total_cost_usd: e.metrics.total_cost_usd || 0,
+            agents_run: e.metrics.agents_run || 0,
+            agent_metrics: e.metrics.agent_metrics,
+          });
+        }
         if (timerRef.current) clearInterval(timerRef.current);
         setTimeout(() => navigate('/review'), 500);
         break;
@@ -254,9 +279,24 @@ export function ProcessScreen() {
                       <Search className="w-4 h-4 text-gray-500" />
                     )}
                   </div>
-                  <div>
-                    <div className="text-white font-medium">{agent.title}</div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <div className="text-white font-medium">{agent.title}</div>
+                      {agent.totalChunks && (
+                        <span className="text-xs text-teal-400 font-mono">
+                          {agent.chunksCompleted || 0}/{agent.totalChunks}
+                        </span>
+                      )}
+                    </div>
                     <div className="text-gray-500 text-sm">{agent.subtitle}</div>
+                    {agent.totalChunks && (
+                      <div className="mt-1.5 h-1 bg-gray-700 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-teal-400 transition-all duration-300"
+                          style={{ width: `${((agent.chunksCompleted || 0) / agent.totalChunks) * 100}%` }}
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

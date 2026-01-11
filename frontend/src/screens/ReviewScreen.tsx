@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Download, FileText, CheckCircle2 } from 'lucide-react';
+import { Download, FileText, CheckCircle2, ChevronDown, ChevronUp, Clock, DollarSign, Cpu } from 'lucide-react';
 import { useAppStore } from '@/store';
 import { ManuscriptView } from '@/components/domain/ManuscriptView';
 import { IssuesPanel } from './ReviewScreen/IssuesPanel';
@@ -70,9 +70,81 @@ function ProgressRing({
   );
 }
 
+// Dev Banner Component
+function DevBanner({
+  metrics,
+  isExpanded,
+  onToggle
+}: {
+  metrics: { total_time_ms: number; total_cost_usd: number; agents_run: number };
+  isExpanded: boolean;
+  onToggle: () => void;
+}) {
+  const formatTime = (ms: number) => {
+    const seconds = ms / 1000;
+    if (seconds < 60) return `${seconds.toFixed(1)}s`;
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}m ${remainingSeconds.toFixed(0)}s`;
+  };
+
+  const formatCost = (usd: number) => {
+    if (usd < 0.01) return `$${(usd * 100).toFixed(2)}¢`;
+    return `$${usd.toFixed(3)}`;
+  };
+
+  return (
+    <div className="bg-[#1a1a1d] border-b border-gray-700/50">
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center justify-between px-4 py-1.5 text-xs hover:bg-gray-800/50 transition-colors"
+      >
+        <div className="flex items-center gap-4">
+          <span className="text-gray-500 font-mono">DEV</span>
+          <div className="flex items-center gap-1 text-gray-400">
+            <Clock className="w-3 h-3" />
+            <span>{formatTime(metrics.total_time_ms)}</span>
+          </div>
+          <div className="flex items-center gap-1 text-green-400">
+            <DollarSign className="w-3 h-3" />
+            <span>{formatCost(metrics.total_cost_usd)}</span>
+          </div>
+          <div className="flex items-center gap-1 text-blue-400">
+            <Cpu className="w-3 h-3" />
+            <span>{metrics.agents_run} agents</span>
+          </div>
+        </div>
+        {isExpanded ? (
+          <ChevronUp className="w-4 h-4 text-gray-500" />
+        ) : (
+          <ChevronDown className="w-4 h-4 text-gray-500" />
+        )}
+      </button>
+      {isExpanded && (
+        <div className="px-4 py-2 border-t border-gray-700/30">
+          <div className="grid grid-cols-3 gap-4 text-xs">
+            <div>
+              <div className="text-gray-500 mb-1">Total Time</div>
+              <div className="text-white font-mono">{formatTime(metrics.total_time_ms)}</div>
+            </div>
+            <div>
+              <div className="text-gray-500 mb-1">Total Cost</div>
+              <div className="text-green-400 font-mono">{formatCost(metrics.total_cost_usd)}</div>
+            </div>
+            <div>
+              <div className="text-gray-500 mb-1">Agents Run</div>
+              <div className="text-blue-400 font-mono">{metrics.agents_run}</div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function ReviewScreen() {
   const navigate = useNavigate();
-  const { currentDocument, setCurrentDocument, findings, setFindings, reviewMode } = useAppStore();
+  const { currentDocument, setCurrentDocument, findings, setFindings, reviewMode, reviewMetrics } = useAppStore();
 
   // Local state for issue management
   const [selectedIssueId, setSelectedIssueId] = useState<string | null>(null);
@@ -86,6 +158,9 @@ export function ReviewScreen() {
   const [filterSeverity, setFilterSeverity] = useState<string | null>(null);
   // Highlighted paragraph (for user edit goto)
   const [highlightedParagraphId, setHighlightedParagraphId] = useState<string | null>(null);
+
+  // Dev banner state
+  const [devBannerExpanded, setDevBannerExpanded] = useState(false);
 
   // Draggable panel width (percentage for issues panel)
   // Default 34%, can only expand (not shrink below 34%)
@@ -532,6 +607,15 @@ export function ReviewScreen() {
 
   return (
     <div className="h-screen flex flex-col bg-[#131316] overscroll-none">
+      {/* Dev Banner - only show if metrics available */}
+      {reviewMetrics && (
+        <DevBanner
+          metrics={reviewMetrics}
+          isExpanded={devBannerExpanded}
+          onToggle={() => setDevBannerExpanded(!devBannerExpanded)}
+        />
+      )}
+
       {/* Header - Refined minimal design */}
       <header className="sticky top-0 z-10 flex items-center justify-between px-5 py-3 border-b border-gray-700/50 bg-[#131316]">
         {/* Left: Logo + Document info */}
