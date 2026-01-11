@@ -16,7 +16,8 @@ class BaseEvent(BaseModel):
 
 class PhaseStartedEvent(BaseEvent):
     type: Literal["phase_started"] = "phase_started"
-    phase: str
+    phase: str  # "researching", "assessing", "evaluating", "synthesizing"
+    description: str = ""
 
 
 class PhaseCompletedEvent(BaseEvent):
@@ -27,14 +28,27 @@ class PhaseCompletedEvent(BaseEvent):
 class AgentStartedEvent(BaseEvent):
     type: Literal["agent_started"] = "agent_started"
     agent_id: str
+    title: str = ""  # "Starting Methodology & Evidence analysis"
+    subtitle: str = ""  # "Examining 1 sections for methodological rigor"
 
 
 class AgentCompletedEvent(BaseEvent):
     type: Literal["agent_completed"] = "agent_completed"
     agent_id: str
-    findings_count: int
-    time_ms: float
-    cost_usd: float
+    findings_count: int = 0
+    time_ms: float = 0.0
+    cost_usd: float = 0.0
+
+
+class ChunkCompletedEvent(BaseEvent):
+    """Event emitted when a chunk within an agent completes processing."""
+    type: Literal["chunk_completed"] = "chunk_completed"
+    agent_id: str
+    chunk_index: int
+    total_chunks: int
+    findings_count: int = 0
+    failed: bool = False
+    error: str | None = None
 
 
 class FindingDiscoveredEvent(BaseEvent):
@@ -45,7 +59,8 @@ class FindingDiscoveredEvent(BaseEvent):
 class ReviewCompletedEvent(BaseEvent):
     type: Literal["review_completed"] = "review_completed"
     total_findings: int
-    metrics: dict  # dev banner data
+    findings: list[Finding] = []  # Final deduplicated findings
+    metrics: dict = {}  # dev banner data
 
 
 class ErrorEvent(BaseEvent):
@@ -59,6 +74,7 @@ SSEEvent = Union[
     PhaseCompletedEvent,
     AgentStartedEvent,
     AgentCompletedEvent,
+    ChunkCompletedEvent,
     FindingDiscoveredEvent,
     ReviewCompletedEvent,
     ErrorEvent,

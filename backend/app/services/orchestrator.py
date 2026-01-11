@@ -1,23 +1,36 @@
 """
-Orchestrator - Pipeline coordination.
+Orchestrator - Pipeline coordination with true parallel execution.
 
-Runs agents in correct order with parallelization:
-1. Briefing + Domain (parallel)
-2. Clarity + Rigor-Find (parallel, after Briefing)
-3. Rigor-Rewrite + Adversary (parallel, after Rigor-Find)
-4. Assembler (final dedup/sort)
+Dependency graph (each agent starts when its inputs are ready):
+
+    Briefing ──┬──→ Clarity ─────────────────────────┐
+               │                                      │
+               ├──→ Rigor-Find ──→ Rigor-Rewrite ────┤
+               │                                      │
+               └──→ Adversary (also needs Domain) ───┤
+                                                      │
+    Domain ────────→ Adversary                        │
+                                                      ▼
+                                                  Assembler
+
+Yields SSE events as agents/chunks complete for real-time progress.
+Logs to terminal with timing and cost information.
 """
 
 import asyncio
-from datetime import datetime
-from typing import Union
+import logging
+import time
+from typing import AsyncGenerator
 
 from app.models import (
-    DocObj, ReviewConfig, ReviewJob,
+    DocObj, ReviewConfig,
     BriefingOutput, EvidencePack, Finding,
     AgentMetrics, ReviewMetrics,
 )
-# Import agents directly to avoid circular imports
+from app.models.events import (
+    SSEEvent, AgentStartedEvent, AgentCompletedEvent, ChunkCompletedEvent,
+    FindingDiscoveredEvent, ReviewCompletedEvent, ErrorEvent,
+)
 from app.agents.briefing import BriefingAgent
 from app.agents.clarity import ClarityAgent
 from app.agents.rigor import RigorFinder, RigorRewriter
@@ -28,12 +41,61 @@ from app.core import get_llm_client
 from app.composer import Composer
 
 
+# Terminal logging setup
+logger = logging.getLogger("orchestrator")
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter(
+        "\033[90m[%(asctime)s]\033[0m %(message)s",
+        datefmt="%H:%M:%S"
+    ))
+    logger.addHandler(handler)
+
+
+def _log_start(agent: str, detail: str = ""):
+    """Log agent start with optional detail."""
+    detail_str = f"  ({detail})" if detail else ""
+    logger.info(f"\033[36m{agent:<16}\033[0m \033[33mSTARTED\033[0m{detail_str}")
+
+
+def _log_done(agent: str, elapsed: float, cost: float | None = None, findings: int | None = None, extra: str = ""):
+    """Log agent completion with metrics."""
+    parts = [f"\033[36m{agent:<16}\033[0m \033[32mDONE\033[0m     {elapsed:.1f}s"]
+    if cost is not None:
+        parts.append(f"  ${cost:.3f}")
+    if findings is not None:
+        parts.append(f"  {findings} finding{'s' if findings != 1 else ''}")
+    if extra:
+        parts.append(f"  {extra}")
+    logger.info("".join(parts))
+
+
+def _log_chunk(agent: str, chunk_idx: int, total: int, elapsed: float, findings: int, failed: bool = False):
+    """Log chunk completion."""
+    status = "\033[31mFAILED\033[0m" if failed else "\033[32mDONE\033[0m"
+    logger.info(f"\033[36m{agent}[{chunk_idx}/{total}]\033[0m {status}    {elapsed:.1f}s   {findings} finding{'s' if findings != 1 else ''}")
+
+
+def _log_error(agent: str, error: str):
+    """Log agent error."""
+    logger.info(f"\033[36m{agent:<16}\033[0m \033[31mFAILED\033[0m   {error}")
+
+
+def _log_summary(elapsed: float, cost: float, findings: int, raw_count: int):
+    """Log final summary."""
+    logger.info("─" * 50)
+    removed = raw_count - findings if raw_count > findings else 0
+    logger.info(f"\033[1mTOTAL: {elapsed:.1f}s  ${cost:.2f}  {findings} findings\033[0m" +
+                (f" (dedupe removed {removed})" if removed else ""))
+
+
 class Orchestrator:
     """
-    Pipeline orchestrator.
+    Pipeline orchestrator with dependency-based parallel execution.
 
-    Coordinates all agents in correct execution order.
-    Aggregates metrics for dev banner.
+    Each agent starts as soon as its dependencies are satisfied,
+    not waiting for unrelated agents to complete.
     """
 
     def __init__(self):
@@ -44,282 +106,471 @@ class Orchestrator:
         self,
         doc: DocObj,
         config: ReviewConfig
-    ) -> ReviewJob:
+    ) -> AsyncGenerator[SSEEvent, None]:
         """
-        Run complete review pipeline.
+        Run complete review pipeline with true parallel execution.
 
-        Args:
-            doc: Document to review
-            config: Review configuration
-
-        Returns:
-            ReviewJob with findings and metrics
+        Yields SSE events as agents and chunks complete.
         """
-        job = ReviewJob(
-            document_id=doc.document_id,
-            config=config,
-            status="running",
-        )
+        start_time = time.time()
 
-        metrics = ReviewMetrics()
+        # Event queue for SSE - agents push events here
+        event_queue: asyncio.Queue[SSEEvent | None] = asyncio.Queue()
+
+        # Shared state for cross-agent dependencies
+        briefing_ready = asyncio.Event()
+        domain_ready = asyncio.Event()
+        rigor_find_ready = asyncio.Event()
+
+        briefing_result: BriefingOutput | None = None
+        evidence_result: EvidencePack = EvidencePack.empty()
+        rigor_findings_result: list[Finding] = []
+
+        # Collect all findings
         all_findings: list[Finding] = []
+        findings_lock = asyncio.Lock()
 
-        try:
-            # ========================================
-            # PHASE 1: Briefing + Domain (parallel)
-            # ========================================
-            job.current_phase = "briefing_domain"
-
-            briefing, evidence, phase1_metrics = await self._run_phase1(
-                doc, config
-            )
-
-            for m in phase1_metrics:
-                metrics.add(m)
-
-            # ========================================
-            # PHASE 2: Clarity + Rigor-Find (parallel)
-            # ========================================
-            job.current_phase = "clarity_rigor_find"
-
-            clarity_findings, rigor_findings, phase2_metrics = await self._run_phase2(
-                doc, briefing, config
-            )
-
-            all_findings.extend(clarity_findings)
-            for m in phase2_metrics:
-                metrics.add(m)
-
-            # ========================================
-            # PHASE 3: Rigor-Rewrite + Adversary (parallel)
-            # ========================================
-            job.current_phase = "rigor_rewrite_adversary"
-
-            rewritten_findings, adversary_findings, phase3_metrics = await self._run_phase3(
-                doc, briefing, rigor_findings, evidence, config
-            )
-
-            # Replace rigor findings with rewritten ones (if any)
-            if rewritten_findings:
-                all_findings.extend(rewritten_findings)
-            else:
-                all_findings.extend(rigor_findings)
-
-            all_findings.extend(adversary_findings)
-
-            for m in phase3_metrics:
-                metrics.add(m)
-
-            # ========================================
-            # PHASE 4: Assembler (final)
-            # ========================================
-            job.current_phase = "assembler"
-
-            assembler = Assembler()
-            final_findings = assembler.assemble(all_findings)
-
-            # Complete job
-            job.status = "completed"
-            job.current_phase = None
-            job.findings = final_findings
-            job.metrics = metrics
-            job.completed_at = datetime.utcnow()
-
-        except Exception as e:
-            job.status = "failed"
-            job.error = str(e)
-            job.completed_at = datetime.utcnow()
-
-        return job
-
-    async def _run_phase1(
-        self,
-        doc: DocObj,
-        config: ReviewConfig
-    ) -> tuple[BriefingOutput, EvidencePack, list[AgentMetrics]]:
-        """
-        Phase 1: Briefing + Domain in parallel.
-
-        Returns:
-            Tuple of (briefing_output, evidence_pack, metrics)
-        """
+        # Metrics collection
         all_metrics: list[AgentMetrics] = []
+        metrics_lock = asyncio.Lock()
 
-        # Create agents
-        briefing_agent = BriefingAgent(
-            client=self._client,
-            composer=self._composer
-        )
+        async def add_finding(finding: Finding):
+            async with findings_lock:
+                all_findings.append(finding)
+            await event_queue.put(FindingDiscoveredEvent(finding=finding))
 
-        # Prepare tasks
-        tasks = []
+        async def add_metrics(m: AgentMetrics | list[AgentMetrics]):
+            async with metrics_lock:
+                if isinstance(m, list):
+                    all_metrics.extend(m)
+                else:
+                    all_metrics.append(m)
 
-        # Briefing task
+        # ============================================================
+        # AGENT TASKS - each runs independently based on dependencies
+        # ============================================================
+
         async def run_briefing():
-            return await briefing_agent.run(
-                doc,
-                steering=config.steering_memo
-            )
+            nonlocal briefing_result
+            agent_start = time.time()
+            _log_start("briefing", f"{len(doc.paragraphs)} paragraphs")
 
-        tasks.append(run_briefing())
+            await event_queue.put(AgentStartedEvent(
+                agent_id="briefing",
+                title="Reading document",
+                subtitle=f"Analyzing {len(doc.paragraphs)} paragraphs"
+            ))
 
-        # Domain task (if enabled)
-        if config.enable_domain:
-            domain_pipeline = DomainPipeline(
+            try:
+                briefing_agent = BriefingAgent(
+                    client=self._client,
+                    composer=self._composer
+                )
+                briefing_result, agent_metrics = await briefing_agent.run(
+                    doc,
+                    steering=config.steering_memo
+                )
+                await add_metrics(agent_metrics)
+
+                elapsed = time.time() - agent_start
+                _log_done("briefing", elapsed, agent_metrics.cost_usd)
+
+                await event_queue.put(AgentCompletedEvent(
+                    agent_id="briefing",
+                    findings_count=0,
+                    time_ms=elapsed * 1000,
+                    cost_usd=agent_metrics.cost_usd
+                ))
+            except Exception as e:
+                _log_error("briefing", str(e))
+                await event_queue.put(ErrorEvent(message=f"Briefing failed: {e}", recoverable=False))
+                raise
+            finally:
+                briefing_ready.set()
+
+        async def run_domain():
+            nonlocal evidence_result
+            if not config.enable_domain:
+                domain_ready.set()
+                return
+
+            agent_start = time.time()
+            _log_start("domain")
+
+            await event_queue.put(AgentStartedEvent(
+                agent_id="domain",
+                title="Researching domain context",
+                subtitle="Gathering external evidence"
+            ))
+
+            try:
+                domain_pipeline = DomainPipeline(
+                    client=self._client,
+                    composer=self._composer
+                )
+                evidence_result, domain_metrics = await domain_pipeline.run(doc)
+                await add_metrics(domain_metrics)
+
+                elapsed = time.time() - agent_start
+                total_cost = sum(m.cost_usd for m in domain_metrics) if isinstance(domain_metrics, list) else domain_metrics.cost_usd
+                _log_done("domain", elapsed, total_cost, extra=f"{len(evidence_result.items)} items")
+
+                await event_queue.put(AgentCompletedEvent(
+                    agent_id="domain",
+                    findings_count=0,
+                    time_ms=elapsed * 1000,
+                    cost_usd=total_cost
+                ))
+            except Exception as e:
+                _log_error("domain", str(e))
+                evidence_result = EvidencePack.empty()
+                # Domain failure is non-critical
+            finally:
+                domain_ready.set()
+
+        async def run_clarity():
+            """Clarity runs after Briefing, streams chunk completions."""
+            await briefing_ready.wait()
+
+            agent_start = time.time()
+            clarity_agent = ClarityAgent(
                 client=self._client,
                 composer=self._composer
             )
 
-            async def run_domain():
-                return await domain_pipeline.run(doc)
+            # Get chunk count for logging
+            chunks = clarity_agent.get_chunks(doc)
+            num_chunks = len(chunks)
 
-            tasks.append(run_domain())
+            _log_start("clarity", f"{num_chunks} chunks")
 
-        # Run in parallel
-        results = await asyncio.gather(*tasks, return_exceptions=True)
+            await event_queue.put(AgentStartedEvent(
+                agent_id="clarity",
+                title="Reviewing writing clarity",
+                subtitle=f"Processing {num_chunks} chunks"
+            ))
 
-        # Process results
-        briefing_result = results[0]
-        if isinstance(briefing_result, Exception):
-            raise briefing_result
+            total_findings = 0
+            chunk_metrics: list[AgentMetrics] = []
 
-        briefing, briefing_metrics = briefing_result
-        all_metrics.append(briefing_metrics)
+            try:
+                # Stream chunk completions
+                async for chunk_result in clarity_agent.run_streaming(
+                    doc,
+                    briefing=briefing_result,
+                    steering=config.steering_memo
+                ):
+                    chunk_idx, chunk_findings, chunk_metric, error = chunk_result
+                    chunk_elapsed = chunk_metric.duration_ms / 1000 if chunk_metric else 0
 
-        # Domain result
-        if config.enable_domain and len(results) > 1:
-            domain_result = results[1]
-            if isinstance(domain_result, Exception):
-                # Domain failure is non-critical, use empty evidence
-                evidence = EvidencePack.empty()
-            else:
-                evidence, domain_metrics = domain_result
-                all_metrics.extend(domain_metrics)
-        else:
-            evidence = EvidencePack.empty()
+                    if error:
+                        _log_chunk("clarity", chunk_idx, num_chunks, chunk_elapsed, 0, failed=True)
+                        await event_queue.put(ChunkCompletedEvent(
+                            agent_id="clarity",
+                            chunk_index=chunk_idx,
+                            total_chunks=num_chunks,
+                            findings_count=0,
+                            failed=True,
+                            error=error
+                        ))
+                    else:
+                        _log_chunk("clarity", chunk_idx, num_chunks, chunk_elapsed, len(chunk_findings))
+                        chunk_metrics.append(chunk_metric)
+                        total_findings += len(chunk_findings)
 
-        return briefing, evidence, all_metrics
+                        for finding in chunk_findings:
+                            await add_finding(finding)
 
-    async def _run_phase2(
-        self,
-        doc: DocObj,
-        briefing: BriefingOutput,
-        config: ReviewConfig
-    ) -> tuple[list[Finding], list[Finding], list[AgentMetrics]]:
-        """
-        Phase 2: Clarity + Rigor-Find in parallel.
+                        await event_queue.put(ChunkCompletedEvent(
+                            agent_id="clarity",
+                            chunk_index=chunk_idx,
+                            total_chunks=num_chunks,
+                            findings_count=len(chunk_findings),
+                            failed=False
+                        ))
 
-        Returns:
-            Tuple of (clarity_findings, rigor_findings, metrics)
-        """
-        all_metrics: list[AgentMetrics] = []
+                # Aggregate metrics for agent-level reporting
+                if chunk_metrics:
+                    await add_metrics(chunk_metrics)  # Add to total cost tracking
+                    total_cost = sum(m.cost_usd for m in chunk_metrics)
+                    elapsed = time.time() - agent_start
+                    _log_done("clarity", elapsed, total_cost, total_findings, "total")
 
-        clarity_agent = ClarityAgent(
-            client=self._client,
-            composer=self._composer
-        )
-        rigor_finder = RigorFinder(
-            client=self._client,
-            composer=self._composer
-        )
+                    await event_queue.put(AgentCompletedEvent(
+                        agent_id="clarity",
+                        findings_count=total_findings,
+                        time_ms=elapsed * 1000,
+                        cost_usd=total_cost
+                    ))
 
-        # Run in parallel
-        results = await asyncio.gather(
-            clarity_agent.run(
-                doc,
-                briefing=briefing,
-                steering=config.steering_memo
-            ),
-            rigor_finder.run(
-                doc,
-                briefing=briefing,
-                steering=config.steering_memo
-            ),
-            return_exceptions=True
-        )
+            except Exception as e:
+                _log_error("clarity", str(e))
+                # Clarity failure is non-critical
 
-        # Process clarity result
-        clarity_findings = []
-        if isinstance(results[0], Exception):
-            # Non-critical failure, continue without clarity
-            pass
-        else:
-            clarity_findings, clarity_metrics = results[0]
-            all_metrics.extend(clarity_metrics)
+        async def run_rigor_find():
+            """Rigor-Find runs after Briefing, streams chunk completions."""
+            nonlocal rigor_findings_result
+            await briefing_ready.wait()
 
-        # Process rigor result
-        rigor_findings = []
-        if isinstance(results[1], Exception):
-            # Non-critical failure, continue without rigor
-            pass
-        else:
-            rigor_findings, rigor_metrics = results[1]
-            all_metrics.extend(rigor_metrics)
+            agent_start = time.time()
+            rigor_finder = RigorFinder(
+                client=self._client,
+                composer=self._composer
+            )
 
-        return clarity_findings, rigor_findings, all_metrics
+            # Get section count for logging
+            sections = rigor_finder.get_sections(doc)
+            num_sections = len(sections)
 
-    async def _run_phase3(
-        self,
-        doc: DocObj,
-        briefing: BriefingOutput,
-        rigor_findings: list[Finding],
-        evidence: EvidencePack,
-        config: ReviewConfig
-    ) -> tuple[list[Finding], list[Finding], list[AgentMetrics]]:
-        """
-        Phase 3: Rigor-Rewrite + Adversary in parallel.
+            _log_start("rigor_find", f"{num_sections} sections")
 
-        Returns:
-            Tuple of (rewritten_findings, adversary_findings, metrics)
-        """
-        all_metrics: list[AgentMetrics] = []
+            await event_queue.put(AgentStartedEvent(
+                agent_id="rigor_find",
+                title="Finding methodological issues",
+                subtitle=f"Processing {num_sections} sections"
+            ))
 
-        rigor_rewriter = RigorRewriter(
-            client=self._client,
-            composer=self._composer
-        )
-        adversary_agent = AdversaryAgent(
-            panel_mode=config.panel_mode,
-            client=self._client,
-            composer=self._composer
-        )
+            chunk_metrics: list[AgentMetrics] = []
 
-        # Run in parallel
-        results = await asyncio.gather(
-            rigor_rewriter.run(rigor_findings, doc),
-            adversary_agent.run(
-                doc,
-                briefing=briefing,
-                rigor_findings=rigor_findings,
-                evidence=evidence,
-                steering=config.steering_memo
-            ),
-            return_exceptions=True
-        )
+            try:
+                async for chunk_result in rigor_finder.run_streaming(
+                    doc,
+                    briefing=briefing_result,
+                    steering=config.steering_memo
+                ):
+                    chunk_idx, chunk_findings, chunk_metric, error = chunk_result
+                    chunk_elapsed = chunk_metric.duration_ms / 1000 if chunk_metric else 0
 
-        # Process rigor rewrite result
-        rewritten_findings = []
-        if isinstance(results[0], Exception):
-            # Non-critical, use original findings
-            pass
-        else:
-            rewritten_findings, rewrite_metrics = results[0]
-            all_metrics.extend(rewrite_metrics)
+                    if error:
+                        _log_chunk("rigor_find", chunk_idx, num_sections, chunk_elapsed, 0, failed=True)
+                        await event_queue.put(ChunkCompletedEvent(
+                            agent_id="rigor_find",
+                            chunk_index=chunk_idx,
+                            total_chunks=num_sections,
+                            findings_count=0,
+                            failed=True,
+                            error=error
+                        ))
+                    else:
+                        _log_chunk("rigor_find", chunk_idx, num_sections, chunk_elapsed, len(chunk_findings))
+                        chunk_metrics.append(chunk_metric)
+                        rigor_findings_result.extend(chunk_findings)
 
-        # Process adversary result
-        adversary_findings = []
-        if isinstance(results[1], Exception):
-            # Non-critical failure
-            pass
-        else:
-            adversary_result = results[1]
-            adversary_findings = adversary_result[0]
+                        for finding in chunk_findings:
+                            await add_finding(finding)
 
-            # Adversary returns single metrics or list depending on mode
-            adversary_metrics = adversary_result[1]
-            if isinstance(adversary_metrics, list):
-                all_metrics.extend(adversary_metrics)
-            else:
-                all_metrics.append(adversary_metrics)
+                        await event_queue.put(ChunkCompletedEvent(
+                            agent_id="rigor_find",
+                            chunk_index=chunk_idx,
+                            total_chunks=num_sections,
+                            findings_count=len(chunk_findings),
+                            failed=False
+                        ))
 
-        return rewritten_findings, adversary_findings, all_metrics
+                # Aggregate metrics
+                if chunk_metrics:
+                    await add_metrics(chunk_metrics)  # Add to total cost tracking
+                    total_cost = sum(m.cost_usd for m in chunk_metrics)
+                    elapsed = time.time() - agent_start
+                    _log_done("rigor_find", elapsed, total_cost, len(rigor_findings_result), "total")
+
+                    await event_queue.put(AgentCompletedEvent(
+                        agent_id="rigor_find",
+                        findings_count=len(rigor_findings_result),
+                        time_ms=elapsed * 1000,
+                        cost_usd=total_cost
+                    ))
+
+            except Exception as e:
+                _log_error("rigor_find", str(e))
+                # Non-critical
+            finally:
+                rigor_find_ready.set()
+
+        async def run_rigor_rewrite():
+            """Rigor-Rewrite runs after Rigor-Find completes."""
+            await rigor_find_ready.wait()
+
+            if not rigor_findings_result:
+                _log_start("rigor_rewrite", "skipped - no findings")
+                return
+
+            agent_start = time.time()
+            _log_start("rigor_rewrite", f"{len(rigor_findings_result)} findings")
+
+            await event_queue.put(AgentStartedEvent(
+                agent_id="rigor_rewrite",
+                title="Generating rewrites",
+                subtitle=f"Improving {len(rigor_findings_result)} findings"
+            ))
+
+            try:
+                rigor_rewriter = RigorRewriter(
+                    client=self._client,
+                    composer=self._composer
+                )
+                rewritten, rewrite_metrics = await rigor_rewriter.run(
+                    rigor_findings_result,
+                    doc
+                )
+                await add_metrics(rewrite_metrics)
+
+                elapsed = time.time() - agent_start
+                total_cost = sum(m.cost_usd for m in rewrite_metrics) if isinstance(rewrite_metrics, list) else rewrite_metrics.cost_usd
+                _log_done("rigor_rewrite", elapsed, total_cost, len(rewritten))
+
+                await event_queue.put(AgentCompletedEvent(
+                    agent_id="rigor_rewrite",
+                    findings_count=len(rewritten),
+                    time_ms=elapsed * 1000,
+                    cost_usd=total_cost
+                ))
+
+            except Exception as e:
+                _log_error("rigor_rewrite", str(e))
+                # Non-critical - use original findings
+
+        async def run_adversary():
+            """Adversary runs after Briefing, Rigor-Find, and Domain all complete."""
+            await asyncio.gather(
+                briefing_ready.wait(),
+                rigor_find_ready.wait(),
+                domain_ready.wait()
+            )
+
+            agent_start = time.time()
+            mode = "panel" if config.panel_mode else "single"
+            _log_start("adversary", mode)
+
+            await event_queue.put(AgentStartedEvent(
+                agent_id="adversary",
+                title="Challenging arguments",
+                subtitle=f"{'Panel mode' if config.panel_mode else 'Single model'}"
+            ))
+
+            try:
+                adversary_agent = AdversaryAgent(
+                    panel_mode=config.panel_mode,
+                    client=self._client,
+                    composer=self._composer
+                )
+                adversary_findings, adversary_metrics = await adversary_agent.run(
+                    doc,
+                    briefing=briefing_result,
+                    rigor_findings=rigor_findings_result,
+                    evidence=evidence_result,
+                    steering=config.steering_memo
+                )
+                await add_metrics(adversary_metrics)
+
+                for finding in adversary_findings:
+                    await add_finding(finding)
+
+                elapsed = time.time() - agent_start
+                if isinstance(adversary_metrics, list):
+                    total_cost = sum(m.cost_usd for m in adversary_metrics)
+                else:
+                    total_cost = adversary_metrics.cost_usd
+                _log_done("adversary", elapsed, total_cost, len(adversary_findings))
+
+                await event_queue.put(AgentCompletedEvent(
+                    agent_id="adversary",
+                    findings_count=len(adversary_findings),
+                    time_ms=elapsed * 1000,
+                    cost_usd=total_cost
+                ))
+
+            except Exception as e:
+                _log_error("adversary", str(e))
+                # Non-critical
+
+        # ============================================================
+        # LAUNCH ALL TASKS
+        # ============================================================
+
+        # Start all agents - they'll wait on their dependencies internally
+        briefing_task = asyncio.create_task(run_briefing())
+        domain_task = asyncio.create_task(run_domain())
+        clarity_task = asyncio.create_task(run_clarity())
+        rigor_find_task = asyncio.create_task(run_rigor_find())
+        rigor_rewrite_task = asyncio.create_task(run_rigor_rewrite())
+        adversary_task = asyncio.create_task(run_adversary())
+
+        async def run_assembler_and_complete():
+            """Wait for all agents, run assembler, signal completion."""
+            # Wait for all finding-producing agents
+            await asyncio.gather(
+                clarity_task,
+                rigor_rewrite_task,
+                adversary_task,
+                return_exceptions=True
+            )
+
+            # Run assembler
+            agent_start = time.time()
+            _log_start("assembler", f"{len(all_findings)} findings")
+
+            await event_queue.put(AgentStartedEvent(
+                agent_id="assembler",
+                title="Synthesizing results",
+                subtitle=f"Processing {len(all_findings)} raw findings"
+            ))
+
+            assembler = Assembler()
+            final_findings = assembler.assemble(all_findings)
+
+            elapsed = time.time() - agent_start
+            removed = len(all_findings) - len(final_findings)
+            _log_done("assembler", elapsed, findings=len(final_findings),
+                     extra=f"(removed {removed})" if removed else "")
+
+            await event_queue.put(AgentCompletedEvent(
+                agent_id="assembler",
+                findings_count=len(final_findings),
+                time_ms=elapsed * 1000
+            ))
+
+            # Final summary
+            total_elapsed = time.time() - start_time
+            total_cost = sum(m.cost_usd for m in all_metrics)
+
+            _log_summary(total_elapsed, total_cost, len(final_findings), len(all_findings))
+
+            await event_queue.put(ReviewCompletedEvent(
+                total_findings=len(final_findings),
+                findings=final_findings,
+                metrics={
+                    "total_time_ms": total_elapsed * 1000,
+                    "total_cost_usd": total_cost,
+                    "agents_run": len(all_metrics),
+                }
+            ))
+            await event_queue.put(None)  # Signal end
+
+        complete_task = asyncio.create_task(run_assembler_and_complete())
+
+        # ============================================================
+        # YIELD EVENTS AS THEY ARRIVE
+        # ============================================================
+
+        all_tasks = [briefing_task, domain_task, clarity_task,
+                    rigor_find_task, rigor_rewrite_task, adversary_task,
+                    complete_task]
+
+        try:
+            while True:
+                event = await event_queue.get()
+                if event is None:
+                    break
+                yield event
+        except Exception as e:
+            yield ErrorEvent(message=str(e), recoverable=False)
+        finally:
+            # Ensure all tasks complete or cancel
+            for task in all_tasks:
+                if not task.done():
+                    task.cancel()
+                    try:
+                        await task
+                    except asyncio.CancelledError:
+                        pass

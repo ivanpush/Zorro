@@ -2,12 +2,19 @@
 Rigor Finder Agent - Identifies methodology, logic, and evidence issues.
 
 Phase 1 of 2-phase rigor pipeline. Finds issues but doesn't propose fixes.
+Supports streaming results as sections complete.
 """
 
 import asyncio
+from typing import AsyncGenerator
 from app.agents.base import BaseAgent
 from app.models import DocObj, BriefingOutput, Finding, AgentMetrics
+from app.models.chunks import RigorChunk
 from app.services.chunker import chunk_for_rigor
+
+
+# Type for streaming results: (chunk_index, findings, metrics, error_msg)
+ChunkResult = tuple[int, list[Finding], AgentMetrics | None, str | None]
 
 
 class RigorFinder(BaseAgent):
@@ -24,6 +31,10 @@ class RigorFinder(BaseAgent):
     @property
     def agent_id(self) -> str:
         return "rigor_find"
+
+    def get_sections(self, doc: DocObj) -> list[RigorChunk]:
+        """Get section chunks for this document (for progress reporting)."""
+        return chunk_for_rigor(doc)
 
     async def run(
         self,
@@ -59,6 +70,37 @@ class RigorFinder(BaseAgent):
             all_metrics.append(metrics)
 
         return all_findings, all_metrics
+
+    async def run_streaming(
+        self,
+        doc: DocObj,
+        briefing: BriefingOutput,
+        steering: str | None = None
+    ) -> AsyncGenerator[ChunkResult, None]:
+        """
+        Find rigor issues, yielding results as sections complete.
+
+        Yields:
+            Tuple of (chunk_index, findings, metrics, error) for each section
+        """
+        chunks = chunk_for_rigor(doc)
+
+        async def process_with_index(chunk: RigorChunk) -> ChunkResult:
+            try:
+                findings, metrics = await self._process_chunk(chunk, briefing, steering)
+                return (chunk.chunk_index, findings, metrics, None)
+            except Exception as e:
+                return (chunk.chunk_index, [], None, str(e))
+
+        tasks = [
+            asyncio.create_task(process_with_index(chunk))
+            for chunk in chunks
+        ]
+
+        # Yield results as they complete
+        for coro in asyncio.as_completed(tasks):
+            result = await coro
+            yield result
 
     async def _process_chunk(
         self,

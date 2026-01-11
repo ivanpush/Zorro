@@ -1,120 +1,203 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle, Circle, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
+import { Circle, Search } from 'lucide-react';
 import { useAppStore } from '@/store';
-import { AGENT_NAMES } from '@/types';
-import type { AgentId, Finding } from '@/types';
+import type {
+  Finding,
+  SSEEvent,
+  PhaseStartedEvent,
+  AgentStartedEvent,
+  AgentCompletedEvent,
+  FindingDiscoveredEvent,
+} from '@/types';
 
-const phases = [
-  { id: 'parsing', label: 'Parsing' },
-  { id: 'context', label: 'Context' },
-  { id: 'analysis', label: 'Analysis' },
-  { id: 'synthesis', label: 'Synthesis' },
-];
+// API base URL - use environment variable or default
+const API_BASE = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_API_URL) || 'http://localhost:8000';
 
-const agents: AgentId[] = [
-  'context_builder',
-  'clarity_inspector',
-  'rigor_inspector',
-  'adversarial_critic',
-  'domain_validator',
-];
+// Pipeline phases matching backend
+const PHASES = ['researching', 'assessing', 'evaluating', 'synthesizing'] as const;
+type Phase = typeof PHASES[number];
+
+const PHASE_LABELS: Record<Phase, string> = {
+  researching: 'Researching...',
+  assessing: 'Assessing...',
+  evaluating: 'Evaluating...',
+  synthesizing: 'Synthesizing...',
+};
+
+interface ActiveAgent {
+  id: string;
+  title: string;
+  subtitle: string;
+}
 
 export function ProcessScreen() {
   const navigate = useNavigate();
-  const { reviewMode, findings } = useAppStore();
-  const [currentPhase, setCurrentPhase] = useState(0);
-  const [agentStatuses, setAgentStatuses] = useState<
-    Record<AgentId, 'pending' | 'running' | 'completed'>
-  >({
-    context_builder: 'pending',
-    clarity_inspector: 'pending',
-    rigor_inspector: 'pending',
-    adversarial_critic: 'pending',
-    domain_validator: 'pending',
-  });
-  const [elapsedTime, setElapsedTime] = useState(0);
+  const { reviewMode, currentDocument, reviewConfig, setFindings } = useAppStore();
+
+  const [_jobId, setJobId] = useState<string | null>(null);
+  const [currentPhase, setCurrentPhase] = useState<Phase>('researching');
+  const [activeAgents, setActiveAgents] = useState<ActiveAgent[]>([]);
   const [discoveredFindings, setDiscoveredFindings] = useState<Finding[]>([]);
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const eventSourceRef = useRef<EventSource | null>(null);
+
+  // Start timer
   useEffect(() => {
-    if (reviewMode === 'demo') {
-      // Simulate processing in demo mode
-      simulateProcessing();
-    } else {
-      // Would connect to SSE for real processing
-      navigate('/review');
-    }
-  }, [reviewMode, navigate]);
-
-  const simulateProcessing = async () => {
-    // Start timer
-    const timer = setInterval(() => {
-      setElapsedTime((prev) => prev + 1);
+    timerRef.current = setInterval(() => {
+      setElapsedTime(prev => prev + 1);
     }, 1000);
 
-    // Phase 1: Parsing
-    await sleep(1000);
-    setCurrentPhase(1);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
 
-    // Phase 2: Context
-    await sleep(1000);
-    setCurrentPhase(2);
-    setAgentStatuses((prev) => ({ ...prev, context_builder: 'running' }));
-    await sleep(1500);
-    setAgentStatuses((prev) => ({ ...prev, context_builder: 'completed' }));
-
-    // Phase 3: Analysis
-    setAgentStatuses((prev) => ({
-      ...prev,
-      clarity_inspector: 'running',
-      rigor_inspector: 'running',
-    }));
-    await sleep(2000);
-    setAgentStatuses((prev) => ({
-      ...prev,
-      clarity_inspector: 'completed',
-      rigor_inspector: 'completed',
-      adversarial_critic: 'running',
-    }));
-
-    // Simulate finding discoveries
-    if (findings.length > 0) {
-      for (let i = 0; i < Math.min(5, findings.length); i++) {
-        await sleep(500);
-        setDiscoveredFindings((prev) => [...prev, findings[i]]);
-      }
+  // Start review and connect to SSE
+  useEffect(() => {
+    if (reviewMode === 'demo') {
+      // In demo mode, run simulation then navigate
+      simulateDemoMode();
+    } else {
+      // Dynamic mode - start real review
+      startRealReview();
     }
 
-    await sleep(1500);
-    setAgentStatuses((prev) => ({
-      ...prev,
-      adversarial_critic: 'completed',
-      domain_validator: 'running',
-    }));
+    return () => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+      }
+    };
+  }, [reviewMode]);
+
+  const simulateDemoMode = async () => {
+    // Quick simulation for demo mode
+    const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
+
+    setActiveAgents([{ id: 'briefing', title: 'Reading document', subtitle: 'Analyzing structure' }]);
     await sleep(1000);
-    setAgentStatuses((prev) => ({
-      ...prev,
-      domain_validator: 'completed',
-    }));
 
-    // Phase 4: Synthesis
-    setCurrentPhase(3);
+    setCurrentPhase('assessing');
+    setActiveAgents([
+      { id: 'clarity', title: 'Reviewing writing style', subtitle: 'Checking clarity' },
+      { id: 'rigor', title: 'Evaluating rigor', subtitle: 'Methods and evidence' },
+    ]);
     await sleep(1500);
 
-    clearInterval(timer);
+    setCurrentPhase('evaluating');
+    setActiveAgents([{ id: 'adversary', title: 'Challenging arguments', subtitle: "Devil's advocate" }]);
+    await sleep(1000);
 
-    // Navigate to review
-    setTimeout(() => {
-      navigate('/review');
-    }, 500);
+    setCurrentPhase('synthesizing');
+    setActiveAgents([{ id: 'assembler', title: 'Synthesizing results', subtitle: 'Deduplicating' }]);
+    await sleep(500);
+
+    navigate('/review');
   };
 
-  const sleep = (ms: number) =>
-    new Promise((resolve) => setTimeout(resolve, ms));
+  const startRealReview = async () => {
+    if (!currentDocument) {
+      setError('No document loaded');
+      return;
+    }
+
+    try {
+      // Start the review job
+      const response = await fetch(`${API_BASE}/review/demo/start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          document: currentDocument,
+          config: {
+            panel_mode: reviewConfig?.reviewMode === 'panel-review',
+            steering_memo: reviewConfig?.steeringMemo || null,
+            enable_domain: reviewConfig?.enableDomainValidation ?? true,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to start review: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      setJobId(data.job_id);
+
+      // Connect to SSE stream
+      connectToStream(data.job_id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    }
+  };
+
+  const connectToStream = (jobId: string) => {
+    const eventSource = new EventSource(`${API_BASE}/review/${jobId}/stream`);
+    eventSourceRef.current = eventSource;
+
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data) as SSEEvent;
+        handleSSEEvent(data);
+      } catch (err) {
+        console.error('Failed to parse SSE event:', err);
+      }
+    };
+
+    eventSource.onerror = (err) => {
+      console.error('SSE error:', err);
+      eventSource.close();
+      // Don't set error - might just be stream ending
+    };
+  };
+
+  const handleSSEEvent = (event: SSEEvent) => {
+    switch (event.type) {
+      case 'phase_started': {
+        const e = event as PhaseStartedEvent;
+        if (PHASES.includes(e.phase as Phase)) {
+          setCurrentPhase(e.phase as Phase);
+        }
+        break;
+      }
+
+      case 'agent_started': {
+        const e = event as AgentStartedEvent;
+        setActiveAgents(prev => [
+          ...prev,
+          { id: e.agent_id, title: e.title, subtitle: e.subtitle }
+        ]);
+        break;
+      }
+
+      case 'agent_completed': {
+        const e = event as AgentCompletedEvent;
+        setActiveAgents(prev => prev.filter(a => a.id !== e.agent_id));
+        break;
+      }
+
+      case 'finding_discovered': {
+        const e = event as FindingDiscoveredEvent;
+        setDiscoveredFindings(prev => [...prev, e.finding]);
+        break;
+      }
+
+      case 'review_completed': {
+        // Store findings and navigate
+        setFindings(discoveredFindings);
+        if (timerRef.current) clearInterval(timerRef.current);
+        setTimeout(() => navigate('/review'), 500);
+        break;
+      }
+
+      case 'error': {
+        setError(event.message);
+        break;
+      }
+    }
+  };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -122,183 +205,116 @@ export function ProcessScreen() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const progress = ((currentPhase + 1) / phases.length) * 100;
+  const getPhaseIndex = (phase: Phase) => PHASES.indexOf(phase);
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#0d0d0f] flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-400 text-lg mb-4">Error: {error}</p>
+          <button
+            onClick={() => navigate('/upload')}
+            className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600"
+          >
+            Back to Upload
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold mb-2">Processing Document</h1>
-        <p className="text-muted-foreground">
-          AI agents are analyzing your document
-        </p>
-      </div>
-
-      {/* Overall Progress */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>Overall Progress</span>
-            <span className="text-sm font-normal text-muted-foreground">
-              Elapsed: {formatTime(elapsedTime)}
+    <div className="min-h-screen bg-[#0d0d0f] text-white p-8">
+      <div className="max-w-3xl mx-auto">
+        {/* Header: Issue count + Timer */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
+            <span className="text-teal-400 text-lg font-medium">
+              {discoveredFindings.length} Suggestions found
             </span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Progress value={progress} className="mb-4" />
-          <div className="flex justify-between">
-            {phases.map((phase, idx) => (
-              <div
-                key={phase.id}
-                className="flex flex-col items-center gap-1"
-              >
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    idx <= currentPhase
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted text-muted-foreground'
-                  }`}
-                >
-                  {idx < currentPhase ? (
-                    <CheckCircle className="w-5 h-5" />
-                  ) : idx === currentPhase ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <Circle className="w-5 h-5" />
-                  )}
-                </div>
-                <span
-                  className={`text-xs ${
-                    idx <= currentPhase
-                      ? 'text-foreground font-medium'
-                      : 'text-muted-foreground'
-                  }`}
-                >
-                  {phase.label}
-                </span>
-              </div>
-            ))}
           </div>
-        </CardContent>
-      </Card>
+          <span className="text-gray-400 font-mono">
+            {formatTime(elapsedTime)}
+          </span>
+        </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Agent Activity */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Agent Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
+        {/* Active Agents Section */}
+        <div className="bg-[#1a1a1d] rounded-xl p-5 mb-6 border border-gray-800">
+          {activeAgents.length === 0 ? (
+            <div className="text-gray-500 text-sm">Starting analysis...</div>
+          ) : (
+            <div className="space-y-4">
+              {activeAgents.map((agent) => (
+                <div key={agent.id} className="flex items-start gap-3">
+                  <div className="mt-1">
+                    {agent.id === activeAgents[0]?.id ? (
+                      <Circle className="w-4 h-4 text-gray-400" />
+                    ) : (
+                      <Search className="w-4 h-4 text-gray-500" />
+                    )}
+                  </div>
+                  <div>
+                    <div className="text-white font-medium">{agent.title}</div>
+                    <div className="text-gray-500 text-sm">{agent.subtitle}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Discovered Findings Section */}
+        {discoveredFindings.length > 0 && (
+          <div className="bg-[#1a1a1d] rounded-xl p-5 mb-8 border border-gray-800 max-h-[400px] overflow-y-auto">
             <div className="space-y-3">
-              {agents.map((agentId) => {
-                const status = agentStatuses[agentId];
-                return (
-                  <div
-                    key={agentId}
-                    className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="relative">
-                        {status === 'running' && (
-                          <div className="absolute inset-0 bg-blue-500 rounded-full animate-ping opacity-20" />
-                        )}
-                        <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                            status === 'completed'
-                              ? 'bg-green-500 text-white'
-                              : status === 'running'
-                              ? 'bg-blue-500 text-white'
-                              : 'bg-muted-foreground/20 text-muted-foreground'
-                          }`}
-                        >
-                          {status === 'completed' ? (
-                            <CheckCircle className="w-4 h-4" />
-                          ) : status === 'running' ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <Circle className="w-4 h-4" />
-                          )}
-                        </div>
-                      </div>
-                      <span className="text-sm font-medium">
-                        {AGENT_NAMES[agentId]}
-                      </span>
-                    </div>
-                    <span
-                      className={`text-xs ${
-                        status === 'completed'
-                          ? 'text-green-600'
-                          : status === 'running'
-                          ? 'text-blue-600'
-                          : 'text-muted-foreground'
-                      }`}
-                    >
-                      {status === 'running' && 'Analyzing...'}
-                      {status === 'completed' && 'Complete'}
-                      {status === 'pending' && 'Waiting'}
+              {discoveredFindings.slice(-10).map((finding) => (
+                <div
+                  key={finding.id}
+                  className="flex items-start gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300"
+                >
+                  <div className="w-2 h-2 rounded-full bg-teal-400 mt-2 flex-shrink-0" />
+                  <div className="border-l-2 border-teal-400/30 pl-3">
+                    <span className="text-[10px] text-gray-500 uppercase tracking-wider">
+                      ALL
                     </span>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Live Findings */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>Live Findings</span>
-              <Badge variant="secondary">{discoveredFindings.length}</Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2 max-h-[400px] overflow-y-auto">
-              {discoveredFindings.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-8">
-                  Findings will appear here as they're discovered...
-                </p>
-              ) : (
-                discoveredFindings.map((finding) => (
-                  <div
-                    key={finding.id}
-                    className="p-3 rounded-lg border animate-in fade-in slide-in-from-bottom-2"
-                  >
-                    <div className="flex items-start gap-2">
-                      <Badge
-                        variant={finding.severity as any}
-                        className="text-xs"
-                      >
-                        {finding.severity}
-                      </Badge>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium line-clamp-1">
-                          {finding.title}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {AGENT_NAMES[finding.agentId]}
-                        </p>
-                      </div>
+                    <div className="text-teal-400 font-medium">
+                      {finding.title}
+                    </div>
+                    <div className="text-gray-400 text-sm line-clamp-1">
+                      {finding.description}
                     </div>
                   </div>
-                ))
-              )}
+                </div>
+              ))}
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        )}
 
-      {/* Cancel Button */}
-      <div className="flex justify-center mt-8">
-        <Button
-          variant="outline"
-          onClick={() => {
-            if (confirm('Are you sure you want to cancel the review?')) {
-              navigate('/upload');
-            }
-          }}
-        >
-          Cancel Review
-        </Button>
+        {/* Pipeline Phases - Bottom */}
+        <div className="flex justify-center gap-8">
+          {PHASES.map((phase, idx) => {
+            const isActive = getPhaseIndex(currentPhase) >= idx;
+            const isCurrent = currentPhase === phase;
+
+            return (
+              <div key={phase} className="flex flex-col items-center gap-2">
+                <span className={`text-sm ${isActive ? 'text-white' : 'text-gray-600'}`}>
+                  {PHASE_LABELS[phase]}
+                </span>
+                <div
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    isCurrent
+                      ? 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]'
+                      : isActive
+                        ? 'bg-teal-400'
+                        : 'bg-gray-700'
+                  }`}
+                />
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

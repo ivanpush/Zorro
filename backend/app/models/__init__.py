@@ -18,8 +18,8 @@ from .metrics import AgentMetrics, ReviewMetrics
 from .review import ReviewConfig, ReviewJob
 from .events import (
     BaseEvent, PhaseStartedEvent, PhaseCompletedEvent, AgentStartedEvent,
-    AgentCompletedEvent, FindingDiscoveredEvent, ReviewCompletedEvent,
-    ErrorEvent, SSEEvent
+    AgentCompletedEvent, ChunkCompletedEvent, FindingDiscoveredEvent,
+    ReviewCompletedEvent, ErrorEvent, SSEEvent
 )
 
 __all__ = [
@@ -42,6 +42,6 @@ __all__ = [
     "ReviewConfig", "ReviewJob",
     # Events
     "BaseEvent", "PhaseStartedEvent", "PhaseCompletedEvent", "AgentStartedEvent",
-    "AgentCompletedEvent", "FindingDiscoveredEvent", "ReviewCompletedEvent",
-    "ErrorEvent", "SSEEvent",
+    "AgentCompletedEvent", "ChunkCompletedEvent", "FindingDiscoveredEvent",
+    "ReviewCompletedEvent", "ErrorEvent", "SSEEvent",
 ]

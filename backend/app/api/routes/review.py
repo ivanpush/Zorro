@@ -2,11 +2,13 @@
 Review API Routes.
 
 Endpoints:
+- POST /review/demo/start - Start review with pre-parsed DocObj (for demo/testing)
 - POST /review/start - Start a new review job
 - GET /review/{job_id}/result - Get review results
 - GET /review/{job_id}/stream - Stream SSE events
 """
 
+import asyncio
 from typing import AsyncGenerator
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
@@ -14,16 +16,22 @@ from pydantic import BaseModel, Field
 import uuid
 
 from app.models import (
-    ReviewConfig, ReviewJob,
-    SSEEvent, PhaseStartedEvent, ReviewCompletedEvent,
+    DocObj, ReviewConfig, ReviewJob, Finding,
+    SSEEvent, ReviewCompletedEvent, FindingDiscoveredEvent,
 )
+from app.services.orchestrator import Orchestrator
 
 
 router = APIRouter(prefix="/review", tags=["review"])
 
 
-# In-memory job store (replace with Redis/DB in production)
+# In-memory stores (replace with Redis/DB in production)
 _jobs: dict[str, ReviewJob] = {}
+_documents: dict[str, DocObj] = {}
+_job_findings: dict[str, list[Finding]] = {}  # Accumulate findings as discovered
+
+# Shared orchestrator instance
+_orchestrator = Orchestrator()
 
 
 # ============================================================
@@ -31,8 +39,14 @@ _jobs: dict[str, ReviewJob] = {}
 # ============================================================
 
 class StartReviewRequest(BaseModel):
-    """Request to start a review."""
+    """Request to start a review with document_id."""
     document_id: str
+    config: ReviewConfig = Field(default_factory=ReviewConfig)
+
+
+class DemoStartRequest(BaseModel):
+    """Request to start a demo review with full DocObj."""
+    document: DocObj
     config: ReviewConfig = Field(default_factory=ReviewConfig)
 
 
@@ -42,63 +56,63 @@ class StartReviewResponse(BaseModel):
 
 
 # ============================================================
-# HELPER FUNCTIONS
+# ENDPOINTS
 # ============================================================
 
-def start_review_job(document_id: str, config: ReviewConfig) -> str:
+@router.post("/demo/start", response_model=StartReviewResponse)
+async def start_demo_review(request: DemoStartRequest) -> StartReviewResponse:
     """
-    Start a review job.
+    Start a review with a pre-parsed DocObj.
 
-    Creates job entry and kicks off background processing.
-    Returns job_id.
+    Used for demo mode where frontend has already parsed the document
+    or is using fixture data.
     """
+    doc = request.document
+    config = request.config
+
+    # Store document
+    doc_id = doc.document_id or str(uuid.uuid4())
+    _documents[doc_id] = doc
+
+    # Create job
     job_id = str(uuid.uuid4())
-
     job = ReviewJob(
         id=job_id,
-        document_id=document_id,
+        document_id=doc_id,
         config=config,
         status="pending",
     )
-
     _jobs[job_id] = job
+    _job_findings[job_id] = []
 
-    return job_id
+    return StartReviewResponse(job_id=job_id)
 
-
-def get_review_result(job_id: str) -> ReviewJob | None:
-    """
-    Get review result by job_id.
-
-    Returns None if job not found.
-    """
-    return _jobs.get(job_id)
-
-
-async def stream_review_events(job_id: str) -> AsyncGenerator[SSEEvent, None]:
-    """
-    Stream review events for a job.
-
-    Yields SSE events as the review progresses.
-    This is a placeholder - actual implementation would
-    integrate with the orchestrator to emit real events.
-    """
-    # Default implementation yields a completed event
-    yield ReviewCompletedEvent(total_findings=0, metrics={})
-
-
-# ============================================================
-# ENDPOINTS
-# ============================================================
 
 @router.post("/start", response_model=StartReviewResponse)
 async def post_start_review(request: StartReviewRequest) -> StartReviewResponse:
     """
-    Start a new review job.
+    Start a new review job with an existing document_id.
 
-    Returns job_id that can be used to poll for results.
+    Document must have been previously uploaded and parsed.
     """
-    job_id = start_review_job(request.document_id, request.config)
+    doc_id = request.document_id
+    config = request.config
+
+    # Check document exists
+    if doc_id not in _documents:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    # Create job
+    job_id = str(uuid.uuid4())
+    job = ReviewJob(
+        id=job_id,
+        document_id=doc_id,
+        config=config,
+        status="pending",
+    )
+    _jobs[job_id] = job
+    _job_findings[job_id] = []
+
     return StartReviewResponse(job_id=job_id)
 
 
@@ -109,10 +123,13 @@ async def get_result(job_id: str):
 
     Returns ReviewJob with findings and metrics.
     """
-    job = get_review_result(job_id)
+    job = _jobs.get(job_id)
 
     if job is None:
         raise HTTPException(status_code=404, detail="Job not found")
+
+    # Include accumulated findings
+    job.findings = _job_findings.get(job_id, [])
 
     return job
 
@@ -122,11 +139,39 @@ async def stream_events(job_id: str):
     """
     Stream SSE events for a review job.
 
-    Returns Server-Sent Events as the review progresses.
+    Runs the orchestrator and streams events in real-time.
     """
+    job = _jobs.get(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    doc = _documents.get(job.document_id)
+    if doc is None:
+        raise HTTPException(status_code=404, detail="Document not found")
+
     async def event_generator():
-        async for event in stream_review_events(job_id):
-            yield event.to_sse()
+        # Update job status
+        job.status = "running"
+
+        try:
+            async for event in _orchestrator.run(doc, job.config):
+                # Accumulate findings as they're discovered
+                if isinstance(event, FindingDiscoveredEvent):
+                    _job_findings[job_id].append(event.finding)
+
+                # Update job on completion
+                if isinstance(event, ReviewCompletedEvent):
+                    job.status = "completed"
+                    job.findings = _job_findings.get(job_id, [])
+
+                yield event.to_sse()
+
+        except Exception as e:
+            job.status = "failed"
+            job.error = str(e)
+            # Yield error event
+            from app.models.events import ErrorEvent
+            yield ErrorEvent(message=str(e), recoverable=False).to_sse()
 
     return StreamingResponse(
         event_generator(),
@@ -134,5 +179,6 @@ async def stream_events(job_id: str):
         headers={
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",  # Disable nginx buffering
         }
     )

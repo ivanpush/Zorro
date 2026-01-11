@@ -256,13 +256,15 @@ export type SSEEvent =
   | PhaseCompletedEvent
   | AgentStartedEvent
   | AgentCompletedEvent
+  | ChunkCompletedEvent
   | FindingDiscoveredEvent
   | ReviewCompletedEvent
   | ErrorEvent;
 
 export interface PhaseStartedEvent {
   type: 'phase_started';
-  phase: string;
+  phase: string;  // "researching", "assessing", "evaluating", "synthesizing"
+  description: string;
   timestamp: string;
 }
 
@@ -274,14 +276,29 @@ export interface PhaseCompletedEvent {
 
 export interface AgentStartedEvent {
   type: 'agent_started';
-  agentId: AgentId;
+  agent_id: string;  // Backend uses snake_case
+  title: string;
+  subtitle: string;
   timestamp: string;
 }
 
 export interface AgentCompletedEvent {
   type: 'agent_completed';
-  agentId: AgentId;
-  findingsCount: number;
+  agent_id: string;
+  findings_count: number;
+  time_ms?: number;
+  cost_usd?: number;
+  timestamp: string;
+}
+
+export interface ChunkCompletedEvent {
+  type: 'chunk_completed';
+  agent_id: string;
+  chunk_index: number;
+  total_chunks: number;
+  findings_count: number;
+  failed: boolean;
+  error?: string;
   timestamp: string;
 }
 

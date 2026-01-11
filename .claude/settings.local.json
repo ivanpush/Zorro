@@ -36,7 +36,10 @@
       "Bash(git reset:*)",
       "Bash(python -m pytest:*)",
       "WebFetch(domain:code.claude.com)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(chmod:*)",
+      "Bash(./start.sh)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []
