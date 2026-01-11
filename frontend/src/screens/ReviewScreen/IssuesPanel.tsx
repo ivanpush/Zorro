@@ -268,7 +268,7 @@ export function IssuesPanel({
     const severity = issue.severity === 'critical' || issue.severity === 'major' ? 'major' : 'minor';
 
     // Check if the paragraph for this issue has been user-edited
-    const paragraphId = issue.anchors[0]?.paragraph_id;
+    const paragraphId = issue.anchors[0]?.paragraphId;
     const isParagraphUserEdited = paragraphId ? userEditedParagraphs.has(paragraphId) : false;
     const isRewriteDisabled = isParagraphUserEdited && !!issue.proposedEdit?.newText;
 
@@ -319,14 +319,14 @@ export function IssuesPanel({
                       key={idx}
                       className="px-1.5 py-0.5 text-[9px] font-medium rounded bg-gray-700/50 text-gray-400"
                     >
-                      {anchor.paragraph_id}
+                      {anchor.paragraphId}
                     </span>
                   ))}
                 </>
               )}
               {isResolved && (
                 <span className="px-2 py-0.5 text-[10px] font-medium rounded bg-gray-600/50 text-gray-300">
-                  {rewrittenParagraphs.has(issue.anchors[0]?.paragraph_id || '') ? 'EDITED' : 'RESOLVED'}
+                  {rewrittenParagraphs.has(issue.anchors[0]?.paragraphId || '') ? 'EDITED' : 'RESOLVED'}
                 </span>
               )}
             </div>
@@ -389,7 +389,7 @@ export function IssuesPanel({
           {isExpanded && (
             <div className="space-y-4 mt-3">
               {/* Quoted text - light gray with left accent */}
-              {issue.anchors[0]?.quoted_text && (
+              {issue.anchors[0]?.quotedText && (
                 <div
                   className="pl-3 py-1 italic text-xs leading-relaxed"
                   style={{
@@ -397,7 +397,7 @@ export function IssuesPanel({
                     borderLeft: '3px solid rgba(232, 152, 85, 0.6)'
                   }}
                 >
-                  "{issue.anchors[0].quoted_text}"
+                  "{issue.anchors[0].quotedText}"
                 </div>
               )}
 
@@ -727,7 +727,7 @@ export function IssuesPanel({
                   const type = getCategoryType(issue.category);
                   const config = typeConfig[type];
                   const severity = issue.severity === 'critical' || issue.severity === 'major' ? 'major' : 'minor';
-                  const isRewritten = rewrittenParagraphs.has(issue.anchors[0]?.paragraph_id || '');
+                  const isRewritten = rewrittenParagraphs.has(issue.anchors[0]?.paragraphId || '');
                   return (
                     <div
                       key={issue.id}

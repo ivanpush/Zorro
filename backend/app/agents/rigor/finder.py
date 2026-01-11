@@ -6,11 +6,14 @@ Supports streaming results as sections complete.
 """
 
 import asyncio
+import logging
 from typing import AsyncGenerator
 from app.agents.base import BaseAgent
 from app.models import DocObj, BriefingOutput, Finding, AgentMetrics
 from app.models.chunks import RigorChunk
 from app.services.chunker import chunk_for_rigor
+
+logger = logging.getLogger("zorro.agents.rigor")
 
 
 # Type for streaming results: (chunk_index, findings, metrics, error_msg)
@@ -56,6 +59,7 @@ class RigorFinder(BaseAgent):
         """
         # Chunk document by section
         chunks = chunk_for_rigor(doc)
+        logger.info(f"[rigor_find] Starting: {len(chunks)} sections")
 
         # Process chunks in parallel
         tasks = [self._process_chunk(chunk, briefing, steering) for chunk in chunks]
@@ -68,6 +72,9 @@ class RigorFinder(BaseAgent):
         for findings, metrics in results:
             all_findings.extend(findings)
             all_metrics.append(metrics)
+
+        total_cost = sum(m.cost_usd for m in all_metrics)
+        logger.info(f"[rigor_find] Complete: {len(all_findings)} findings, ${total_cost:.3f}")
 
         return all_findings, all_metrics
 
@@ -109,6 +116,9 @@ class RigorFinder(BaseAgent):
         steering: str | None
     ) -> tuple[list[Finding], AgentMetrics]:
         """Process a single chunk."""
+        section_name = chunk.section.section_title or "Untitled"
+        logger.debug(f"[rigor_find] Processing section {chunk.chunk_index}/{chunk.chunk_total}: {section_name}")
+
         # Build prompt
         system, user = self.composer.build_rigor_find_prompt(chunk, briefing, steering)
 
@@ -124,5 +134,10 @@ class RigorFinder(BaseAgent):
         # Update metrics with chunk info
         metrics.chunk_index = chunk.chunk_index
         metrics.chunk_total = chunk.chunk_total
+
+        logger.debug(
+            f"[rigor_find] Section {chunk.chunk_index}/{chunk.chunk_total}: "
+            f"{len(findings)} findings, {metrics.time_ms:.0f}ms"
+        )
 
         return findings, metrics

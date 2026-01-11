@@ -2,8 +2,11 @@
 Document chunking for parallelized agents.
 """
 
+import logging
 from app.models import DocObj, Paragraph, Section, ClarityChunk, RigorChunk, ContextOverlap
 from app.config import get_settings
+
+logger = logging.getLogger("zorro.services.chunker")
 
 
 def get_last_n_sentences(paragraphs: list[Paragraph], n: int = 3) -> ContextOverlap | None:
@@ -112,6 +115,9 @@ def chunk_for_clarity(
     for chunk in chunks:
         chunk.chunk_total = len(chunks)
 
+    total_words = sum(c.word_count for c in chunks)
+    logger.info(f"[chunker] Clarity: {len(chunks)} chunks from {len(doc.paragraphs)} paragraphs ({total_words} words)")
+
     return chunks
 
 
@@ -186,5 +192,7 @@ def chunk_for_rigor(doc: DocObj) -> list[RigorChunk]:
     # Set total count
     for chunk in chunks:
         chunk.chunk_total = len(chunks)
+
+    logger.info(f"[chunker] Rigor: {len(chunks)} sections from {len(doc.sections)} total sections")
 
     return chunks

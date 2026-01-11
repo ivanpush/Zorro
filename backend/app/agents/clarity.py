@@ -7,6 +7,7 @@ Supports streaming results as chunks complete.
 
 import asyncio
 import json
+import logging
 from typing import AsyncGenerator, Any
 from pydantic import BaseModel, Field, field_validator
 
@@ -14,6 +15,8 @@ from app.agents.base import BaseAgent
 from app.models import DocObj, BriefingOutput, Finding, AgentMetrics
 from app.models.chunks import ClarityChunk
 from app.services.chunker import chunk_for_clarity
+
+logger = logging.getLogger("zorro.agents.clarity")
 
 
 class ClarityOutput(BaseModel):
@@ -76,6 +79,7 @@ class ClarityAgent(BaseAgent):
         """
         # Chunk the document
         chunks = chunk_for_clarity(doc)
+        logger.info(f"[clarity] Starting: {len(chunks)} chunks")
 
         # Process all chunks in parallel
         tasks = [
@@ -91,6 +95,9 @@ class ClarityAgent(BaseAgent):
         for findings, metrics in results:
             all_findings.extend(findings)
             all_metrics.append(metrics)
+
+        total_cost = sum(m.cost_usd for m in all_metrics)
+        logger.info(f"[clarity] Complete: {len(all_findings)} findings, ${total_cost:.3f}")
 
         return all_findings, all_metrics
 
@@ -146,6 +153,8 @@ class ClarityAgent(BaseAgent):
         Returns:
             Tuple of (findings for this chunk, metrics)
         """
+        logger.debug(f"[clarity] Processing chunk {chunk.chunk_index}/{chunk.chunk_total}")
+
         # Build prompt using composer
         system, user = self.composer.build_clarity_prompt(
             chunk=chunk,
@@ -169,5 +178,10 @@ class ClarityAgent(BaseAgent):
         else:
             # If mock returns list directly, use it
             findings = output if isinstance(output, list) else []
+
+        logger.debug(
+            f"[clarity] Chunk {chunk.chunk_index}/{chunk.chunk_total}: "
+            f"{len(findings)} findings, {metrics.time_ms:.0f}ms"
+        )
 
         return findings, metrics

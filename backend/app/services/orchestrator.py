@@ -554,32 +554,35 @@ class Orchestrator:
             ))
 
             assembler = Assembler()
-            final_findings = assembler.assemble(all_findings)
+            review_output = assembler.assemble(all_findings, all_metrics)
 
             elapsed = time.time() - agent_start
-            removed = len(all_findings) - len(final_findings)
-            _log_done("assembler", elapsed, findings=len(final_findings),
+            removed = len(all_findings) - len(review_output.findings)
+            _log_done("assembler", elapsed, findings=len(review_output.findings),
                      extra=f"(removed {removed})" if removed else "")
 
             await event_queue.put(AgentCompletedEvent(
                 agent_id="assembler",
-                findings_count=len(final_findings),
+                findings_count=len(review_output.findings),
                 time_ms=elapsed * 1000
             ))
 
             # Final summary
             total_elapsed = time.time() - start_time
-            total_cost = sum(m.cost_usd for m in all_metrics)
+            total_cost = review_output.metadata.total_cost_usd
 
-            _log_summary(total_elapsed, total_cost, len(final_findings), len(all_findings))
+            _log_summary(total_elapsed, total_cost, len(review_output.findings), len(all_findings))
 
             await event_queue.put(ReviewCompletedEvent(
-                total_findings=len(final_findings),
-                findings=final_findings,
+                total_findings=review_output.summary.total_findings,
+                findings=review_output.findings,
                 metrics={
                     "total_time_ms": total_elapsed * 1000,
                     "total_cost_usd": total_cost,
-                    "agents_run": len(all_metrics),
+                    "agents_run": review_output.metadata.agents_run,
+                    "by_track": review_output.summary.by_track,
+                    "by_severity": review_output.summary.by_severity,
+                    "by_dimension": review_output.summary.by_dimension,
                 }
             ))
             await event_queue.put(None)  # Signal end

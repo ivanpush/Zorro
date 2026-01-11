@@ -33,14 +33,14 @@ export function DocumentViewer({
 
     findings.forEach((finding) => {
       finding.anchors.forEach((anchor) => {
-        const existing = highlights.get(anchor.paragraph_id) || [];
+        const existing = highlights.get(anchor.paragraphId) || [];
         existing.push({
           finding,
-          startChar: anchor.start_char,
-          endChar: anchor.end_char,
-          sentenceId: anchor.sentence_id,
+          startChar: anchor.startChar,
+          endChar: anchor.endChar,
+          sentenceId: anchor.sentenceId,
         });
-        highlights.set(anchor.paragraph_id, existing);
+        highlights.set(anchor.paragraphId, existing);
       });
     });
 

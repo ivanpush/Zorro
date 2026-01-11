@@ -95,9 +95,9 @@ export async function loadDemoFindings(id: DemoDocumentId): Promise<Finding[]> {
           description,
           anchors: [
             {
-              paragraph_id: issue.paragraph_id,
-              sentence_id: issue.sentence_ids?.[0],
-              quoted_text: issue.original_text || issue.quoted_text || '',
+              paragraphId: issue.paragraph_id,
+              sentenceId: issue.sentence_ids?.[0],
+              quotedText: issue.original_text || issue.quoted_text || '',
             }
           ],
           createdAt: new Date().toISOString(),
@@ -430,8 +430,8 @@ function createSimpleDemoDocument(): DocObj {
     ],
     references: [],
     metadata: {
-      wordCount: 250,
-      characterCount: 1200,
+      word_count: 250,
+      character_count: 1200,
       author: 'Demo Author',
       createdDate: timestamp,
       modifiedDate: timestamp,
@@ -457,17 +457,17 @@ function createSimpleDemoFindings(): Finding[] {
       description: 'The phrase "various factors" is too vague. Consider specifying which factors are being investigated.',
       anchors: [
         {
-          paragraph_id: 'p_001',
-          sentence_id: 'p_001_s_001',
-          quoted_text: 'various factors',
+          paragraphId: 'p_001',
+          sentenceId: 'p_001_s_001',
+          quotedText: 'various factors',
         },
       ],
       proposedEdit: {
         type: 'replace',
         anchor: {
-          paragraph_id: 'p_001',
-          sentence_id: 'p_001_s_001',
-          quoted_text: 'various factors',
+          paragraphId: 'p_001',
+          sentenceId: 'p_001_s_001',
+          quotedText: 'various factors',
         },
         newText: 'temperature, pressure, and humidity',
         rationale: 'Specificity improves clarity and reader understanding',
@@ -484,17 +484,17 @@ function createSimpleDemoFindings(): Finding[] {
       description: '"Standard methods" is too vague for reproducibility. Specific statistical tests and software should be mentioned.',
       anchors: [
         {
-          paragraph_id: 'p_003',
-          sentence_id: 'p_003_s_002',
-          quoted_text: 'standard methods',
+          paragraphId: 'p_003',
+          sentenceId: 'p_003_s_002',
+          quotedText: 'standard methods',
         },
       ],
       proposedEdit: {
         type: 'replace',
         anchor: {
-          paragraph_id: 'p_003',
-          sentence_id: 'p_003_s_002',
-          quoted_text: 'using standard methods',
+          paragraphId: 'p_003',
+          sentenceId: 'p_003_s_002',
+          quotedText: 'using standard methods',
         },
         newText: 'using ANOVA with Bonferroni correction (SPSS v28)',
         rationale: 'Specific methods are required for reproducibility',
@@ -511,9 +511,9 @@ function createSimpleDemoFindings(): Finding[] {
       description: 'The conclusion claims "strong evidence" but the methodology only supports correlation, not causation.',
       anchors: [
         {
-          paragraph_id: 'p_007',
-          sentence_id: 'p_007_s_001',
-          quoted_text: 'strong evidence for the proposed hypothesis',
+          paragraphId: 'p_007',
+          sentenceId: 'p_007_s_001',
+          quotedText: 'strong evidence for the proposed hypothesis',
         },
       ],
       createdAt: timestamp,
@@ -528,8 +528,8 @@ function createSimpleDemoFindings(): Finding[] {
       description: 'The transition from methods to results could be smoother. Consider adding a bridging sentence.',
       anchors: [
         {
-          paragraph_id: 'p_004',
-          quoted_text: 'All participants provided informed consent.',
+          paragraphId: 'p_004',
+          quotedText: 'All participants provided informed consent.',
         },
       ],
       createdAt: timestamp,
@@ -544,17 +544,17 @@ function createSimpleDemoFindings(): Finding[] {
       description: 'Claims "substantial" effect size without providing specific values or confidence intervals.',
       anchors: [
         {
-          paragraph_id: 'p_005',
-          sentence_id: 'p_005_s_002',
-          quoted_text: 'substantial across all conditions',
+          paragraphId: 'p_005',
+          sentenceId: 'p_005_s_002',
+          quotedText: 'substantial across all conditions',
         },
       ],
       proposedEdit: {
         type: 'replace',
         anchor: {
-          paragraph_id: 'p_005',
-          sentence_id: 'p_005_s_002',
-          quoted_text: 'The effect size was substantial across all conditions.',
+          paragraphId: 'p_005',
+          sentenceId: 'p_005_s_002',
+          quotedText: 'The effect size was substantial across all conditions.',
         },
         newText: "Cohen's d = 0.82 (95% CI: 0.65-0.99) across all conditions.",
         rationale: 'Quantitative metrics are needed for scientific rigor',
@@ -571,17 +571,17 @@ function createSimpleDemoFindings(): Finding[] {
       description: 'Active voice is preferred in modern scientific writing for clarity.',
       anchors: [
         {
-          paragraph_id: 'p_004',
-          sentence_id: 'p_004_s_001',
-          quoted_text: 'Data was collected',
+          paragraphId: 'p_004',
+          sentenceId: 'p_004_s_001',
+          quotedText: 'Data was collected',
         },
       ],
       proposedEdit: {
         type: 'replace',
         anchor: {
-          paragraph_id: 'p_004',
-          sentence_id: 'p_004_s_001',
-          quoted_text: 'Data was collected',
+          paragraphId: 'p_004',
+          sentenceId: 'p_004_s_001',
+          quotedText: 'Data was collected',
         },
         newText: 'We collected data',
         rationale: 'Active voice improves clarity and readability',

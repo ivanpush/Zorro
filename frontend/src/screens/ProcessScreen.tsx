@@ -48,6 +48,7 @@ export function ProcessScreen() {
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
+  const hasStartedRef = useRef(false);
 
   // Start timer
   useEffect(() => {
@@ -60,8 +61,11 @@ export function ProcessScreen() {
     };
   }, []);
 
-  // Start review and connect to SSE
+  // Start review and connect to SSE (guard against StrictMode double-mount)
   useEffect(() => {
+    if (hasStartedRef.current) return;
+    hasStartedRef.current = true;
+
     if (reviewMode === 'demo') {
       // In demo mode, run simulation then navigate
       simulateDemoMode();
@@ -208,7 +212,7 @@ export function ProcessScreen() {
           setReviewMetrics({
             total_time_ms: e.metrics.total_time_ms || 0,
             total_cost_usd: e.metrics.total_cost_usd || 0,
-            agents_run: e.metrics.agents_run || 0,
+            agents_run: e.metrics.agents_run || [],
             agent_metrics: e.metrics.agent_metrics,
           });
         }

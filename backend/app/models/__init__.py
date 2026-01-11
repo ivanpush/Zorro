@@ -6,6 +6,7 @@ from .document import (
 )
 from .finding import (
     Finding, Anchor, ProposedEdit, AgentId, FindingCategory, Severity,
+    Track, Dimension, AGENT_TO_TRACK, CATEGORY_TO_DIMENSIONS,
     AGENT_PRIORITY, PRESENTATION_ORDER
 )
 from .briefing import BriefingOutput
@@ -15,7 +16,10 @@ from .domain import (
 )
 from .chunks import ClarityChunk, RigorChunk, ContextOverlap
 from .metrics import AgentMetrics, ReviewMetrics
-from .review import ReviewConfig, ReviewJob
+from .review import (
+    ReviewConfig, ReviewJob,
+    ReviewSummary, ReviewMetadataOutput, ReviewOutput
+)
 from .events import (
     BaseEvent, PhaseStartedEvent, PhaseCompletedEvent, AgentStartedEvent,
     AgentCompletedEvent, ChunkCompletedEvent, FindingDiscoveredEvent,
@@ -28,6 +32,7 @@ __all__ = [
     "BoundingBox", "Figure", "Reference",
     # Finding
     "Finding", "Anchor", "ProposedEdit", "AgentId", "FindingCategory", "Severity",
+    "Track", "Dimension", "AGENT_TO_TRACK", "CATEGORY_TO_DIMENSIONS",
     "AGENT_PRIORITY", "PRESENTATION_ORDER",
     # Briefing
     "BriefingOutput",
@@ -40,6 +45,7 @@ __all__ = [
     "AgentMetrics", "ReviewMetrics",
     # Review
     "ReviewConfig", "ReviewJob",
+    "ReviewSummary", "ReviewMetadataOutput", "ReviewOutput",
     # Events
     "BaseEvent", "PhaseStartedEvent", "PhaseCompletedEvent", "AgentStartedEvent",
     "AgentCompletedEvent", "ChunkCompletedEvent", "FindingDiscoveredEvent",

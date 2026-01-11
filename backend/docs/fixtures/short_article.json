@@ -1,0 +1,484 @@
+{
+  "document_id": "doc_short_001",
+  "filename": "caffeine_cognition_study.pdf",
+  "type": "pdf",
+  "title": "Effects of Caffeine on Working Memory in Sleep-Deprived Adults: A Randomized Controlled Trial",
+  "sections": [
+    {
+      "section_id": "sec_abstract",
+      "section_title": "Abstract",
+      "section_index": 0,
+      "level": 1,
+      "paragraph_ids": ["p_001"]
+    },
+    {
+      "section_id": "sec_intro",
+      "section_title": "Introduction",
+      "section_index": 1,
+      "level": 1,
+      "paragraph_ids": ["p_002", "p_003"]
+    },
+    {
+      "section_id": "sec_methods",
+      "section_title": "Methods",
+      "section_index": 2,
+      "level": 1,
+      "paragraph_ids": ["p_004", "p_005", "p_006"]
+    },
+    {
+      "section_id": "sec_results",
+      "section_title": "Results",
+      "section_index": 3,
+      "level": 1,
+      "paragraph_ids": ["p_007", "p_008", "p_009"]
+    },
+    {
+      "section_id": "sec_discussion",
+      "section_title": "Discussion",
+      "section_index": 4,
+      "level": 1,
+      "paragraph_ids": ["p_010", "p_011", "p_012"]
+    },
+    {
+      "section_id": "sec_conclusion",
+      "section_title": "Conclusion",
+      "section_index": 5,
+      "level": 1,
+      "paragraph_ids": ["p_013"]
+    }
+  ],
+  "paragraphs": [
+    {
+      "paragraph_id": "p_001",
+      "section_id": "sec_abstract",
+      "paragraph_index": 0,
+      "text": "Caffeine is the world's most widely consumed psychoactive substance, yet its effects on cognitive function under sleep deprivation remain poorly characterized. We conducted a double-blind, placebo-controlled trial with 48 healthy adults who underwent 24 hours of sleep deprivation. Participants received either 200mg caffeine or placebo before completing a battery of working memory tasks. Caffeine significantly improved performance on the n-back task (p < 0.001) and reduced reaction time variability. These findings suggest caffeine may partially mitigate sleep deprivation-induced cognitive deficits.",
+      "sentences": [
+        {
+          "sentence_id": "p_001_s_001",
+          "paragraph_id": "p_001",
+          "sentence_index": 0,
+          "text": "Caffeine is the world's most widely consumed psychoactive substance, yet its effects on cognitive function under sleep deprivation remain poorly characterized.",
+          "start_char": 0,
+          "end_char": 159
+        },
+        {
+          "sentence_id": "p_001_s_002",
+          "paragraph_id": "p_001",
+          "sentence_index": 1,
+          "text": "We conducted a double-blind, placebo-controlled trial with 48 healthy adults who underwent 24 hours of sleep deprivation.",
+          "start_char": 160,
+          "end_char": 282
+        },
+        {
+          "sentence_id": "p_001_s_003",
+          "paragraph_id": "p_001",
+          "sentence_index": 2,
+          "text": "Participants received either 200mg caffeine or placebo before completing a battery of working memory tasks.",
+          "start_char": 283,
+          "end_char": 390
+        },
+        {
+          "sentence_id": "p_001_s_004",
+          "paragraph_id": "p_001",
+          "sentence_index": 3,
+          "text": "Caffeine significantly improved performance on the n-back task (p < 0.001) and reduced reaction time variability.",
+          "start_char": 391,
+          "end_char": 504
+        },
+        {
+          "sentence_id": "p_001_s_005",
+          "paragraph_id": "p_001",
+          "sentence_index": 4,
+          "text": "These findings suggest caffeine may partially mitigate sleep deprivation-induced cognitive deficits.",
+          "start_char": 505,
+          "end_char": 605
+        }
+      ]
+    },
+    {
+      "paragraph_id": "p_002",
+      "section_id": "sec_intro",
+      "paragraph_index": 1,
+      "text": "Sleep deprivation affects millions of workers worldwide, particularly in healthcare, transportation, and emergency services. Acute sleep loss impairs attention, working memory, and executive function, increasing error rates and accident risk. Understanding interventions that can mitigate these deficits has important implications for occupational safety.",
+      "sentences": [
+        {
+          "sentence_id": "p_002_s_001",
+          "paragraph_id": "p_002",
+          "sentence_index": 0,
+          "text": "Sleep deprivation affects millions of workers worldwide, particularly in healthcare, transportation, and emergency services.",
+          "start_char": 0,
+          "end_char": 124
+        },
+        {
+          "sentence_id": "p_002_s_002",
+          "paragraph_id": "p_002",
+          "sentence_index": 1,
+          "text": "Acute sleep loss impairs attention, working memory, and executive function, increasing error rates and accident risk.",
+          "start_char": 125,
+          "end_char": 243
+        },
+        {
+          "sentence_id": "p_002_s_003",
+          "paragraph_id": "p_002",
+          "sentence_index": 2,
+          "text": "Understanding interventions that can mitigate these deficits has important implications for occupational safety.",
+          "start_char": 244,
+          "end_char": 356
+        }
+      ]
+    },
+    {
+      "paragraph_id": "p_003",
+      "section_id": "sec_intro",
+      "paragraph_index": 2,
+      "text": "Caffeine acts as an adenosine receptor antagonist, blocking the sleep-promoting effects of adenosine accumulation. Previous studies have shown mixed results regarding caffeine's ability to restore cognitive function after sleep loss, with some showing complete restoration and others showing only partial benefits. We hypothesized that caffeine would improve working memory performance but not fully restore it to baseline levels.",
+      "sentences": [
+        {
+          "sentence_id": "p_003_s_001",
+          "paragraph_id": "p_003",
+          "sentence_index": 0,
+          "text": "Caffeine acts as an adenosine receptor antagonist, blocking the sleep-promoting effects of adenosine accumulation.",
+          "start_char": 0,
+          "end_char": 114
+        },
+        {
+          "sentence_id": "p_003_s_002",
+          "paragraph_id": "p_003",
+          "sentence_index": 1,
+          "text": "Previous studies have shown mixed results regarding caffeine's ability to restore cognitive function after sleep loss, with some showing complete restoration and others showing only partial benefits.",
+          "start_char": 115,
+          "end_char": 314
+        },
+        {
+          "sentence_id": "p_003_s_003",
+          "paragraph_id": "p_003",
+          "sentence_index": 2,
+          "text": "We hypothesized that caffeine would improve working memory performance but not fully restore it to baseline levels.",
+          "start_char": 315,
+          "end_char": 431
+        }
+      ]
+    },
+    {
+      "paragraph_id": "p_004",
+      "section_id": "sec_methods",
+      "paragraph_index": 3,
+      "text": "We recruited 48 healthy adults aged 18-35 from the university community. Participants were screened for sleep disorders, psychiatric conditions, and regular caffeine use exceeding 400mg daily. All participants provided written informed consent. The study was approved by the Institutional Review Board.",
+      "sentences": [
+        {
+          "sentence_id": "p_004_s_001",
+          "paragraph_id": "p_004",
+          "sentence_index": 0,
+          "text": "We recruited 48 healthy adults aged 18-35 from the university community.",
+          "start_char": 0,
+          "end_char": 72
+        },
+        {
+          "sentence_id": "p_004_s_002",
+          "paragraph_id": "p_004",
+          "sentence_index": 1,
+          "text": "Participants were screened for sleep disorders, psychiatric conditions, and regular caffeine use exceeding 400mg daily.",
+          "start_char": 73,
+          "end_char": 192
+        },
+        {
+          "sentence_id": "p_004_s_003",
+          "paragraph_id": "p_004",
+          "sentence_index": 2,
+          "text": "All participants provided written informed consent.",
+          "start_char": 193,
+          "end_char": 244
+        },
+        {
+          "sentence_id": "p_004_s_004",
+          "paragraph_id": "p_004",
+          "sentence_index": 3,
+          "text": "The study was approved by the Institutional Review Board.",
+          "start_char": 245,
+          "end_char": 302
+        }
+      ]
+    },
+    {
+      "paragraph_id": "p_005",
+      "section_id": "sec_methods",
+      "paragraph_index": 4,
+      "text": "Participants underwent 24 hours of supervised sleep deprivation in our laboratory facility. They were randomly assigned to receive either 200mg caffeine or matching placebo capsules 30 minutes before cognitive testing. The primary outcome was performance on the 2-back working memory task, measured by accuracy and reaction time.",
+      "sentences": [
+        {
+          "sentence_id": "p_005_s_001",
+          "paragraph_id": "p_005",
+          "sentence_index": 0,
+          "text": "Participants underwent 24 hours of supervised sleep deprivation in our laboratory facility.",
+          "start_char": 0,
+          "end_char": 91
+        },
+        {
+          "sentence_id": "p_005_s_002",
+          "paragraph_id": "p_005",
+          "sentence_index": 1,
+          "text": "They were randomly assigned to receive either 200mg caffeine or matching placebo capsules 30 minutes before cognitive testing.",
+          "start_char": 92,
+          "end_char": 218
+        },
+        {
+          "sentence_id": "p_005_s_003",
+          "paragraph_id": "p_005",
+          "sentence_index": 2,
+          "text": "The primary outcome was performance on the 2-back working memory task, measured by accuracy and reaction time.",
+          "start_char": 219,
+          "end_char": 329
+        }
+      ]
+    },
+    {
+      "paragraph_id": "p_006",
+      "section_id": "sec_methods",
+      "paragraph_index": 5,
+      "text": "Statistical analysis was performed using mixed-effects models with treatment group as a fixed factor and participant as a random effect. We used an alpha level of 0.05 for all analyses. Power analysis indicated our sample size provided 85% power to detect a medium effect size.",
+      "sentences": [
+        {
+          "sentence_id": "p_006_s_001",
+          "paragraph_id": "p_006",
+          "sentence_index": 0,
+          "text": "Statistical analysis was performed using mixed-effects models with treatment group as a fixed factor and participant as a random effect.",
+          "start_char": 0,
+          "end_char": 136
+        },
+        {
+          "sentence_id": "p_006_s_002",
+          "paragraph_id": "p_006",
+          "sentence_index": 1,
+          "text": "We used an alpha level of 0.05 for all analyses.",
+          "start_char": 137,
+          "end_char": 185
+        },
+        {
+          "sentence_id": "p_006_s_003",
+          "paragraph_id": "p_006",
+          "sentence_index": 2,
+          "text": "Power analysis indicated our sample size provided 85% power to detect a medium effect size.",
+          "start_char": 186,
+          "end_char": 277
+        }
+      ]
+    },
+    {
+      "paragraph_id": "p_007",
+      "section_id": "sec_results",
+      "paragraph_index": 6,
+      "text": "The caffeine group showed significantly higher accuracy on the 2-back task compared to placebo (82.3% vs 71.4%, p < 0.001, d = 0.89). This represents a large effect size, suggesting caffeine has a substantial impact on working memory under sleep deprivation conditions.",
+      "sentences": [
+        {
+          "sentence_id": "p_007_s_001",
+          "paragraph_id": "p_007",
+          "sentence_index": 0,
+          "text": "The caffeine group showed significantly higher accuracy on the 2-back task compared to placebo (82.3% vs 71.4%, p < 0.001, d = 0.89).",
+          "start_char": 0,
+          "end_char": 133
+        },
+        {
+          "sentence_id": "p_007_s_002",
+          "paragraph_id": "p_007",
+          "sentence_index": 1,
+          "text": "This represents a large effect size, suggesting caffeine has a substantial impact on working memory under sleep deprivation conditions.",
+          "start_char": 134,
+          "end_char": 269
+        }
+      ]
+    },
+    {
+      "paragraph_id": "p_008",
+      "section_id": "sec_results",
+      "paragraph_index": 7,
+      "text": "Reaction time was faster in the caffeine group (423ms vs 512ms, p = 0.003). More importantly, reaction time variability was significantly reduced (SD: 89ms vs 142ms, p < 0.001), indicating more consistent performance. No significant adverse events were reported in either group.",
+      "sentences": [
+        {
+          "sentence_id": "p_008_s_001",
+          "paragraph_id": "p_008",
+          "sentence_index": 0,
+          "text": "Reaction time was faster in the caffeine group (423ms vs 512ms, p = 0.003).",
+          "start_char": 0,
+          "end_char": 75
+        },
+        {
+          "sentence_id": "p_008_s_002",
+          "paragraph_id": "p_008",
+          "sentence_index": 1,
+          "text": "More importantly, reaction time variability was significantly reduced (SD: 89ms vs 142ms, p < 0.001), indicating more consistent performance.",
+          "start_char": 76,
+          "end_char": 217
+        },
+        {
+          "sentence_id": "p_008_s_003",
+          "paragraph_id": "p_008",
+          "sentence_index": 2,
+          "text": "No significant adverse events were reported in either group.",
+          "start_char": 218,
+          "end_char": 278
+        }
+      ]
+    },
+    {
+      "paragraph_id": "p_009",
+      "section_id": "sec_results",
+      "paragraph_index": 8,
+      "text": "Subgroup analysis revealed that habitual low caffeine consumers showed larger benefits than moderate consumers, though this interaction did not reach statistical significance (p = 0.08). Age and sex did not significantly moderate the treatment effect.",
+      "sentences": [
+        {
+          "sentence_id": "p_009_s_001",
+          "paragraph_id": "p_009",
+          "sentence_index": 0,
+          "text": "Subgroup analysis revealed that habitual low caffeine consumers showed larger benefits than moderate consumers, though this interaction did not reach statistical significance (p = 0.08).",
+          "start_char": 0,
+          "end_char": 186
+        },
+        {
+          "sentence_id": "p_009_s_002",
+          "paragraph_id": "p_009",
+          "sentence_index": 1,
+          "text": "Age and sex did not significantly moderate the treatment effect.",
+          "start_char": 187,
+          "end_char": 251
+        }
+      ]
+    },
+    {
+      "paragraph_id": "p_010",
+      "section_id": "sec_discussion",
+      "paragraph_index": 9,
+      "text": "Our findings demonstrate that caffeine significantly improves working memory performance in sleep-deprived adults. The effect size observed (d = 0.89) is larger than previously reported in well-rested populations, suggesting caffeine may be particularly beneficial under conditions of sleep pressure.",
+      "sentences": [
+        {
+          "sentence_id": "p_010_s_001",
+          "paragraph_id": "p_010",
+          "sentence_index": 0,
+          "text": "Our findings demonstrate that caffeine significantly improves working memory performance in sleep-deprived adults.",
+          "start_char": 0,
+          "end_char": 114
+        },
+        {
+          "sentence_id": "p_010_s_002",
+          "paragraph_id": "p_010",
+          "sentence_index": 1,
+          "text": "The effect size observed (d = 0.89) is larger than previously reported in well-rested populations, suggesting caffeine may be particularly beneficial under conditions of sleep pressure.",
+          "start_char": 115,
+          "end_char": 300
+        }
+      ]
+    },
+    {
+      "paragraph_id": "p_011",
+      "section_id": "sec_discussion",
+      "paragraph_index": 10,
+      "text": "The reduction in reaction time variability is particularly noteworthy. Inconsistent performance is a hallmark of sleep deprivation and contributes significantly to real-world errors. Caffeine's ability to stabilize performance may be as important as its effects on mean performance levels.",
+      "sentences": [
+        {
+          "sentence_id": "p_011_s_001",
+          "paragraph_id": "p_011",
+          "sentence_index": 0,
+          "text": "The reduction in reaction time variability is particularly noteworthy.",
+          "start_char": 0,
+          "end_char": 70
+        },
+        {
+          "sentence_id": "p_011_s_002",
+          "paragraph_id": "p_011",
+          "sentence_index": 1,
+          "text": "Inconsistent performance is a hallmark of sleep deprivation and contributes significantly to real-world errors.",
+          "start_char": 71,
+          "end_char": 182
+        },
+        {
+          "sentence_id": "p_011_s_003",
+          "paragraph_id": "p_011",
+          "sentence_index": 2,
+          "text": "Caffeine's ability to stabilize performance may be as important as its effects on mean performance levels.",
+          "start_char": 183,
+          "end_char": 289
+        }
+      ]
+    },
+    {
+      "paragraph_id": "p_012",
+      "section_id": "sec_discussion",
+      "paragraph_index": 11,
+      "text": "Several limitations should be acknowledged. Our sample consisted of young, healthy adults, limiting generalizability to older populations or those with medical conditions. The 24-hour sleep deprivation protocol may not reflect chronic partial sleep restriction common in real-world settings. Additionally, we only tested a single caffeine dose.",
+      "sentences": [
+        {
+          "sentence_id": "p_012_s_001",
+          "paragraph_id": "p_012",
+          "sentence_index": 0,
+          "text": "Several limitations should be acknowledged.",
+          "start_char": 0,
+          "end_char": 43
+        },
+        {
+          "sentence_id": "p_012_s_002",
+          "paragraph_id": "p_012",
+          "sentence_index": 1,
+          "text": "Our sample consisted of young, healthy adults, limiting generalizability to older populations or those with medical conditions.",
+          "start_char": 44,
+          "end_char": 171
+        },
+        {
+          "sentence_id": "p_012_s_003",
+          "paragraph_id": "p_012",
+          "sentence_index": 2,
+          "text": "The 24-hour sleep deprivation protocol may not reflect chronic partial sleep restriction common in real-world settings.",
+          "start_char": 172,
+          "end_char": 291
+        },
+        {
+          "sentence_id": "p_012_s_004",
+          "paragraph_id": "p_012",
+          "sentence_index": 3,
+          "text": "Additionally, we only tested a single caffeine dose.",
+          "start_char": 292,
+          "end_char": 344
+        }
+      ]
+    },
+    {
+      "paragraph_id": "p_013",
+      "section_id": "sec_conclusion",
+      "paragraph_index": 12,
+      "text": "In conclusion, 200mg caffeine significantly improves working memory performance and reduces performance variability in sleep-deprived adults. These findings have practical implications for shift workers and others who must maintain cognitive function despite inadequate sleep. Future research should examine dose-response relationships and the duration of these protective effects.",
+      "sentences": [
+        {
+          "sentence_id": "p_013_s_001",
+          "paragraph_id": "p_013",
+          "sentence_index": 0,
+          "text": "In conclusion, 200mg caffeine significantly improves working memory performance and reduces performance variability in sleep-deprived adults.",
+          "start_char": 0,
+          "end_char": 141
+        },
+        {
+          "sentence_id": "p_013_s_002",
+          "paragraph_id": "p_013",
+          "sentence_index": 1,
+          "text": "These findings have practical implications for shift workers and others who must maintain cognitive function despite inadequate sleep.",
+          "start_char": 142,
+          "end_char": 276
+        },
+        {
+          "sentence_id": "p_013_s_003",
+          "paragraph_id": "p_013",
+          "sentence_index": 2,
+          "text": "Future research should examine dose-response relationships and the duration of these protective effects.",
+          "start_char": 277,
+          "end_char": 381
+        }
+      ]
+    }
+  ],
+  "figures": [],
+  "references": [],
+  "metadata": {
+    "page_count": 4,
+    "word_count": 987,
+    "character_count": 6142
+  },
+  "created_at": "2026-01-10T22:30:00Z"
+}

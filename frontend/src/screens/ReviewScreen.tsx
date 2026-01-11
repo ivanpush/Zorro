@@ -76,7 +76,7 @@ function DevBanner({
   isExpanded,
   onToggle
 }: {
-  metrics: { total_time_ms: number; total_cost_usd: number; agents_run: number };
+  metrics: { total_time_ms: number; total_cost_usd: number; agents_run: string[] };
   isExpanded: boolean;
   onToggle: () => void;
 }) {
@@ -88,10 +88,7 @@ function DevBanner({
     return `${minutes}m ${remainingSeconds.toFixed(0)}s`;
   };
 
-  const formatCost = (usd: number) => {
-    if (usd < 0.01) return `$${(usd * 100).toFixed(2)}¢`;
-    return `$${usd.toFixed(3)}`;
-  };
+  const formatCost = (usd: number) => `$${usd.toFixed(2)}`;
 
   return (
     <div className="bg-[#1a1a1d] border-b border-gray-700/50">
@@ -111,7 +108,7 @@ function DevBanner({
           </div>
           <div className="flex items-center gap-1 text-blue-400">
             <Cpu className="w-3 h-3" />
-            <span>{metrics.agents_run} agents</span>
+            <span>{metrics.agents_run.join(', ')}</span>
           </div>
         </div>
         {isExpanded ? (
@@ -133,7 +130,7 @@ function DevBanner({
             </div>
             <div>
               <div className="text-gray-500 mb-1">Agents Run</div>
-              <div className="text-blue-400 font-mono">{metrics.agents_run}</div>
+              <div className="text-blue-400 font-mono">{metrics.agents_run.join(', ')}</div>
             </div>
           </div>
         </div>
@@ -278,15 +275,15 @@ export function ReviewScreen() {
               title: issue.title,
               description,
               anchors: issue.paragraph_id ? [{
-                paragraph_id: issue.paragraph_id,
-                sentence_id: issue.sentence_ids?.[0],
-                quoted_text: issue.original_text || ''
+                paragraphId: issue.paragraph_id,
+                sentenceId: issue.sentence_ids?.[0],
+                quotedText: issue.original_text || ''
               }] : [],
               proposedEdit: proposedText ? {
                 type: isSuggestion ? 'suggestion' : 'replace',
                 anchor: {
-                  paragraph_id: issue.paragraph_id,
-                  quoted_text: issue.original_text || ''
+                  paragraphId: issue.paragraph_id,
+                  quotedText: issue.original_text || ''
                 },
                 newText: proposedText,
                 // Don't duplicate rationale in tooltip if it's already the main suggestion text
@@ -331,7 +328,7 @@ export function ReviewScreen() {
 
     const issue = findings.find(f => f.id === issueId);
     if (issue && issue.anchors.length > 0) {
-      const paragraphId = issue.anchors[0].paragraph_id;
+      const paragraphId = issue.anchors[0].paragraphId;
       const element = document.getElementById(paragraphId);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -351,7 +348,7 @@ export function ReviewScreen() {
   // Handle paragraph click
   const handleParagraphClick = useCallback((paragraphId: string) => {
     const issue = findings.find(f =>
-      f.anchors.some(a => a.paragraph_id === paragraphId)
+      f.anchors.some(a => a.paragraphId === paragraphId)
     );
 
     if (issue) {
@@ -377,10 +374,10 @@ export function ReviewScreen() {
   const handleAcceptRewrite = useCallback((issueId: string, editedText?: string) => {
     const issue = findings.find(f => f.id === issueId);
     // Allow if we have editedText OR if the issue has proposedEdit.newText
-    if (!issue || (!editedText && !issue.proposedEdit?.newText) || !issue.anchors[0]?.paragraph_id) return;
+    if (!issue || (!editedText && !issue.proposedEdit?.newText) || !issue.anchors[0]?.paragraphId) return;
 
-    const paragraphId = issue.anchors[0].paragraph_id;
-    const quotedText = issue.anchors[0].quoted_text;
+    const paragraphId = issue.anchors[0].paragraphId;
+    const quotedText = issue.anchors[0].quotedText;
     const replacementText = editedText || issue.proposedEdit!.newText!;
 
     // Get original paragraph text
@@ -438,7 +435,7 @@ export function ReviewScreen() {
     });
     // Find and un-accept ALL related issues with rewrites on this paragraph
     const relatedIssues = findings.filter(f =>
-      f.anchors[0]?.paragraph_id === paragraphId &&
+      f.anchors[0]?.paragraphId === paragraphId &&
       acceptedIssueIds.has(f.id) &&
       f.proposedEdit?.newText
     );
@@ -456,7 +453,7 @@ export function ReviewScreen() {
   const handleUserEdit = useCallback((paragraphId: string, newText: string) => {
     // Find all accepted issues with rewrites applied to this paragraph
     const issuesToAutoDismiss = findings.filter(f =>
-      f.anchors[0]?.paragraph_id === paragraphId &&
+      f.anchors[0]?.paragraphId === paragraphId &&
       acceptedIssueIds.has(f.id) &&
       f.proposedEdit?.newText
     );

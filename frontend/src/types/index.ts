@@ -87,9 +87,9 @@ export interface BoundingBox {
 }
 
 export interface DocumentMetadata {
-  pageCount?: number;
-  wordCount: number;
-  characterCount: number;
+  page_count?: number;
+  word_count: number;
+  character_count: number;
   author?: string;
   createdDate?: string;
   modifiedDate?: string;
@@ -149,11 +149,11 @@ export type FindingCategory =
 export type Severity = 'critical' | 'major' | 'minor' | 'suggestion';
 
 export interface Anchor {
-  paragraph_id: string;            // REQUIRED
-  sentence_id?: string;            // More specific if available
-  start_char?: number;             // Character offset in paragraph
-  end_char?: number;
-  quoted_text: string;             // REQUIRED: the actual text
+  paragraphId: string;             // REQUIRED (camelCase from backend)
+  sentenceId?: string;             // More specific if available
+  startChar?: number;              // Character offset in paragraph
+  endChar?: number;
+  quotedText: string;              // REQUIRED: the actual text
 }
 
 export interface ProposedEdit {
@@ -317,7 +317,7 @@ export interface ReviewCompletedEvent {
   metrics?: {
     total_time_ms: number;
     total_cost_usd: number;
-    agents_run: number;
+    agents_run: string[];  // List of agent IDs that ran
     agent_metrics?: Record<string, { time_ms: number; cost_usd: number; findings_count: number }>;
   };
   timestamp: string;

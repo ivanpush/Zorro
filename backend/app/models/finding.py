@@ -5,7 +5,7 @@ Uses camelCase aliases for frontend compatibility.
 
 from datetime import datetime
 from typing import Literal, Any
-from pydantic import BaseModel, Field, field_validator, model_serializer
+from pydantic import BaseModel, Field, field_validator, model_serializer, model_validator
 import uuid
 
 
@@ -50,6 +50,54 @@ FindingCategory = Literal[
 
 Severity = Literal["critical", "major", "minor", "suggestion"]
 
+# =============================================================================
+# Track: Frontend tab routing (A=Writing, B=Methodology, C=Argumentation)
+# =============================================================================
+Track = Literal["A", "B", "C"]
+
+AGENT_TO_TRACK: dict[str, Track] = {
+    "clarity": "A",
+    "rigor_find": "B",
+    "rigor_rewrite": "B",
+    "adversary": "C",
+    "adversary_panel": "C",
+    "adversary_panel_claude": "C",
+    "adversary_panel_openai": "C",
+    "adversary_panel_google": "C",
+    "adversary_reconcile": "C",
+    "domain": "C",
+}
+
+# =============================================================================
+# Dimension: Summary charts (WQ=Writing Quality, CR=Claim Rigor, AS=Argument Strength)
+# =============================================================================
+Dimension = Literal["WQ", "CR", "AS"]
+
+CATEGORY_TO_DIMENSIONS: dict[str, list[Dimension]] = {
+    # Clarity -> Writing Quality
+    "clarity_sentence": ["WQ"],
+    "clarity_paragraph": ["WQ"],
+    "clarity_section": ["WQ"],
+    "clarity_flow": ["WQ"],
+    # Rigor -> Claim Rigor
+    "rigor_methodology": ["CR"],
+    "rigor_logic": ["CR"],
+    "rigor_evidence": ["CR"],
+    "rigor_statistics": ["CR"],
+    # Scope -> Argument Strength
+    "scope_overclaim": ["AS"],
+    "scope_underclaim": ["AS"],
+    "scope_missing": ["AS"],
+    # Domain -> both AS and CR
+    "domain_convention": ["AS", "CR"],
+    "domain_terminology": ["AS", "CR"],
+    "domain_factual": ["AS", "CR"],
+    # Adversarial -> Argument Strength
+    "adversarial_weakness": ["AS"],
+    "adversarial_gap": ["AS"],
+    "adversarial_alternative": ["AS"],
+}
+
 
 class Anchor(BaseModel):
     """Precise location reference in document."""
@@ -90,11 +138,40 @@ class Finding(BaseModel):
     anchors: list[Anchor] = Field(min_length=1)
     proposed_edit: ProposedEdit | None = None
 
+    # Track for frontend tab routing (auto-derived from agent_id)
+    track: Track = Field(default="A")
+
+    # Dimensions for summary charts (auto-derived from category)
+    dimensions: list[Dimension] = Field(default_factory=list)
+
     # Panel mode: how many models flagged this (1, 2, or 3)
     votes: int | None = Field(None, ge=1, le=3)
 
     metadata: dict[str, Any] | None = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
+
+    @model_validator(mode="after")
+    def auto_derive_fields(self) -> "Finding":
+        """Auto-derive track from agent_id and dimensions from category."""
+        # Derive track from agent_id
+        self.track = AGENT_TO_TRACK.get(self.agent_id, "A")
+
+        # Derive dimensions from category (if not already set)
+        if not self.dimensions:
+            self.dimensions = CATEGORY_TO_DIMENSIONS.get(self.category, [])
+
+        return self
+
+    @property
+    def sentence_ids(self) -> list[str]:
+        """Extract sentence_ids from anchors for frontend highlighting."""
+        return [a.sentence_id for a in self.anchors if a.sentence_id]
+
+    def merge_dimensions(self, other: "Finding") -> None:
+        """Merge dimensions from another finding (used in dedup)."""
+        for dim in other.dimensions:
+            if dim not in self.dimensions:
+                self.dimensions.append(dim)
 
     @model_serializer
     def serialize(self) -> dict[str, Any]:
@@ -109,12 +186,15 @@ class Finding(BaseModel):
             "description": self.description,
             "anchors": [
                 {
-                    "paragraph_id": a.paragraph_id,
-                    "sentence_id": a.sentence_id,
-                    "quoted_text": a.quoted_text,
+                    "paragraphId": a.paragraph_id,
+                    "sentenceId": a.sentence_id,
+                    "quotedText": a.quoted_text,
                 }
                 for a in self.anchors
             ],
+            "track": self.track,
+            "dimensions": self.dimensions,
+            "sentenceIds": self.sentence_ids,
             "createdAt": self.created_at.isoformat(),
         }
 
@@ -122,8 +202,8 @@ class Finding(BaseModel):
             data["proposedEdit"] = {
                 "type": self.proposed_edit.type,
                 "anchor": {
-                    "paragraph_id": self.proposed_edit.anchor.paragraph_id,
-                    "quoted_text": self.proposed_edit.anchor.quoted_text,
+                    "paragraphId": self.proposed_edit.anchor.paragraph_id,
+                    "quotedText": self.proposed_edit.anchor.quoted_text,
                 },
                 "newText": self.proposed_edit.new_text,
                 "rationale": self.proposed_edit.rationale,
@@ -138,10 +218,14 @@ class Finding(BaseModel):
         return data
 
 
-# Priority for deduplication (lower = higher priority)
+# Priority for deduplication (lower = higher priority = wins on overlap)
 AGENT_PRIORITY = {
     "adversary": 1,
     "adversary_panel": 1,
+    "adversary_panel_claude": 1,
+    "adversary_panel_openai": 1,
+    "adversary_panel_google": 1,
+    "adversary_reconcile": 1,
     "rigor_rewrite": 2,
     "rigor_find": 2,
     "domain": 2,
@@ -157,4 +241,8 @@ PRESENTATION_ORDER = {
     "domain": 3,
     "adversary": 4,
     "adversary_panel": 4,
+    "adversary_panel_claude": 4,
+    "adversary_panel_openai": 4,
+    "adversary_panel_google": 4,
+    "adversary_reconcile": 4,
 }

@@ -71,10 +71,10 @@ export function ManuscriptView({
       if (acceptedIssueIds.has(finding.id) || dismissedIssueIds.has(finding.id)) return;
 
       finding.anchors.forEach(anchor => {
-        if (anchor.paragraph_id) {
-          const existing = map.get(anchor.paragraph_id) || [];
+        if (anchor.paragraphId) {
+          const existing = map.get(anchor.paragraphId) || [];
           existing.push(finding);
-          map.set(anchor.paragraph_id, existing);
+          map.set(anchor.paragraphId, existing);
         }
       });
     });
@@ -88,7 +88,7 @@ export function ManuscriptView({
     return findings.find(f => f.id === selectedIssueId) || null;
   }, [selectedIssueId, findings]);
 
-  const selectedParagraphId = selectedIssue?.anchors[0]?.paragraph_id || null;
+  const selectedParagraphId = selectedIssue?.anchors[0]?.paragraphId || null;
 
   const toggleFinalView = (paragraphId: string) => {
     setShowingFinal(prev => {
@@ -142,11 +142,11 @@ export function ManuscriptView({
 
     // Highlight the quoted text within the paragraph
     const renderTextWithHighlight = (text: string) => {
-      if (!isSelected || !selectedIssue?.anchors[0]?.quoted_text) {
+      if (!isSelected || !selectedIssue?.anchors[0]?.quotedText) {
         return <span className="text-gray-200">{text}</span>;
       }
 
-      const quotedText = selectedIssue.anchors[0].quoted_text;
+      const quotedText = selectedIssue.anchors[0].quotedText;
       const idx = text.indexOf(quotedText);
 
       if (idx === -1) return <span className="text-gray-200">{text}</span>;

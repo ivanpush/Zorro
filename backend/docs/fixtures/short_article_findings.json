@@ -1,0 +1,212 @@
+{
+  "document_id": "doc_short_001",
+  "generated_at": "2026-01-10T22:30:00Z",
+  "findings": [
+    {
+      "id": "f_001",
+      "agentId": "clarity",
+      "category": "clarity_sentence",
+      "severity": "minor",
+      "confidence": 0.85,
+      "title": "Vague quantifier in abstract",
+      "description": "The phrase 'poorly characterized' is vague. Consider specifying what aspects remain unclear (e.g., dose-response, individual differences, task specificity).",
+      "anchors": [
+        {
+          "paragraphId": "p_001",
+          "sentenceId": "p_001_s_001",
+          "quotedText": "yet its effects on cognitive function under sleep deprivation remain poorly characterized"
+        }
+      ],
+      "track": "A",
+      "dimensions": ["WQ"],
+      "sentenceIds": ["p_001_s_001"],
+      "createdAt": "2026-01-10T22:30:01Z"
+    },
+    {
+      "id": "f_002",
+      "agentId": "clarity",
+      "category": "clarity_flow",
+      "severity": "suggestion",
+      "confidence": 0.72,
+      "title": "Missing transition in introduction",
+      "description": "The transition between paragraph 2 (occupational impact) and paragraph 3 (caffeine mechanism) could be smoother. Consider adding a sentence connecting these ideas.",
+      "anchors": [
+        {
+          "paragraphId": "p_003",
+          "sentenceId": "p_003_s_001",
+          "quotedText": "Caffeine acts as an adenosine receptor antagonist"
+        }
+      ],
+      "track": "A",
+      "dimensions": ["WQ"],
+      "sentenceIds": ["p_003_s_001"],
+      "createdAt": "2026-01-10T22:30:02Z"
+    },
+    {
+      "id": "f_003",
+      "agentId": "rigor_find",
+      "category": "rigor_methodology",
+      "severity": "major",
+      "confidence": 0.91,
+      "title": "Missing blinding verification",
+      "description": "While the study is described as double-blind, there is no mention of blinding verification or whether participants could guess their treatment assignment. Caffeine has noticeable subjective effects that could compromise blinding.",
+      "anchors": [
+        {
+          "paragraphId": "p_005",
+          "sentenceId": "p_005_s_002",
+          "quotedText": "They were randomly assigned to receive either 200mg caffeine or matching placebo capsules"
+        }
+      ],
+      "track": "B",
+      "dimensions": ["CR"],
+      "sentenceIds": ["p_005_s_002"],
+      "createdAt": "2026-01-10T22:30:03Z"
+    },
+    {
+      "id": "f_004",
+      "agentId": "rigor_find",
+      "category": "rigor_statistics",
+      "severity": "major",
+      "confidence": 0.88,
+      "title": "Missing multiple comparison correction",
+      "description": "Multiple outcomes are tested (accuracy, reaction time, variability) but no correction for multiple comparisons is mentioned. This increases the risk of Type I errors.",
+      "anchors": [
+        {
+          "paragraphId": "p_006",
+          "sentenceId": "p_006_s_002",
+          "quotedText": "We used an alpha level of 0.05 for all analyses"
+        }
+      ],
+      "track": "B",
+      "dimensions": ["CR"],
+      "sentenceIds": ["p_006_s_002"],
+      "createdAt": "2026-01-10T22:30:04Z"
+    },
+    {
+      "id": "f_005",
+      "agentId": "rigor_find",
+      "category": "rigor_evidence",
+      "severity": "minor",
+      "confidence": 0.79,
+      "title": "Baseline data not reported",
+      "description": "No baseline cognitive performance data is presented before sleep deprivation. Without this, we cannot assess the magnitude of sleep deprivation effects or how well caffeine restored performance toward baseline.",
+      "anchors": [
+        {
+          "paragraphId": "p_007",
+          "sentenceId": "p_007_s_001",
+          "quotedText": "The caffeine group showed significantly higher accuracy on the 2-back task compared to placebo (82.3% vs 71.4%, p < 0.001, d = 0.89)"
+        }
+      ],
+      "track": "B",
+      "dimensions": ["CR"],
+      "sentenceIds": ["p_007_s_001"],
+      "createdAt": "2026-01-10T22:30:05Z"
+    },
+    {
+      "id": "f_006",
+      "agentId": "adversary",
+      "category": "adversarial_weakness",
+      "severity": "critical",
+      "confidence": 0.94,
+      "title": "Confound: alerting effects vs. cognitive enhancement",
+      "description": "The study cannot distinguish between caffeine's direct cognitive enhancement effects and its alerting/arousal effects. Sleep-deprived participants receiving caffeine may simply be more awake, not cognitively enhanced. A control condition with a non-cognitive alerting stimulus would strengthen the claims.",
+      "anchors": [
+        {
+          "paragraphId": "p_010",
+          "sentenceId": "p_010_s_001",
+          "quotedText": "Our findings demonstrate that caffeine significantly improves working memory performance in sleep-deprived adults"
+        }
+      ],
+      "track": "C",
+      "dimensions": ["AS"],
+      "sentenceIds": ["p_010_s_001"],
+      "createdAt": "2026-01-10T22:30:06Z"
+    },
+    {
+      "id": "f_007",
+      "agentId": "adversary",
+      "category": "scope_overclaim",
+      "severity": "major",
+      "confidence": 0.86,
+      "title": "Overclaim about 'practical implications'",
+      "description": "The conclusion claims 'practical implications for shift workers' but the study used acute total sleep deprivation, which differs substantially from the chronic partial sleep restriction typical of shift work. The ecological validity of these findings for real-world shift work is questionable.",
+      "anchors": [
+        {
+          "paragraphId": "p_013",
+          "sentenceId": "p_013_s_002",
+          "quotedText": "These findings have practical implications for shift workers and others who must maintain cognitive function despite inadequate sleep"
+        }
+      ],
+      "track": "C",
+      "dimensions": ["AS"],
+      "sentenceIds": ["p_013_s_002"],
+      "createdAt": "2026-01-10T22:30:07Z"
+    },
+    {
+      "id": "f_008",
+      "agentId": "adversary",
+      "category": "adversarial_gap",
+      "severity": "major",
+      "confidence": 0.82,
+      "title": "Unaddressed tolerance effects",
+      "description": "The study excludes regular high caffeine users (>400mg) but doesn't address how tolerance might affect results for habitual moderate users. The subgroup analysis (p=0.08) hints at this but is not adequately discussed as a potential confound.",
+      "anchors": [
+        {
+          "paragraphId": "p_009",
+          "sentenceId": "p_009_s_001",
+          "quotedText": "Subgroup analysis revealed that habitual low caffeine consumers showed larger benefits than moderate consumers, though this interaction did not reach statistical significance (p = 0.08)"
+        }
+      ],
+      "track": "C",
+      "dimensions": ["AS"],
+      "sentenceIds": ["p_009_s_001"],
+      "createdAt": "2026-01-10T22:30:08Z"
+    },
+    {
+      "id": "f_009",
+      "agentId": "clarity",
+      "category": "clarity_paragraph",
+      "severity": "minor",
+      "confidence": 0.75,
+      "title": "Undefined effect size interpretation",
+      "description": "The paper states d=0.89 is a 'large effect size' but doesn't provide context for readers unfamiliar with Cohen's conventions. Brief explanation would improve accessibility.",
+      "anchors": [
+        {
+          "paragraphId": "p_007",
+          "sentenceId": "p_007_s_002",
+          "quotedText": "This represents a large effect size"
+        }
+      ],
+      "track": "A",
+      "dimensions": ["WQ"],
+      "sentenceIds": ["p_007_s_002"],
+      "createdAt": "2026-01-10T22:30:09Z"
+    },
+    {
+      "id": "f_010",
+      "agentId": "rigor_find",
+      "category": "rigor_methodology",
+      "severity": "minor",
+      "confidence": 0.77,
+      "title": "Incomplete exclusion criteria",
+      "description": "Exclusion criteria mention sleep disorders and psychiatric conditions but don't specify which ones or the screening method used. ADHD, for instance, could significantly affect both caffeine response and working memory.",
+      "anchors": [
+        {
+          "paragraphId": "p_004",
+          "sentenceId": "p_004_s_002",
+          "quotedText": "Participants were screened for sleep disorders, psychiatric conditions, and regular caffeine use exceeding 400mg daily"
+        }
+      ],
+      "track": "B",
+      "dimensions": ["CR"],
+      "sentenceIds": ["p_004_s_002"],
+      "createdAt": "2026-01-10T22:30:10Z"
+    }
+  ],
+  "summary": {
+    "totalFindings": 10,
+    "byTrack": {"A": 3, "B": 4, "C": 3},
+    "bySeverity": {"critical": 1, "major": 5, "minor": 4, "suggestion": 0},
+    "byDimension": {"WQ": 3, "CR": 4, "AS": 3}
+  }
+}

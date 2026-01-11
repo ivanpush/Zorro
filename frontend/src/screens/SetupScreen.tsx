@@ -157,18 +157,7 @@ export function SetupScreen() {
 
   return (
     <div className="min-h-screen bg-background antialiased">
-      {/* Top bar with ZORRO branding */}
-      <div className="fixed top-0 left-0 right-0 h-20 bg-background/80 backdrop-blur-sm border-b border-border/20 z-50">
-        <div className="max-w-7xl mx-auto px-8 h-full flex items-center justify-between">
-          <div></div> {/* Empty div for spacing */}
-          <h1 className="text-2xl font-serif tracking-wider"
-              style={{ color: '#E89855' }}>
-            ZORRO
-          </h1>
-        </div>
-      </div>
-
-      <div className="max-w-3xl mx-auto px-8 pt-32 pb-12">
+      <div className="max-w-3xl mx-auto px-8 pt-12 pb-12">
 
         {/* Document Classification - Refined */}
         <section className="mb-14">
@@ -223,8 +212,13 @@ export function SetupScreen() {
             )}
           </div>
 
-          <p className="mt-2 text-sm text-muted-foreground font-medium">
-            {currentDocument.metadata?.pageCount || 0} pages · {currentDocument.metadata?.wordCount?.toLocaleString() || 0} words
+          {currentDocument.title && (
+            <p className="mt-3 text-base text-foreground/80 font-medium truncate" title={currentDocument.title}>
+              {currentDocument.title.length > 60 ? currentDocument.title.slice(0, 60) + '…' : currentDocument.title}
+            </p>
+          )}
+          <p className="mt-1 text-sm text-muted-foreground font-medium">
+            {currentDocument.metadata?.page_count || 0} pages · {currentDocument.metadata?.word_count?.toLocaleString() || 0} words
           </p>
         </section>
 

@@ -6,6 +6,7 @@ Acts as "Reviewer 2" - the skeptical expert reviewer.
 
 import asyncio
 import json
+import logging
 from typing import Any
 from pydantic import BaseModel, Field, field_validator
 
@@ -13,6 +14,8 @@ from app.agents.base import BaseAgent
 from app.models import (
     DocObj, BriefingOutput, Finding, Anchor, EvidencePack, AgentMetrics
 )
+
+logger = logging.getLogger("zorro.agents.adversary")
 
 
 class AdversaryFinding(BaseModel):
@@ -74,6 +77,11 @@ class SingleAdversary(BaseAgent):
         Returns:
             Tuple of (list[Finding], AgentMetrics)
         """
+        logger.info(
+            f"[adversary] Starting: {len(rigor_findings)} rigor findings, "
+            f"{len(evidence.items)} evidence items"
+        )
+
         system, user = self.composer.build_adversary_prompt(
             doc, briefing, rigor_findings, evidence, steering
         )
@@ -87,6 +95,11 @@ class SingleAdversary(BaseAgent):
 
         # Convert to Finding objects
         findings = self._convert_findings(output)
+
+        logger.info(
+            f"[adversary] Complete: {len(findings)} findings, "
+            f"{metrics.time_ms:.0f}ms, ${metrics.cost_usd:.3f}"
+        )
 
         return findings, metrics
 

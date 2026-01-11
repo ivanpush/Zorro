@@ -40,6 +40,12 @@ class Settings(BaseSettings):
     enable_domain: bool = True      # Domain validation (Perplexity)
     enable_adversary: bool = True   # Adversarial critic
 
+    # ===========================================
+    # Debug Settings
+    # ===========================================
+    llm_debug: bool = False         # Log full prompts/responses
+    debug_dump: bool = False        # Save intermediate outputs to JSON files
+
     model_config = {
         "env_file": ".env",
         "env_file_encoding": "utf-8",

@@ -13,7 +13,7 @@ import type {
 export interface ReviewMetrics {
   total_time_ms: number;
   total_cost_usd: number;
-  agents_run: number;
+  agents_run: string[];  // List of agent IDs that ran
   // Per-agent breakdown (optional)
   agent_metrics?: Record<string, { time_ms: number; cost_usd: number; findings_count: number }>;
 }
