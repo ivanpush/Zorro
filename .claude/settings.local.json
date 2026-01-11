@@ -39,7 +39,12 @@
       "Bash(python:*)",
       "Bash(chmod:*)",
       "Bash(./start.sh)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(awk '{print $9, \"\"\"\"(\"\"\"\" $5 \"\"\"\")\"\"\"\"}')",
+      "Bash(xargs:*)",
+      "Bash(test:*)",
+      "Bash(awk:*)",
+      "Bash(source .venv/bin/activate)"
     ],
     "deny": [],
     "ask": []

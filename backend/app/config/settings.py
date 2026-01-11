@@ -1,5 +1,10 @@
 """
 Application settings using pydantic-settings.
+
+Agent toggles allow testing individual agents:
+  ENABLE_BRIEFING=true
+  ENABLE_CLARITY=false  # Skip clarity for faster testing
+  etc.
 """
 
 from pydantic_settings import BaseSettings
@@ -22,9 +27,18 @@ class Settings(BaseSettings):
     # Concurrency
     max_concurrent_agents: int = 4
 
-    # Chunking
-    DEFAULT_CHUNK_WORDS: int = 1500
+    # Chunking - smaller = more parallelism = faster
+    DEFAULT_CHUNK_WORDS: int = 400
     CONTEXT_OVERLAP_SENTENCES: int = 3
+
+    # ===========================================
+    # Agent Toggles - set to False to skip agent
+    # ===========================================
+    enable_briefing: bool = True    # Always needed for other agents
+    enable_clarity: bool = True     # Clarity inspector
+    enable_rigor: bool = True       # Rigor finder + rewriter
+    enable_domain: bool = True      # Domain validation (Perplexity)
+    enable_adversary: bool = True   # Adversarial critic
 
     model_config = {
         "env_file": ".env",

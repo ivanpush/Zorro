@@ -7,7 +7,7 @@ from functools import lru_cache
 from typing import TypeVar, Type
 
 import instructor
-from anthropic import Anthropic
+from anthropic import AsyncAnthropic
 from pydantic import BaseModel
 
 from app.config import get_settings, get_model, calculate_cost
@@ -22,11 +22,12 @@ class LLMClient:
     LLM client wrapper that:
     1. Uses Instructor for structured outputs
     2. Automatically collects metrics (tokens, time, cost)
+    3. Uses async client for true parallelism
     """
 
     def __init__(self):
         settings = get_settings()
-        self._anthropic = Anthropic(api_key=settings.anthropic_api_key)
+        self._anthropic = AsyncAnthropic(api_key=settings.anthropic_api_key)
         self._instructor = instructor.from_anthropic(self._anthropic)
 
     async def call(
@@ -58,8 +59,8 @@ class LLMClient:
 
         start_time = time.perf_counter()
 
-        # Make the call with Instructor
-        response = self._instructor.messages.create(
+        # Make the call with Instructor (async)
+        response = await self._instructor.messages.create(
             model=model,
             max_tokens=max_tokens,
             system=system,
@@ -70,16 +71,15 @@ class LLMClient:
         elapsed_ms = (time.perf_counter() - start_time) * 1000
 
         # Extract token usage from the raw response
-        # Instructor wraps the response, but we can access usage
-        input_tokens = getattr(response, '_raw_response', {}).get('usage', {}).get('input_tokens', 0)
-        output_tokens = getattr(response, '_raw_response', {}).get('usage', {}).get('output_tokens', 0)
-
-        # If we can't get tokens from response, estimate
-        if input_tokens == 0:
-            # Rough estimate: 4 chars per token
+        # Instructor attaches _raw_response which is an Anthropic Message object
+        raw = getattr(response, '_raw_response', None)
+        if raw is not None and hasattr(raw, 'usage'):
+            input_tokens = raw.usage.input_tokens
+            output_tokens = raw.usage.output_tokens
+        else:
+            # Fallback: rough estimate (4 chars per token)
             input_tokens = (len(system) + len(user)) // 4
-        if output_tokens == 0:
-            output_tokens = max_tokens // 4  # Rough estimate
+            output_tokens = max_tokens // 4
 
         cost = calculate_cost(model, input_tokens, output_tokens)
 
@@ -111,7 +111,7 @@ class LLMClient:
 
         start_time = time.perf_counter()
 
-        response = self._anthropic.messages.create(
+        response = await self._anthropic.messages.create(
             model=model,
             max_tokens=max_tokens,
             system=system,

@@ -752,18 +752,119 @@ interface ReviewResultResponse {
 
 ---
 
+## Parser Output Requirements
+
+All document parsers (PDF, DOCX, etc.) MUST produce a DocObj that conforms to this schema. The following is a complete, minimal example showing required fields:
+
+```json
+{
+  "document_id": "doc_abc123",
+  "filename": "example.pdf",
+  "type": "pdf",
+  "title": "Example Document Title",
+  "sections": [
+    {
+      "section_id": "sec_001",
+      "section_index": 0,
+      "section_title": "Introduction",
+      "level": 1,
+      "paragraph_ids": ["p_001", "p_002"]
+    },
+    {
+      "section_id": "sec_002",
+      "section_index": 1,
+      "section_title": "Methods",
+      "level": 1,
+      "paragraph_ids": ["p_003"]
+    }
+  ],
+  "paragraphs": [
+    {
+      "paragraph_id": "p_001",
+      "section_id": "sec_001",
+      "paragraph_index": 0,
+      "text": "This is the first paragraph. It contains two sentences.",
+      "sentences": [
+        {
+          "sentence_id": "p_001_s_001",
+          "paragraph_id": "p_001",
+          "sentence_index": 0,
+          "text": "This is the first paragraph.",
+          "start_char": 0,
+          "end_char": 28
+        },
+        {
+          "sentence_id": "p_001_s_002",
+          "paragraph_id": "p_001",
+          "sentence_index": 1,
+          "text": "It contains two sentences.",
+          "start_char": 29,
+          "end_char": 55
+        }
+      ]
+    },
+    {
+      "paragraph_id": "p_002",
+      "section_id": "sec_001",
+      "paragraph_index": 1,
+      "text": "Second paragraph here.",
+      "sentences": [
+        {
+          "sentence_id": "p_002_s_001",
+          "paragraph_id": "p_002",
+          "sentence_index": 0,
+          "text": "Second paragraph here.",
+          "start_char": 0,
+          "end_char": 22
+        }
+      ]
+    },
+    {
+      "paragraph_id": "p_003",
+      "section_id": "sec_002",
+      "paragraph_index": 2,
+      "text": "Methods section content.",
+      "sentences": [
+        {
+          "sentence_id": "p_003_s_001",
+          "paragraph_id": "p_003",
+          "sentence_index": 0,
+          "text": "Methods section content.",
+          "start_char": 0,
+          "end_char": 24
+        }
+      ]
+    }
+  ],
+  "figures": [],
+  "references": [],
+  "metadata": {
+    "page_count": 5,
+    "word_count": 150,
+    "character_count": 800
+  },
+  "created_at": "2025-01-10T12:00:00Z"
+}
+```
+
+### Key Requirements for Parsers
+
+1. **IDs must be unique and stable** - Use consistent naming: `sec_XXX`, `p_XXX`, `p_XXX_s_YYY`
+2. **Indexes must be sequential** - `section_index`, `paragraph_index`, `sentence_index` are 0-based and sequential
+3. **Character offsets must be accurate** - `start_char` and `end_char` are offsets within the paragraph text, NOT the document
+4. **Sentence text must match** - `paragraph.text[start_char:end_char]` must equal `sentence.text`
+5. **Back-references must be valid** - `sentence.paragraph_id` must match its parent paragraph's `paragraph_id`
+
+---
+
 ## Demo Fixtures Structure
 
-For demo mode, fixtures are stored in `apps/web/src/fixtures/`:
+For demo mode, fixtures are stored in `frontend/public/fixtures/`:
 
 ```
 fixtures/
-├── documents/
-│   ├── sample-manuscript.json    # DocObj
-│   └── sample-grant.json         # DocObj
-└── findings/
-    ├── sample-manuscript.json    # Finding[]
-    └── sample-grant.json         # Finding[]
+├── manuscript_pdf.json           # DocObj for demo manuscript
+└── (findings are in /reviews/)
 ```
 
 Each demo document needs a corresponding findings file with pre-built findings that reference valid paragraph/sentence IDs from that document.

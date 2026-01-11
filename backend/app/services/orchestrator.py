@@ -39,6 +39,7 @@ from app.agents.domain import DomainPipeline
 from app.services.assembler import Assembler
 from app.core import get_llm_client
 from app.composer import Composer
+from app.config import get_settings
 
 
 # Terminal logging setup
@@ -80,6 +81,11 @@ def _log_chunk(agent: str, chunk_idx: int, total: int, elapsed: float, findings:
 def _log_error(agent: str, error: str):
     """Log agent error."""
     logger.info(f"\033[36m{agent:<16}\033[0m \033[31mFAILED\033[0m   {error}")
+
+
+def _log_skip(agent: str):
+    """Log agent skipped."""
+    logger.info(f"\033[36m{agent:<16}\033[0m \033[33mSKIPPED\033[0m  (disabled in settings)")
 
 
 def _log_summary(elapsed: float, cost: float, findings: int, raw_count: int):
@@ -261,7 +267,7 @@ class Orchestrator:
                     steering=config.steering_memo
                 ):
                     chunk_idx, chunk_findings, chunk_metric, error = chunk_result
-                    chunk_elapsed = chunk_metric.duration_ms / 1000 if chunk_metric else 0
+                    chunk_elapsed = chunk_metric.time_ms / 1000 if chunk_metric else 0
 
                     if error:
                         _log_chunk("clarity", chunk_idx, num_chunks, chunk_elapsed, 0, failed=True)
@@ -339,7 +345,7 @@ class Orchestrator:
                     steering=config.steering_memo
                 ):
                     chunk_idx, chunk_findings, chunk_metric, error = chunk_result
-                    chunk_elapsed = chunk_metric.duration_ms / 1000 if chunk_metric else 0
+                    chunk_elapsed = chunk_metric.time_ms / 1000 if chunk_metric else 0
 
                     if error:
                         _log_chunk("rigor_find", chunk_idx, num_sections, chunk_elapsed, 0, failed=True)
@@ -485,16 +491,47 @@ class Orchestrator:
                 # Non-critical
 
         # ============================================================
-        # LAUNCH ALL TASKS
+        # LAUNCH ALL TASKS (respecting agent toggles from settings)
         # ============================================================
+        settings = get_settings()
 
-        # Start all agents - they'll wait on their dependencies internally
-        briefing_task = asyncio.create_task(run_briefing())
-        domain_task = asyncio.create_task(run_domain())
-        clarity_task = asyncio.create_task(run_clarity())
-        rigor_find_task = asyncio.create_task(run_rigor_find())
-        rigor_rewrite_task = asyncio.create_task(run_rigor_rewrite())
-        adversary_task = asyncio.create_task(run_adversary())
+        # Helper to create a skip task that just signals ready
+        async def skip_agent(name: str, ready_event: asyncio.Event | None = None):
+            _log_skip(name)
+            if ready_event:
+                ready_event.set()
+
+        # Briefing is always needed (other agents depend on it)
+        if settings.enable_briefing:
+            briefing_task = asyncio.create_task(run_briefing())
+        else:
+            briefing_task = asyncio.create_task(skip_agent("briefing", briefing_ready))
+
+        # Domain (parallel with briefing, feeds adversary)
+        if settings.enable_domain and config.enable_domain:
+            domain_task = asyncio.create_task(run_domain())
+        else:
+            domain_task = asyncio.create_task(skip_agent("domain", domain_ready))
+
+        # Clarity (needs briefing)
+        if settings.enable_clarity:
+            clarity_task = asyncio.create_task(run_clarity())
+        else:
+            clarity_task = asyncio.create_task(skip_agent("clarity"))
+
+        # Rigor (needs briefing)
+        if settings.enable_rigor:
+            rigor_find_task = asyncio.create_task(run_rigor_find())
+            rigor_rewrite_task = asyncio.create_task(run_rigor_rewrite())
+        else:
+            rigor_find_task = asyncio.create_task(skip_agent("rigor_find", rigor_find_ready))
+            rigor_rewrite_task = asyncio.create_task(skip_agent("rigor_rewrite"))
+
+        # Adversary (needs briefing + rigor + domain)
+        if settings.enable_adversary:
+            adversary_task = asyncio.create_task(run_adversary())
+        else:
+            adversary_task = asyncio.create_task(skip_agent("adversary"))
 
         async def run_assembler_and_complete():
             """Wait for all agents, run assembler, signal completion."""

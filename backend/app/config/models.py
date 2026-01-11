@@ -20,6 +20,7 @@ MODEL_COSTS: dict[str, ModelCost] = {
     # Anthropic
     "claude-opus-4-20250514": ModelCost(input=15.0, output=75.0),
     "claude-sonnet-4-20250514": ModelCost(input=3.0, output=15.0),
+    "claude-3-5-haiku-20241022": ModelCost(input=0.80, output=4.0),
 
     # OpenAI (placeholder - update when GPT-5 pricing known)
     "gpt-5": ModelCost(input=15.0, output=60.0),
@@ -39,31 +40,31 @@ MODEL_COSTS: dict[str, ModelCost] = {
 
 AGENT_MODELS: dict[str, str] = {
     # Briefing
-    "briefing": "claude-sonnet-4-20250514",
+    "briefing": "claude-3-5-haiku-20241022",
 
     # Clarity (chunked, parallel)
-    "clarity": "claude-sonnet-4-20250514",
+    "clarity": "claude-3-5-haiku-20241022",
 
     # Rigor (section-chunked, 2-phase)
-    "rigor_find": "claude-sonnet-4-20250514",
-    "rigor_rewrite": "claude-sonnet-4-20250514",
+    "rigor_find": "claude-3-5-haiku-20241022",
+    "rigor_rewrite": "claude-3-5-haiku-20241022",
 
     # Domain pipeline (4 stages)
-    "domain_target_extractor": "claude-sonnet-4-20250514",
-    "domain_query_generator": "claude-sonnet-4-20250514",
+    "domain_target_extractor": "claude-3-5-haiku-20241022",
+    "domain_query_generator": "claude-3-5-haiku-20241022",
     "domain_search": "sonar",
-    "domain_evidence_synthesizer": "claude-sonnet-4-20250514",
+    "domain_evidence_synthesizer": "claude-3-5-haiku-20241022",
 
     # Adversary (single model mode)
-    "adversary": "claude-opus-4-20250514",
+    "adversary": "claude-3-5-haiku-20241022",
 
     # Adversary panel mode (3 frontier models)
-    "adversary_panel_claude": "claude-opus-4-20250514",
+    "adversary_panel_claude": "claude-3-5-haiku-20241022",
     "adversary_panel_openai": "gpt-5",
     "adversary_panel_google": "gemini-3-opus",
 
     # Panel reconciliation
-    "adversary_reconcile": "claude-sonnet-4-20250514",
+    "adversary_reconcile": "claude-3-5-haiku-20241022",
 }
 
 
@@ -73,7 +74,7 @@ AGENT_MODELS: dict[str, str] = {
 
 def get_model(agent_id: str) -> str:
     """Get model name for an agent."""
-    return AGENT_MODELS.get(agent_id, "claude-sonnet-4-20250514")
+    return AGENT_MODELS.get(agent_id, "claude-3-5-haiku-20241022")
 
 
 def get_cost(model: str) -> ModelCost:

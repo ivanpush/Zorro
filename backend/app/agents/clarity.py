@@ -6,8 +6,9 @@ Supports streaming results as chunks complete.
 """
 
 import asyncio
-from typing import AsyncGenerator
-from pydantic import BaseModel, Field
+import json
+from typing import AsyncGenerator, Any
+from pydantic import BaseModel, Field, field_validator
 
 from app.agents.base import BaseAgent
 from app.models import DocObj, BriefingOutput, Finding, AgentMetrics
@@ -18,6 +19,17 @@ from app.services.chunker import chunk_for_clarity
 class ClarityOutput(BaseModel):
     """Structured output from Clarity agent for a single chunk."""
     findings: list[Finding] = Field(default_factory=list)
+
+    @field_validator('findings', mode='before')
+    @classmethod
+    def parse_findings(cls, v: Any) -> list:
+        """Handle case where model returns JSON string instead of list."""
+        if isinstance(v, str):
+            try:
+                return json.loads(v)
+            except json.JSONDecodeError:
+                return []
+        return v
 
 
 # Type for streaming results: (chunk_index, findings, metrics, error_msg)
@@ -96,13 +108,16 @@ class ClarityAgent(BaseAgent):
         """
         chunks = chunk_for_clarity(doc)
 
-        # Create tasks with their chunk indices
+        # Limit concurrent API calls to avoid rate limiting
+        semaphore = asyncio.Semaphore(8)
+
         async def process_with_index(chunk: ClarityChunk) -> ChunkResult:
-            try:
-                findings, metrics = await self._process_chunk(chunk, briefing, steering)
-                return (chunk.chunk_index, findings, metrics, None)
-            except Exception as e:
-                return (chunk.chunk_index, [], None, str(e))
+            async with semaphore:
+                try:
+                    findings, metrics = await self._process_chunk(chunk, briefing, steering)
+                    return (chunk.chunk_index, findings, metrics, None)
+                except Exception as e:
+                    return (chunk.chunk_index, [], None, str(e))
 
         tasks = [
             asyncio.create_task(process_with_index(chunk))

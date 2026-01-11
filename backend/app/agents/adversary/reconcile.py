@@ -4,7 +4,9 @@ Reconciler - Merges findings from 3-model panel.
 Deduplicates similar findings and sets vote counts.
 """
 
-from pydantic import BaseModel, Field
+import json
+from typing import Any
+from pydantic import BaseModel, Field, field_validator
 
 from app.agents.base import BaseAgent
 from app.models import Finding, Anchor, AgentMetrics
@@ -24,6 +26,17 @@ class ReconciledFinding(BaseModel):
 class ReconcileOutput(BaseModel):
     """Output from reconciliation."""
     findings: list[ReconciledFinding] = Field(default_factory=list)
+
+    @field_validator('findings', mode='before')
+    @classmethod
+    def parse_findings(cls, v: Any) -> list:
+        """Handle case where model returns JSON string instead of list."""
+        if isinstance(v, str):
+            try:
+                return json.loads(v)
+            except json.JSONDecodeError:
+                return []
+        return v
 
 
 class Reconciler(BaseAgent):

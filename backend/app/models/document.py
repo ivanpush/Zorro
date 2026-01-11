@@ -32,9 +32,13 @@ class Paragraph(BaseModel):
     """Paragraph with sentence breakdown."""
     paragraph_id: str = Field(description="Format: p_XXX")
     section_id: str | None = None
-    paragraph_index: int = Field(ge=0)
+    paragraph_index: int = Field(ge=0, default=0)
     text: str
     sentences: list[Sentence] = Field(default_factory=list)
+
+    # Extra fields from fixtures (ignored but allowed)
+    para_type: str | None = Field(None, exclude=True)
+    metadata: dict | None = Field(None, exclude=True)
 
     # Export mapping for PDF
     bounding_box: BoundingBox | None = None
@@ -94,7 +98,7 @@ class DocObj(BaseModel):
     document_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     filename: str
     type: Literal["pdf", "docx"]
-    title: str
+    title: str = "Untitled Document"
 
     sections: list[Section] = Field(default_factory=list)
     paragraphs: list[Paragraph] = Field(default_factory=list)
@@ -103,6 +107,15 @@ class DocObj(BaseModel):
 
     metadata: DocumentMetadata = Field(default_factory=DocumentMetadata)
     created_at: datetime = Field(default_factory=datetime.utcnow)
+
+    # Extra fields from fixtures (ignored but allowed)
+    authors: str | None = Field(None, exclude=True)
+    affiliations: str | None = Field(None, exclude=True)
+    tables: list | None = Field(None, exclude=True)
+    issues: list | None = Field(None, exclude=True)
+    document_type: str | None = Field(None, exclude=True)
+    source_format: str | None = Field(None, exclude=True)
+    meta: dict | None = Field(None, exclude=True)
 
     def get_paragraph(self, paragraph_id: str) -> Paragraph | None:
         return next((p for p in self.paragraphs if p.paragraph_id == paragraph_id), None)

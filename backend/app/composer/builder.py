@@ -56,13 +56,14 @@ class Composer:
     def build_clarity_prompt(
         self,
         chunk: ClarityChunk,
-        briefing: BriefingOutput,
+        briefing: BriefingOutput | None,
         steering: str | None = None
     ) -> tuple[str, str]:
+        briefing_context = briefing.format_for_prompt() if briefing else "(No briefing context available)"
         return (
             self.lib.CLARITY_SYSTEM,
             self.lib.CLARITY_USER.format(
-                briefing_context=briefing.format_for_prompt(),
+                briefing_context=briefing_context,
                 chunk_index=chunk.chunk_index + 1,
                 chunk_total=chunk.chunk_total,
                 chunk_text=chunk.get_text_with_ids(),
@@ -77,13 +78,14 @@ class Composer:
     def build_rigor_find_prompt(
         self,
         chunk: RigorChunk,
-        briefing: BriefingOutput,
+        briefing: BriefingOutput | None,
         steering: str | None = None
     ) -> tuple[str, str]:
+        briefing_context = briefing.format_for_prompt() if briefing else "(No briefing context available)"
         return (
             self.lib.RIGOR_FIND_SYSTEM,
             self.lib.RIGOR_FIND_USER.format(
-                briefing_context=briefing.format_for_prompt(),
+                briefing_context=briefing_context,
                 section_name=chunk.section.section_title or "Untitled",
                 chunk_index=chunk.chunk_index + 1,
                 chunk_total=chunk.chunk_total,
@@ -143,15 +145,16 @@ class Composer:
     def build_adversary_prompt(
         self,
         doc: DocObj,
-        briefing: BriefingOutput,
+        briefing: BriefingOutput | None,
         rigor_findings: list[Finding],
         evidence: EvidencePack,
         steering: str | None = None
     ) -> tuple[str, str]:
+        briefing_context = briefing.format_for_prompt() if briefing else "(No briefing context available)"
         return (
             self.lib.ADVERSARY_SYSTEM,
             self.lib.ADVERSARY_USER.format(
-                briefing_context=briefing.format_for_prompt(),
+                briefing_context=briefing_context,
                 rigor_findings=self._format_findings(rigor_findings),
                 evidence_pack=evidence.format_for_prompt(),
                 document_text=doc.get_text_with_ids(),

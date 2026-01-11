@@ -189,7 +189,10 @@ export function ReviewScreen() {
       const mode = sessionStorage.getItem('reviewMode') || reviewMode || 'static';
       const demoFile = sessionStorage.getItem('demoFile') || 'manuscript_pdf';
 
-      if (mode === 'static' || !currentDocument || findings.length === 0) {
+      // Only load fixture data in static mode OR if we don't have a document
+      // In dynamic mode with a document, we use findings from the store (even if empty)
+      const isDynamicWithDocument = (mode === 'demo' || mode === 'dynamic') && currentDocument;
+      if (!isDynamicWithDocument && (mode === 'static' || !currentDocument)) {
         try {
           const response = await fetch(`/reviews/${demoFile}_fullreview.json`);
           if (!response.ok) throw new Error('Failed to load review data');
