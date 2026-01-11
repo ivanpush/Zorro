@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from app.agents.base import BaseAgent
 from app.models import (
-    DocObj, BriefingOutput, Finding, Anchor, EvidencePack, AgentMetrics
+    DocObj, BriefingOutput, Finding, Anchor, ProposedEdit, EvidencePack, AgentMetrics
 )
 
 logger = logging.getLogger("zorro.agents.adversary")
@@ -26,6 +26,8 @@ class AdversaryFinding(BaseModel):
     description: str
     paragraph_id: str
     quoted_text: str
+    suggestion: str = Field(description="WHAT the author should do to address this")
+    rationale: str = Field(description="WHY this suggestion would strengthen the argument")
 
 
 class AdversaryOutput(BaseModel):
@@ -112,18 +114,24 @@ class SingleAdversary(BaseAgent):
 
         findings = []
         for f in output.findings:
+            anchor = Anchor(
+                paragraph_id=f.paragraph_id,
+                quoted_text=f.quoted_text,
+            )
             findings.append(Finding(
                 agent_id=self.agent_id,
                 category=f.category,
                 severity=f.severity,
                 title=f.title,
                 description=f.description,
-                anchors=[
-                    Anchor(
-                        paragraph_id=f.paragraph_id,
-                        quoted_text=f.quoted_text,
-                    )
-                ],
+                anchors=[anchor],
+                proposed_edit=ProposedEdit(
+                    type="suggestion",
+                    anchor=anchor,
+                    new_text=None,  # Adversary doesn't provide concrete rewrites
+                    rationale=f.rationale,
+                    suggestion=f.suggestion,
+                ),
             ))
 
         return findings

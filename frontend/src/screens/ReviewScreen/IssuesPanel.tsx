@@ -408,7 +408,7 @@ export function IssuesPanel({
                 </p>
               )}
 
-              {/* SUGGESTED REWRITE or SUGGESTION section */}
+              {/* SUGGESTED REWRITE section */}
               {issue.proposedEdit?.newText && !isEditing && (
                 <div
                   className={`p-3 rounded-md ${isRewriteDisabled ? 'opacity-60' : ''}`}
@@ -417,9 +417,8 @@ export function IssuesPanel({
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <h5 className="text-[11px] font-bold uppercase tracking-wider" style={{ color: '#88CACA' }}>
-                        {issue.proposedEdit.type === 'suggestion' ? 'Suggestion' : 'Suggested Rewrite'}
+                        Suggested Rewrite
                       </h5>
-                      {/* Rationale tooltip with ? icon */}
                       {issue.proposedEdit.rationale && (
                         <div className="relative group/tooltip">
                           <HelpCircle
@@ -436,14 +435,13 @@ export function IssuesPanel({
                         <span className="text-[11px] text-amber-400/80 font-normal">(disabled)</span>
                       )}
                     </div>
-                    {!isResolved && !isRewriteDisabled && issue.proposedEdit.type !== 'suggestion' && (
+                    {!isResolved && !isRewriteDisabled && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           handleEditRewrite(issue);
                         }}
                         className="flex items-center gap-1 text-[11px] text-gray-400 transition-colors"
-                        style={{ }}
                         onMouseEnter={(e) => e.currentTarget.style.color = '#88CACA'}
                         onMouseLeave={(e) => e.currentTarget.style.color = '#9ca3af'}
                       >
@@ -456,6 +454,36 @@ export function IssuesPanel({
                     {issue.proposedEdit.newText}
                   </p>
                 </div>
+              )}
+
+              {/* SUGGESTION (amber) - collapsible compact card */}
+              {issue.proposedEdit && !issue.proposedEdit.newText && issue.proposedEdit.suggestion && !isEditing && (
+                <details
+                  className={`group rounded border ${isRewriteDisabled ? 'opacity-60' : ''}`}
+                  style={{ backgroundColor: 'rgba(251, 191, 36, 0.05)', borderColor: 'rgba(251, 191, 36, 0.2)' }}
+                >
+                  <summary className="flex items-center justify-between px-2 py-1.5 cursor-pointer list-none select-none">
+                    <div className="flex items-center gap-2">
+                      <ChevronRight className="w-3 h-3 group-open:rotate-90 transition-transform" style={{ color: '#FBBF24' }} />
+                      <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: '#FBBF24' }}>
+                        Suggestion
+                      </span>
+                      {issue.proposedEdit.rationale && (
+                        <div className="relative group/tooltip">
+                          <HelpCircle className="w-3 h-3 cursor-help opacity-60" style={{ color: '#FBBF24' }} />
+                          <div className="absolute left-0 bottom-full mb-2 w-56 p-2 rounded bg-gray-800 border border-gray-700 text-[11px] text-gray-300 opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all z-50 shadow-lg">
+                            {issue.proposedEdit.rationale}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </summary>
+                  <div className="px-2 pb-2 pt-1">
+                    <p className="text-[12px] text-gray-300 leading-relaxed">
+                      {issue.proposedEdit.suggestion}
+                    </p>
+                  </div>
+                </details>
               )}
 
               {/* Edit mode */}

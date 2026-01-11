@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Download, FileText, CheckCircle2, ChevronDown, ChevronUp, Clock, DollarSign, Cpu } from 'lucide-react';
+import { Download, FileText, CheckCircle2 } from 'lucide-react';
 import { useAppStore } from '@/store';
 import { ManuscriptView } from '@/components/domain/ManuscriptView';
 import { IssuesPanel } from './ReviewScreen/IssuesPanel';
@@ -71,14 +71,19 @@ function ProgressRing({
   );
 }
 
-// Dev Banner Component
+// Dev Banner Component - Collapsible card (bottom-right)
 function DevBanner({
   metrics,
-  isExpanded,
+  isOpen,
   onToggle
 }: {
-  metrics: { total_time_ms: number; total_cost_usd: number; agents_run: string[] };
-  isExpanded: boolean;
+  metrics: {
+    total_time_ms: number;
+    total_cost_usd: number;
+    agents_run: string[];
+    agent_metrics?: Record<string, { time_ms: number; cost_usd: number; findings_count: number }>;
+  };
+  isOpen: boolean;
   onToggle: () => void;
 }) {
   const formatTime = (ms: number) => {
@@ -91,51 +96,80 @@ function DevBanner({
 
   const formatCost = (usd: number) => `$${usd.toFixed(2)}`;
 
+  // Agent display names and order
+  const agentDisplay: Record<string, string> = {
+    briefing: 'Briefing',
+    clarity: 'Clarity',
+    rigor_find: 'Rigor',
+    rigor_rewrite: 'Rigor',
+    adversary: 'Adversary',
+    domain: 'Domain',
+  };
+
+  // Combine rigor_find and rigor_rewrite metrics
+  const getCombinedMetrics = () => {
+    if (!metrics.agent_metrics) return {};
+    const combined: Record<string, { time_ms: number; cost_usd: number }> = {};
+    for (const [agentId, data] of Object.entries(metrics.agent_metrics)) {
+      const displayName = agentDisplay[agentId] || agentId;
+      if (combined[displayName]) {
+        combined[displayName].time_ms += data.time_ms;
+        combined[displayName].cost_usd += data.cost_usd;
+      } else {
+        combined[displayName] = { time_ms: data.time_ms, cost_usd: data.cost_usd };
+      }
+    }
+    return combined;
+  };
+
+  const combinedMetrics = getCombinedMetrics();
+  const displayOrder = ['Briefing', 'Clarity', 'Rigor', 'Adversary', 'Domain'];
+  const hasAgentMetrics = Object.keys(combinedMetrics).length > 0;
+
   return (
-    <div className="bg-[#1a1a1d] border-b border-gray-700/50">
-      <button
-        onClick={onToggle}
-        className="w-full flex items-center justify-between px-4 py-1.5 text-xs hover:bg-gray-800/50 transition-colors"
-      >
-        <div className="flex items-center gap-4">
-          <span className="text-gray-500 font-mono">DEV</span>
-          <div className="flex items-center gap-1 text-gray-400">
-            <Clock className="w-3 h-3" />
-            <span>{formatTime(metrics.total_time_ms)}</span>
+    <div className="fixed bottom-4 right-4 z-50">
+      <div className="bg-[#1a1a1d] border border-gray-800 rounded-lg shadow-xl overflow-hidden">
+        {/* Header - always visible, clickable */}
+        <button
+          onClick={onToggle}
+          className="flex items-center gap-2 px-3 py-2 hover:bg-gray-800/50 transition-colors w-full"
+        >
+          <span className="text-amber-500">⚡</span>
+          <span className="text-xs text-gray-400 font-medium">Pipeline Stats</span>
+          <span className="text-gray-600 ml-auto">{isOpen ? '▼' : '▲'}</span>
+        </button>
+
+        {/* Stats - only when open */}
+        {isOpen && (
+          <div className="px-3 py-2 border-t border-gray-800 font-mono text-xs min-w-[180px]">
+            {hasAgentMetrics && (
+              <div className="space-y-1 mb-2">
+                {displayOrder.map(name => {
+                  const data = combinedMetrics[name];
+                  if (!data) return null;
+                  return (
+                    <div key={name} className="flex items-center justify-between">
+                      <span className="text-gray-500">{name}:</span>
+                      <div>
+                        <span className="text-gray-300">{formatTime(data.time_ms)}</span>
+                        <span className="text-gray-600 ml-1">({formatCost(data.cost_usd)})</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            {/* Total */}
+            <div className="flex items-center justify-between pt-1 border-t border-gray-800">
+              <span className="text-gray-300 font-medium">Total:</span>
+              <div>
+                <span className="text-amber-500 font-medium">{formatTime(metrics.total_time_ms)}</span>
+                <span className="text-amber-500/60 ml-1">({formatCost(metrics.total_cost_usd)})</span>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-1 text-green-400">
-            <DollarSign className="w-3 h-3" />
-            <span>{formatCost(metrics.total_cost_usd)}</span>
-          </div>
-          <div className="flex items-center gap-1 text-blue-400">
-            <Cpu className="w-3 h-3" />
-            <span>{metrics.agents_run.join(', ')}</span>
-          </div>
-        </div>
-        {isExpanded ? (
-          <ChevronUp className="w-4 h-4 text-gray-500" />
-        ) : (
-          <ChevronDown className="w-4 h-4 text-gray-500" />
         )}
-      </button>
-      {isExpanded && (
-        <div className="px-4 py-2 border-t border-gray-700/30">
-          <div className="grid grid-cols-3 gap-4 text-xs">
-            <div>
-              <div className="text-gray-500 mb-1">Total Time</div>
-              <div className="text-white font-mono">{formatTime(metrics.total_time_ms)}</div>
-            </div>
-            <div>
-              <div className="text-gray-500 mb-1">Total Cost</div>
-              <div className="text-green-400 font-mono">{formatCost(metrics.total_cost_usd)}</div>
-            </div>
-            <div>
-              <div className="text-gray-500 mb-1">Agents Run</div>
-              <div className="text-blue-400 font-mono">{metrics.agents_run.join(', ')}</div>
-            </div>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -157,8 +191,8 @@ export function ReviewScreen() {
   // Highlighted paragraph (for user edit goto)
   const [highlightedParagraphId, setHighlightedParagraphId] = useState<string | null>(null);
 
-  // Dev banner state
-  const [devBannerExpanded, setDevBannerExpanded] = useState(false);
+  // Dev banner state (open by default)
+  const [devBannerOpen, setDevBannerOpen] = useState(true);
 
   // Draggable panel width (percentage for issues panel)
   // Default 34%, can only expand (not shrink below 34%)
@@ -608,15 +642,6 @@ export function ReviewScreen() {
 
   return (
     <div className="h-screen flex flex-col bg-[#131316] overscroll-none">
-      {/* Dev Banner - only show if enabled in settings and metrics available */}
-      {settings.showDevBanner && reviewMetrics && (
-        <DevBanner
-          metrics={reviewMetrics}
-          isExpanded={devBannerExpanded}
-          onToggle={() => setDevBannerExpanded(!devBannerExpanded)}
-        />
-      )}
-
       {/* Header - Refined minimal design */}
       <header className="sticky top-0 z-10 flex items-center justify-between px-5 py-3 border-b border-gray-700/50 bg-[#131316]">
         {/* Left: Logo + Document info */}
@@ -741,6 +766,15 @@ export function ReviewScreen() {
           />
         </div>
       </div>
+
+      {/* Dev Banner - Collapsible card (bottom-right) */}
+      {settings.showDevBanner && reviewMetrics && (
+        <DevBanner
+          metrics={reviewMetrics}
+          isOpen={devBannerOpen}
+          onToggle={() => setDevBannerOpen(!devBannerOpen)}
+        />
+      )}
     </div>
   );
 }

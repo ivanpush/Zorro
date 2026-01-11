@@ -2,13 +2,19 @@
 Rigor Rewriter Agent - Adds proposed edits to rigor findings.
 
 Phase 2 of 2-phase rigor pipeline. Takes findings from Finder and adds fixes.
+Groups findings by section and processes in parallel (mirrors rigor_find batching).
 """
 
+import asyncio
+import logging
+from collections import defaultdict
 from typing import Literal
 from pydantic import BaseModel, Field
 
 from app.agents.base import BaseAgent
 from app.models import DocObj, Finding, Anchor, ProposedEdit, AgentMetrics
+
+logger = logging.getLogger("zorro.agents.rigor")
 
 
 # =============================================================================
@@ -21,7 +27,8 @@ class RigorRewriteItem(BaseModel):
     type: Literal["replace", "insert_before", "insert_after", "suggestion"]
     quoted_text: str = Field(description="EXACT text being replaced (copy from issue)")
     new_text: str | None = Field(None, description="Replacement text (null if not fixable)")
-    rationale: str = Field(description="Why this fixes the problem")
+    rationale: str = Field(description="WHY this suggestion/fix is a good one")
+    suggestion: str = Field(description="WHAT to do - actionable guidance for the author")
     is_fixable: bool = Field(True, description="False if needs new data/experiments")
 
 
@@ -43,6 +50,7 @@ class RigorRewriter(BaseAgent):
     2. RigorRewriter: Adds proposed_edit to findings
 
     Takes findings from Finder and returns them with proposed_edit populated.
+    Processes findings in batches for parallelism and to avoid timeouts.
     """
 
     @property
@@ -65,25 +73,106 @@ class RigorRewriter(BaseAgent):
             Tuple of (list[Finding], list[AgentMetrics])
             Findings have proposed_edit populated
         """
-        # If no findings, return empty
         if not findings:
             return [], []
 
-        # Build prompt with all findings
-        system, user = self.composer.build_rigor_rewrite_prompt(findings, doc)
+        # Group findings by section (mirrors rigor_find batching)
+        batches = self._group_by_section(findings, doc)
 
-        # Call LLM with structured output - returns rewrites keyed by index
-        batch, metrics = await self.client.call(
+        logger.info(f"[rigor_rewrite] Processing {len(findings)} findings in {len(batches)} section batches")
+
+        # Process all batches in parallel
+        tasks = [
+            self._process_batch(batch, batch_idx, len(batches), doc)
+            for batch_idx, batch in enumerate(batches)
+        ]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        # Merge results
+        all_merged: list[Finding] = []
+        all_metrics: list[AgentMetrics] = []
+
+        for batch_idx, result in enumerate(results):
+            if isinstance(result, Exception):
+                logger.error(f"[rigor_rewrite] Batch {batch_idx} failed: {result}")
+                # Keep original findings for failed batch
+                all_merged.extend(batches[batch_idx])
+            else:
+                merged_findings, metrics = result
+                all_merged.extend(merged_findings)
+                all_metrics.append(metrics)
+
+        return all_merged, all_metrics
+
+    async def _process_batch(
+        self,
+        batch: list[Finding],
+        batch_idx: int,
+        total_batches: int,
+        doc: DocObj
+    ) -> tuple[list[Finding], AgentMetrics]:
+        """Process a single batch of findings."""
+        logger.debug(f"[rigor_rewrite] Processing batch {batch_idx}/{total_batches} ({len(batch)} findings)")
+
+        # Build prompt for this batch
+        system, user = self.composer.build_rigor_rewrite_prompt(batch, doc)
+
+        # Call LLM
+        output, metrics = await self.client.call(
             agent_id=self.agent_id,
             system=system,
             user=user,
             response_model=RigorRewriteBatch,
+            chunk_index=batch_idx,
+            chunk_total=total_batches,
         )
 
-        # Merge rewrites back into original findings
-        merged = self._merge_rewrites_into_findings(findings, batch.rewrites)
+        # Merge rewrites into findings
+        merged = self._merge_rewrites_into_findings(batch, output.rewrites)
 
-        return merged, [metrics]
+        logger.debug(f"[rigor_rewrite] Batch {batch_idx}/{total_batches} done: {len(merged)} findings")
+
+        return merged, metrics
+
+    def _group_by_section(
+        self,
+        findings: list[Finding],
+        doc: DocObj
+    ) -> list[list[Finding]]:
+        """
+        Group findings by their section (mirrors rigor_find batching).
+
+        Falls back to batches of 6 if section lookup fails.
+        """
+        # Build paragraph_id -> section_id lookup
+        para_to_section: dict[str, str] = {}
+        for p in doc.paragraphs:
+            if p.section_id:
+                para_to_section[p.paragraph_id] = p.section_id
+
+        # Group findings by section
+        by_section: dict[str, list[Finding]] = defaultdict(list)
+        no_section: list[Finding] = []
+
+        for f in findings:
+            if f.anchors:
+                para_id = f.anchors[0].paragraph_id
+                section_id = para_to_section.get(para_id)
+                if section_id:
+                    by_section[section_id].append(f)
+                else:
+                    no_section.append(f)
+            else:
+                no_section.append(f)
+
+        # Convert to list of batches
+        batches = list(by_section.values())
+
+        # Add findings with no section as separate batch
+        if no_section:
+            batches.append(no_section)
+
+        return batches
 
     def _merge_rewrites_into_findings(
         self,
@@ -96,7 +185,7 @@ class RigorRewriter(BaseAgent):
         Preserves original finding IDs and all other fields.
         Only adds/updates proposed_edit.
         """
-        # Build lookup by index
+        # Build lookup by index (indices are relative to this batch)
         rewrite_map = {r.issue_index: r for r in rewrites}
 
         merged = []
@@ -115,20 +204,21 @@ class RigorRewriter(BaseAgent):
                         ),
                         new_text=rewrite.new_text,
                         rationale=rewrite.rationale,
+                        suggestion=rewrite.suggestion,
                     )
                 else:
-                    # Not fixable - include as suggestion with rationale
+                    # Not fixable - include as suggestion type
                     proposed_edit = ProposedEdit(
                         type="suggestion",
                         anchor=finding.anchors[0],
                         new_text=None,
                         rationale=rewrite.rationale,
+                        suggestion=rewrite.suggestion,
                     )
 
                 # Create new finding with proposed_edit attached
-                # Preserve all original fields, update agent_id
                 merged.append(Finding(
-                    id=finding.id,  # Keep original ID
+                    id=finding.id,
                     agent_id="rigor_rewrite",
                     category=finding.category,
                     severity=finding.severity,

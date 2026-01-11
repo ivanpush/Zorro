@@ -581,6 +581,24 @@ class Orchestrator:
 
             _log_summary(total_elapsed, total_cost, len(review_output.findings), len(all_findings))
 
+            # Aggregate per-agent metrics for frontend dev banner
+            agent_metrics_agg: dict[str, dict] = {}
+            for m in all_metrics:
+                if m.agent_id not in agent_metrics_agg:
+                    agent_metrics_agg[m.agent_id] = {
+                        "time_ms": 0,
+                        "cost_usd": 0,
+                        "findings_count": 0,
+                    }
+                agent_metrics_agg[m.agent_id]["time_ms"] += m.time_ms
+                agent_metrics_agg[m.agent_id]["cost_usd"] += m.cost_usd
+
+            # Add findings count per agent
+            for f in review_output.findings:
+                agent_id = f.agent_id
+                if agent_id in agent_metrics_agg:
+                    agent_metrics_agg[agent_id]["findings_count"] += 1
+
             await event_queue.put(ReviewCompletedEvent(
                 total_findings=review_output.summary.total_findings,
                 findings=review_output.findings,
@@ -588,6 +606,7 @@ class Orchestrator:
                     "total_time_ms": total_elapsed * 1000,
                     "total_cost_usd": total_cost,
                     "agents_run": review_output.metadata.agents_run,
+                    "agent_metrics": agent_metrics_agg,
                     "by_track": review_output.summary.by_track,
                     "by_severity": review_output.summary.by_severity,
                     "by_dimension": review_output.summary.by_dimension,

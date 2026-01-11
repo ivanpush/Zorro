@@ -4,7 +4,7 @@ Instructor-wrapped LLM client with automatic metrics collection.
 Features:
 - Concurrency control (max 6 parallel calls)
 - Retry with exponential backoff
-- Timeout enforcement (60s default)
+- Timeout enforcement (120s default, configurable via LLM_TIMEOUT)
 - Detailed logging
 """
 
@@ -58,16 +58,16 @@ class LLMClient:
     1. Uses Instructor for structured outputs
     2. Automatically collects metrics (tokens, time, cost)
     3. Uses async client for true parallelism
-    4. Limits concurrent calls to 6
+    4. Limits concurrent calls (configurable via MAX_CONCURRENT_AGENTS)
     5. Retries transient failures with exponential backoff
-    6. Enforces timeout (60s default)
+    6. Enforces timeout (configurable via LLM_TIMEOUT, default 120s)
     """
 
     def __init__(self):
         settings = get_settings()
         self._anthropic = AsyncAnthropic(api_key=settings.anthropic_api_key)
         self._instructor = instructor.from_anthropic(self._anthropic)
-        self._timeout = 60.0  # seconds
+        self._timeout = settings.llm_timeout  # configurable, default 120s
         self._debug = settings.llm_debug
 
     async def call(

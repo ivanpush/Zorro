@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     demo_mode_default: bool = True
 
     # Concurrency
-    max_concurrent_agents: int = 10
+    max_concurrent_agents: int = 8
 
     # Chunking - smaller = more parallelism = faster
     DEFAULT_CHUNK_WORDS: int = 400
@@ -38,7 +38,12 @@ class Settings(BaseSettings):
     enable_clarity: bool = False    # Clarity inspector
     enable_rigor: bool = True       # Rigor finder + rewriter
     enable_domain: bool = False     # Domain validation (Perplexity) - disabled while optimizing
-    enable_adversary: bool = True   # Adversarial critic
+    enable_adversary: bool = False  # Adversarial critic - needs Opus, disabled for now
+
+    # ===========================================
+    # LLM Settings
+    # ===========================================
+    llm_timeout: float = 120.0      # Timeout per LLM call (seconds) - increased for rate limit handling
 
     # ===========================================
     # Debug Settings

@@ -118,7 +118,8 @@ class ProposedEdit(BaseModel):
     type: Literal["replace", "delete", "insert_before", "insert_after", "suggestion"]
     anchor: Anchor
     new_text: str | None = None
-    rationale: str
+    rationale: str  # WHY this suggestion/fix is a good one
+    suggestion: str | None = None  # WHAT to do - actionable guidance
 
 
 class Finding(BaseModel):
@@ -207,6 +208,7 @@ class Finding(BaseModel):
                 },
                 "newText": self.proposed_edit.new_text,
                 "rationale": self.proposed_edit.rationale,
+                "suggestion": self.proposed_edit.suggestion,
             }
 
         if self.votes is not None:

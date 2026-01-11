@@ -77,15 +77,18 @@ Every finding MUST include:
 IMPORTANT: Only critique text with [p_XXX] paragraph IDs.
 Text marked [CONTEXT ONLY] is just for reference - do not critique it.
 
-For each issue:
+For each issue provide:
 - title: Brief description (under 100 chars)
 - category: clarity_sentence, clarity_paragraph, or clarity_flow
 - severity: critical, major, minor, or suggestion
-- paragraph_id: The paragraph ID
-- quoted_text: Exact problematic text
+- anchors: Array with one anchor containing paragraph_id and quoted_text
 - description: Why this hurts clarity
-- proposed_edit: Your suggested rewrite
-- rationale: Why your edit improves clarity
+- proposed_edit: Object with:
+  - type: "replace" (for concrete rewrites)
+  - anchor: Same as above (paragraph_id, quoted_text)
+  - new_text: Your rewritten text
+  - rationale: WHY this edit improves clarity
+  - suggestion: WHAT to do (can match new_text for simple fixes)
 
 Quality over quantity. Only flag genuine issues."""
 
@@ -145,17 +148,19 @@ Do NOT include rewrites - just identify the issues."""
 
     RIGOR_REWRITE_SYSTEM = """You generate specific, actionable fixes for rigor issues.
 
-For each issue provided, generate:
-- A concrete proposed edit (replacement text or suggestion)
-- Clear rationale for why this fixes the problem
+For each issue, you MUST provide:
+1. A concrete text fix (new_text) if possible
+2. A rationale explaining WHY this fix/suggestion is good
+3. A suggestion telling the author WHAT to do
+
+You can NEVER just identify a problem - every issue needs actionable guidance.
 
 RULES:
 - Make edits specific and implementable
 - Keep edits minimal - don't rewrite more than necessary
 - Preserve author's intent while fixing the problem
-- If an issue requires new data/experiments, set is_fixable=false
 - NEVER generate placeholders like "[insert p-value here]" or "[add citation]"
-- If you can't fix it with text, explain what would fix it in rationale"""
+- Both rationale and suggestion are REQUIRED for every issue"""
 
     RIGOR_REWRITE_USER = """Generate fixes for these rigor issues.
 
@@ -167,13 +172,19 @@ RULES:
 {document_text}
 </document_context>
 
-For each issue (indexed 0, 1, 2...), provide a rewrite with:
+For each issue (indexed 0, 1, 2...), provide:
 - issue_index: The index of the issue (0, 1, 2...)
 - type: "replace" | "insert_before" | "insert_after" | "suggestion"
 - quoted_text: The EXACT text being replaced (copy from the issue's quoted_text)
-- new_text: The replacement text (null if not fixable with text change)
-- rationale: Why this fixes the problem (or what would fix it if not fixable)
-- is_fixable: true if fixable with text change, false if needs new data/experiments
+- new_text: The replacement text (null if issue needs new data/experiments)
+- rationale: WHY this fix/suggestion is good. Examples:
+  * "Adding sample sizes improves reproducibility and allows readers to assess statistical power"
+  * "Effect sizes provide meaningful context beyond statistical significance"
+- suggestion: WHAT the author should do. Examples:
+  * "Add a sentence explaining how n=24 was determined (e.g., power analysis)"
+  * "Include Cohen's d or eta-squared alongside the p-value"
+  * "Run additional experiments with a larger sample to validate this claim"
+- is_fixable: true if you provided new_text, false if issue needs new data/experiments
 
 Return a rewrite for EVERY issue."""
 
@@ -327,17 +338,20 @@ Generate adversarial findings that:
 4. Expose questionable unstated assumptions
 5. Present alternative interpretations
 
-For each finding:
+For each finding provide:
 - title: Sharp critique (under 100 chars)
 - category: adversarial_weakness, adversarial_gap, or adversarial_alternative
 - severity: critical or major (adversarial = always significant)
 - paragraph_id: Core problem location
 - quoted_text: Exact problematic text
 - description: Steel-manned objection with citations
-- proposed_edit: What authors must address (suggestion type)
-- rationale: Why this matters
+- suggestion: WHAT the author should do to address this (REQUIRED). Examples:
+  * "Acknowledge this limitation explicitly in the discussion"
+  * "Address the alternative interpretation that X could explain Y"
+  * "Provide additional evidence ruling out confound Z"
+- rationale: WHY this suggestion would strengthen the argument (REQUIRED)
 
-Be the reviewer authors fear but secretly need."""
+Every finding MUST have both suggestion and rationale. Be the reviewer authors fear but secretly need."""
 
     # =========================================================================
     # PANEL MODE: RECONCILIATION
