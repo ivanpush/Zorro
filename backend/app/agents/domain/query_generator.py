@@ -36,8 +36,8 @@ class QueryGenerator(BaseAgent):
         # Call LLM
         output, metrics = await self.client.call(
             agent_id=self.agent_id,
-            system_prompt=system,
-            user_prompt=user,
+            system=system,
+            user=user,
             response_model=QueryGeneratorOutput,
         )
 

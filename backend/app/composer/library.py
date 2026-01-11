@@ -149,10 +149,13 @@ For each issue provided, generate:
 - A concrete proposed edit (replacement text or suggestion)
 - Clear rationale for why this fixes the problem
 
-Make edits:
-- Specific and implementable
-- Minimal (don't rewrite more than needed)
-- Faithful to author's intent while fixing the problem"""
+RULES:
+- Make edits specific and implementable
+- Keep edits minimal - don't rewrite more than necessary
+- Preserve author's intent while fixing the problem
+- If an issue requires new data/experiments, set is_fixable=false
+- NEVER generate placeholders like "[insert p-value here]" or "[add citation]"
+- If you can't fix it with text, explain what would fix it in rationale"""
 
     RIGOR_REWRITE_USER = """Generate fixes for these rigor issues.
 
@@ -164,13 +167,15 @@ Make edits:
 {document_text}
 </document_context>
 
-For each issue, provide:
-- issue_id: The ID of the issue being fixed
-- edit_type: "replace", "insert_before", "insert_after", or "suggestion"
-- new_text: The replacement/insertion text (or suggestion text)
-- rationale: Why this fixes the problem
+For each issue (indexed 0, 1, 2...), provide a rewrite with:
+- issue_index: The index of the issue (0, 1, 2...)
+- type: "replace" | "insert_before" | "insert_after" | "suggestion"
+- quoted_text: The EXACT text being replaced (copy from the issue's quoted_text)
+- new_text: The replacement text (null if not fixable with text change)
+- rationale: Why this fixes the problem (or what would fix it if not fixable)
+- is_fixable: true if fixable with text change, false if needs new data/experiments
 
-Keep edits minimal and specific."""
+Return a rewrite for EVERY issue."""
 
     # =========================================================================
     # DOMAIN PIPELINE

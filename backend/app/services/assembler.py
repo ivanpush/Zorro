@@ -1,5 +1,11 @@
 """
-Assembler - Deterministic deduplication and sorting.
+Assembler - Deterministic deduplication, validation, and sorting.
+
+Validation Rules:
+1. All findings MUST have at least one anchor with paragraph_id
+2. Findings with proposed_edit.type='replace' MUST have quoted_text that exists in document
+3. Adversarial findings (Track C) can be comments without grounded text
+4. Invalid findings are logged and filtered out
 
 Dedup Rules:
 1. Track B (Rigor) - NEVER deduplicated, all kept
@@ -22,7 +28,7 @@ Presentation order (lower number = earlier in output):
 import logging
 from collections import defaultdict
 from app.models import (
-    Finding, Anchor, AgentMetrics,
+    Finding, Anchor, AgentMetrics, DocObj,
     ReviewOutput, ReviewSummary, ReviewMetadataOutput,
     AGENT_PRIORITY, PRESENTATION_ORDER
 )
@@ -31,22 +37,24 @@ logger = logging.getLogger("zorro.assembler")
 
 
 class Assembler:
-    """Deterministic deduplication with priority and track rules."""
+    """Deterministic validation, deduplication with priority and track rules."""
 
     def assemble(
         self,
         findings: list[Finding],
-        metrics: list[AgentMetrics] | None = None
+        metrics: list[AgentMetrics] | None = None,
+        doc: DocObj | None = None
     ) -> ReviewOutput:
         """
-        Deduplicate and sort findings, return ReviewOutput.
+        Validate, deduplicate and sort findings, return ReviewOutput.
 
         Args:
             findings: All findings from all agents
             metrics: Optional agent metrics for metadata
+            doc: Document for anchor validation (if provided, validates anchors)
 
         Returns:
-            ReviewOutput with deduplicated findings, summary, and metadata
+            ReviewOutput with validated, deduplicated findings, summary, and metadata
         """
         if not findings:
             return ReviewOutput(
@@ -57,12 +65,22 @@ class Assembler:
 
         input_count = len(findings)
 
+        # Validate anchors if document provided
+        if doc:
+            validated = self._validate_findings(findings, doc)
+            validated_count = len(validated)
+            invalid_count = input_count - validated_count
+            if invalid_count > 0:
+                logger.warning(f"[assembler] Validation: {invalid_count} findings had invalid anchors")
+        else:
+            validated = findings
+
         # Deduplicate with track-aware rules
-        deduped = self._deduplicate(findings)
+        deduped = self._deduplicate(validated)
 
         output_count = len(deduped)
-        removed = input_count - output_count
-        logger.info(f"[assembler] Dedup: {input_count} → {output_count} ({removed} removed)")
+        removed = len(validated) - output_count
+        logger.info(f"[assembler] Dedup: {len(validated)} → {output_count} ({removed} removed)")
 
         # Build summary and metadata
         summary = ReviewSummary.from_findings(deduped)
@@ -73,6 +91,57 @@ class Assembler:
             summary=summary,
             metadata=metadata,
         )
+
+    def _validate_findings(self, findings: list[Finding], doc: DocObj) -> list[Finding]:
+        """
+        Validate finding anchors against document.
+
+        Rules:
+        - All findings must have at least one anchor with valid paragraph_id
+        - If proposed_edit.type='replace', quoted_text MUST exist in the paragraph
+        - Track C (adversarial) findings can have ungrounded text (comments)
+
+        Returns:
+            List of valid findings (invalid ones are filtered out with warnings)
+        """
+        valid: list[Finding] = []
+        paragraph_ids = {p.paragraph_id for p in doc.paragraphs}
+
+        for f in findings:
+            is_valid = True
+            issues: list[str] = []
+
+            # Check all anchors have valid paragraph_id
+            for anchor in f.anchors:
+                if anchor.paragraph_id not in paragraph_ids:
+                    issues.append(f"paragraph_id '{anchor.paragraph_id}' not in document")
+                    is_valid = False
+
+            # If it's a replace edit, quoted_text MUST exist in paragraph
+            if f.proposed_edit and f.proposed_edit.type == 'replace':
+                anchor = f.proposed_edit.anchor
+                if anchor.paragraph_id in paragraph_ids:
+                    if not doc.validate_anchor_text(anchor.paragraph_id, anchor.quoted_text):
+                        # For Track C (adversarial), downgrade to suggestion but keep
+                        if f.track == "C":
+                            logger.warning(
+                                f"[assembler] DOWNGRADED {f.agent_id} {f.id[:8]}: "
+                                f"quoted_text not found → keeping as comment-only"
+                            )
+                            # Convert to suggestion type since we can't do replace
+                            f.proposed_edit.type = "suggestion"
+                        else:
+                            issues.append(f"quoted_text not found (requires exact match for replace)")
+                            is_valid = False
+
+            if is_valid:
+                valid.append(f)
+            else:
+                logger.warning(
+                    f"[assembler] FILTERED {f.agent_id} {f.id[:8]}: {'; '.join(issues)}"
+                )
+
+        return valid
 
     def _deduplicate(self, findings: list[Finding]) -> list[Finding]:
         """

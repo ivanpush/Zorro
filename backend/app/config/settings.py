@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     demo_mode_default: bool = True
 
     # Concurrency
-    max_concurrent_agents: int = 4
+    max_concurrent_agents: int = 10
 
     # Chunking - smaller = more parallelism = faster
     DEFAULT_CHUNK_WORDS: int = 400
@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     enable_briefing: bool = True    # Always needed for other agents
     enable_clarity: bool = False    # Clarity inspector
     enable_rigor: bool = True       # Rigor finder + rewriter
-    enable_domain: bool = True      # Domain validation (Perplexity)
+    enable_domain: bool = False     # Domain validation (Perplexity) - disabled while optimizing
     enable_adversary: bool = True   # Adversarial critic
 
     # ===========================================

@@ -31,8 +31,17 @@ from app.models import AgentMetrics
 
 T = TypeVar("T", bound=BaseModel)
 
-# Module-level semaphore for concurrency control
-_semaphore = asyncio.Semaphore(6)
+# Module-level semaphore - initialized lazily from settings
+_semaphore: asyncio.Semaphore | None = None
+
+
+def _get_semaphore() -> asyncio.Semaphore:
+    """Get or create semaphore from settings."""
+    global _semaphore
+    if _semaphore is None:
+        from app.config import get_settings
+        _semaphore = asyncio.Semaphore(get_settings().max_concurrent_agents)
+    return _semaphore
 
 # Logger
 logger = logging.getLogger("zorro.llm")
@@ -88,7 +97,7 @@ class LLMClient:
         """
         model = get_model(agent_id)
 
-        async with _semaphore:
+        async with _get_semaphore():
             start_time = time.perf_counter()
 
             # Debug: log full prompts
@@ -164,6 +173,7 @@ class LLMClient:
         return await self._instructor.messages.create(
             model=model,
             max_tokens=max_tokens,
+            temperature=0,
             system=system,
             messages=[{"role": "user", "content": user}],
             response_model=response_model,
@@ -182,7 +192,7 @@ class LLMClient:
         """
         model = get_model(agent_id)
 
-        async with _semaphore:
+        async with _get_semaphore():
             start_time = time.perf_counter()
 
             try:
@@ -240,6 +250,7 @@ class LLMClient:
         return await self._anthropic.messages.create(
             model=model,
             max_tokens=max_tokens,
+            temperature=0,
             system=system,
             messages=[{"role": "user", "content": user}],
         )

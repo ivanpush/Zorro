@@ -77,9 +77,10 @@ class SingleAdversary(BaseAgent):
         Returns:
             Tuple of (list[Finding], AgentMetrics)
         """
+        evidence_count = len(evidence.sources) if evidence.has_content() else 0
         logger.info(
             f"[adversary] Starting: {len(rigor_findings)} rigor findings, "
-            f"{len(evidence.items)} evidence items"
+            f"{evidence_count} evidence sources"
         )
 
         system, user = self.composer.build_adversary_prompt(

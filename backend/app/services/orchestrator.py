@@ -219,7 +219,7 @@ class Orchestrator:
 
                 elapsed = time.time() - agent_start
                 total_cost = sum(m.cost_usd for m in domain_metrics) if isinstance(domain_metrics, list) else domain_metrics.cost_usd
-                _log_done("domain", elapsed, total_cost, extra=f"{len(evidence_result.items)} items")
+                _log_done("domain", elapsed, total_cost, extra=f"{len(evidence_result.sources)} sources")
 
                 await event_queue.put(AgentCompletedEvent(
                     agent_id="domain",
@@ -421,6 +421,14 @@ class Orchestrator:
                 )
                 await add_metrics(rewrite_metrics)
 
+                # Replace original rigor findings with merged ones (that have proposed_edit)
+                rewritten_ids = {f.id for f in rewritten}
+                async with findings_lock:
+                    # Remove original rigor findings
+                    all_findings[:] = [f for f in all_findings if f.id not in rewritten_ids]
+                    # Add merged findings with proposed_edit
+                    all_findings.extend(rewritten)
+
                 elapsed = time.time() - agent_start
                 total_cost = sum(m.cost_usd for m in rewrite_metrics) if isinstance(rewrite_metrics, list) else rewrite_metrics.cost_usd
                 _log_done("rigor_rewrite", elapsed, total_cost, len(rewritten))
@@ -434,7 +442,7 @@ class Orchestrator:
 
             except Exception as e:
                 _log_error("rigor_rewrite", str(e))
-                # Non-critical - use original findings
+                # Non-critical - use original findings (without proposed_edit)
 
         async def run_adversary():
             """Adversary runs after Briefing, Rigor-Find, and Domain all complete."""
@@ -554,7 +562,7 @@ class Orchestrator:
             ))
 
             assembler = Assembler()
-            review_output = assembler.assemble(all_findings, all_metrics)
+            review_output = assembler.assemble(all_findings, all_metrics, doc=doc)
 
             elapsed = time.time() - agent_start
             removed = len(all_findings) - len(review_output.findings)
