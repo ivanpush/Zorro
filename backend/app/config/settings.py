@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     # Agent Toggles - set to False to skip agent
     # ===========================================
     enable_briefing: bool = True    # Always needed for other agents
-    enable_clarity: bool = True     # Clarity inspector
+    enable_clarity: bool = False    # Clarity inspector
     enable_rigor: bool = True       # Rigor finder + rewriter
     enable_domain: bool = True      # Domain validation (Perplexity)
     enable_adversary: bool = True   # Adversarial critic

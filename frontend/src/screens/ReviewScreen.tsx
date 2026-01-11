@@ -4,6 +4,7 @@ import { Download, FileText, CheckCircle2, ChevronDown, ChevronUp, Clock, Dollar
 import { useAppStore } from '@/store';
 import { ManuscriptView } from '@/components/domain/ManuscriptView';
 import { IssuesPanel } from './ReviewScreen/IssuesPanel';
+import { settings } from '@/settings';
 import type { DocObj, Finding } from '@/types';
 
 // Progress Ring Component
@@ -607,8 +608,8 @@ export function ReviewScreen() {
 
   return (
     <div className="h-screen flex flex-col bg-[#131316] overscroll-none">
-      {/* Dev Banner - only show if metrics available */}
-      {reviewMetrics && (
+      {/* Dev Banner - only show if enabled in settings and metrics available */}
+      {settings.showDevBanner && reviewMetrics && (
         <DevBanner
           metrics={reviewMetrics}
           isExpanded={devBannerExpanded}
