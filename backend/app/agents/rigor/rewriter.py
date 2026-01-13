@@ -8,7 +8,7 @@ Groups findings by section and processes in parallel (mirrors rigor_find batchin
 import asyncio
 import logging
 from collections import defaultdict
-from typing import Literal
+from typing import AsyncGenerator, Literal
 from pydantic import BaseModel, Field
 
 from app.agents.base import BaseAgent
@@ -76,33 +76,60 @@ class RigorRewriter(BaseAgent):
         if not findings:
             return [], []
 
-        # Group findings by section (mirrors rigor_find batching)
-        batches = self._group_by_section(findings, doc)
-
-        logger.info(f"[rigor_rewrite] Processing {len(findings)} findings in {len(batches)} section batches")
-
-        # Process all batches in parallel
-        tasks = [
-            self._process_batch(batch, batch_idx, len(batches), doc)
-            for batch_idx, batch in enumerate(batches)
-        ]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-
-        # Merge results
+        # Collect results from streaming
         all_merged: list[Finding] = []
         all_metrics: list[AgentMetrics] = []
 
-        for batch_idx, result in enumerate(results):
-            if isinstance(result, Exception):
-                logger.error(f"[rigor_rewrite] Batch {batch_idx} failed: {result}")
-                # Keep original findings for failed batch
-                all_merged.extend(batches[batch_idx])
+        async for result in self.run_streaming(findings, doc):
+            batch_idx, batch_findings, metrics, error = result
+            if error:
+                logger.error(f"[rigor_rewrite] Batch {batch_idx} failed: {error}")
             else:
-                merged_findings, metrics = result
-                all_merged.extend(merged_findings)
-                all_metrics.append(metrics)
+                all_merged.extend(batch_findings)
+                if metrics:
+                    all_metrics.append(metrics)
 
         return all_merged, all_metrics
+
+    async def run_streaming(
+        self,
+        findings: list[Finding],
+        doc: DocObj
+    ) -> AsyncGenerator[tuple[int, list[Finding], AgentMetrics | None, str | None], None]:
+        """
+        Stream batch completions for real-time progress.
+
+        Yields:
+            Tuple of (batch_index, findings, metrics, error)
+            On error, findings is empty list from original batch, metrics is None
+        """
+        if not findings:
+            return
+
+        # Group findings by section (mirrors rigor_find batching)
+        batches = self._group_by_section(findings, doc)
+        total_batches = len(batches)
+
+        logger.info(f"[rigor_rewrite] Processing {len(findings)} findings in {total_batches} section batches")
+
+        # Process all batches in parallel, yield as they complete
+        async def process_with_index(batch_idx: int, batch: list[Finding]):
+            """Wrapper to preserve batch_idx through as_completed."""
+            try:
+                merged, metrics = await self._process_batch(batch, batch_idx, total_batches, doc)
+                return (batch_idx, merged, metrics, None)
+            except Exception as e:
+                logger.error(f"[rigor_rewrite] Batch {batch_idx} failed: {e}")
+                return (batch_idx, batch, None, str(e))
+
+        tasks = [
+            process_with_index(batch_idx, batch)
+            for batch_idx, batch in enumerate(batches)
+        ]
+
+        for coro in asyncio.as_completed(tasks):
+            result = await coro
+            yield result
 
     async def _process_batch(
         self,
@@ -230,7 +257,27 @@ class RigorRewriter(BaseAgent):
                     metadata=finding.metadata,
                 ))
             else:
-                # No rewrite generated - keep original finding as-is
-                merged.append(finding)
+                # No rewrite generated - create fallback suggestion
+                # This should NOT happen if LLM follows instructions, but we enforce it
+                logger.warning(f"[rigor_rewrite] Missing rewrite for finding {i}, creating fallback suggestion")
+                fallback_edit = ProposedEdit(
+                    type="suggestion",
+                    anchor=finding.anchors[0],
+                    new_text=None,
+                    rationale="This issue was identified but requires author judgment to address.",
+                    suggestion="Review this issue and determine the best way to address it based on your expertise and available data.",
+                )
+                merged.append(Finding(
+                    id=finding.id,
+                    agent_id="rigor_rewrite",
+                    category=finding.category,
+                    severity=finding.severity,
+                    confidence=finding.confidence,
+                    title=finding.title,
+                    description=finding.description,
+                    anchors=finding.anchors,
+                    proposed_edit=fallback_edit,
+                    metadata=finding.metadata,
+                ))
 
         return merged

@@ -394,7 +394,7 @@ class Orchestrator:
                 rigor_find_ready.set()
 
         async def run_rigor_rewrite():
-            """Rigor-Rewrite runs after Rigor-Find completes."""
+            """Rigor-Rewrite runs after Rigor-Find completes, streams batch progress."""
             await rigor_find_ready.wait()
 
             if not rigor_findings_result:
@@ -402,7 +402,16 @@ class Orchestrator:
                 return
 
             agent_start = time.time()
-            _log_start("rigor_rewrite", f"{len(rigor_findings_result)} findings")
+            rigor_rewriter = RigorRewriter(
+                client=self._client,
+                composer=self._composer
+            )
+
+            # Get batch count for logging
+            batches = rigor_rewriter._group_by_section(rigor_findings_result, doc)
+            num_batches = len(batches)
+
+            _log_start("rigor_rewrite", f"{len(rigor_findings_result)} findings in {num_batches} batches")
 
             await event_queue.put(AgentStartedEvent(
                 agent_id="rigor_rewrite",
@@ -410,16 +419,41 @@ class Orchestrator:
                 subtitle=f"Improving {len(rigor_findings_result)} findings"
             ))
 
+            rewritten: list[Finding] = []
+            chunk_metrics: list[AgentMetrics] = []
+
             try:
-                rigor_rewriter = RigorRewriter(
-                    client=self._client,
-                    composer=self._composer
-                )
-                rewritten, rewrite_metrics = await rigor_rewriter.run(
+                async for chunk_result in rigor_rewriter.run_streaming(
                     rigor_findings_result,
                     doc
-                )
-                await add_metrics(rewrite_metrics)
+                ):
+                    batch_idx, batch_findings, batch_metric, error = chunk_result
+                    batch_elapsed = batch_metric.time_ms / 1000 if batch_metric else 0
+
+                    if error:
+                        _log_chunk("rigor_rewrite", batch_idx, num_batches, batch_elapsed, len(batch_findings), failed=True)
+                        # Keep original findings for failed batch
+                        rewritten.extend(batch_findings)
+                        await event_queue.put(ChunkCompletedEvent(
+                            agent_id="rigor_rewrite",
+                            chunk_index=batch_idx,
+                            total_chunks=num_batches,
+                            findings_count=len(batch_findings),
+                            failed=True,
+                            error=error
+                        ))
+                    else:
+                        _log_chunk("rigor_rewrite", batch_idx, num_batches, batch_elapsed, len(batch_findings))
+                        chunk_metrics.append(batch_metric)
+                        rewritten.extend(batch_findings)
+
+                        await event_queue.put(ChunkCompletedEvent(
+                            agent_id="rigor_rewrite",
+                            chunk_index=batch_idx,
+                            total_chunks=num_batches,
+                            findings_count=len(batch_findings),
+                            failed=False
+                        ))
 
                 # Replace original rigor findings with merged ones (that have proposed_edit)
                 rewritten_ids = {f.id for f in rewritten}
@@ -429,9 +463,11 @@ class Orchestrator:
                     # Add merged findings with proposed_edit
                     all_findings.extend(rewritten)
 
+                await add_metrics(chunk_metrics)
+
                 elapsed = time.time() - agent_start
-                total_cost = sum(m.cost_usd for m in rewrite_metrics) if isinstance(rewrite_metrics, list) else rewrite_metrics.cost_usd
-                _log_done("rigor_rewrite", elapsed, total_cost, len(rewritten))
+                total_cost = sum(m.cost_usd for m in chunk_metrics)
+                _log_done("rigor_rewrite", elapsed, total_cost, len(rewritten), "total")
 
                 await event_queue.put(AgentCompletedEvent(
                     agent_id="rigor_rewrite",

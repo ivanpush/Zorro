@@ -79,7 +79,7 @@ export function ProcessScreen() {
         eventSourceRef.current.close();
       }
     };
-  }, [reviewMode]);
+  }, []);  // eslint-disable-line react-hooks/exhaustive-deps
 
   const simulateDemoMode = async () => {
     // Quick simulation for demo mode

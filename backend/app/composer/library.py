@@ -146,23 +146,30 @@ Do NOT include rewrites - just identify the issues."""
     # RIGOR-REWRITE AGENT
     # =========================================================================
 
-    RIGOR_REWRITE_SYSTEM = """You generate specific, actionable fixes for rigor issues.
+    RIGOR_REWRITE_SYSTEM = """You provide actionable guidance for rigor issues.
 
-For each issue, you MUST provide:
-1. A concrete text fix (new_text) if possible
-2. A rationale explaining WHY this fix/suggestion is good
-3. A suggestion telling the author WHAT to do
+For EACH issue, you MUST provide ONE of these:
+1. A SUGGESTED REWRITE: Concrete text replacement (type="replace", new_text filled in)
+2. A SUGGESTION: Strategic guidance when a text fix isn't appropriate (type="suggestion", new_text=null)
 
-You can NEVER just identify a problem - every issue needs actionable guidance.
+Use SUGGESTED REWRITE when:
+- The fix is a clear text change (add a qualifier, clarify wording, etc.)
+- You can write the exact replacement text
+
+Use SUGGESTION when:
+- The issue is strategic (needs new experiments, different analysis, etc.)
+- The fix requires author judgment or domain knowledge
+- Multiple valid approaches exist
+
+EVERY issue needs either a rewrite OR a suggestion - never neither, never skip.
 
 RULES:
-- Make edits specific and implementable
-- Keep edits minimal - don't rewrite more than necessary
-- Preserve author's intent while fixing the problem
-- NEVER generate placeholders like "[insert p-value here]" or "[add citation]"
-- Both rationale and suggestion are REQUIRED for every issue"""
+- Both rationale and suggestion fields are ALWAYS required
+- Keep rewrites minimal - don't rewrite more than necessary
+- NEVER use placeholders like "[insert p-value here]" or "[add citation]"
+- NEVER skip issues - every issue index must have an entry"""
 
-    RIGOR_REWRITE_USER = """Generate fixes for these rigor issues.
+    RIGOR_REWRITE_USER = """Provide guidance for these rigor issues.
 
 <issues>
 {rigor_findings}
@@ -172,21 +179,26 @@ RULES:
 {document_text}
 </document_context>
 
-For each issue (indexed 0, 1, 2...), provide:
+For EACH issue (indexed 0, 1, 2...), provide:
 - issue_index: The index of the issue (0, 1, 2...)
-- type: "replace" | "insert_before" | "insert_after" | "suggestion"
-- quoted_text: The EXACT text being replaced (copy from the issue's quoted_text)
-- new_text: The replacement text (null if issue needs new data/experiments)
-- rationale: WHY this fix/suggestion is good. Examples:
-  * "Adding sample sizes improves reproducibility and allows readers to assess statistical power"
-  * "Effect sizes provide meaningful context beyond statistical significance"
-- suggestion: WHAT the author should do. Examples:
-  * "Add a sentence explaining how n=24 was determined (e.g., power analysis)"
-  * "Include Cohen's d or eta-squared alongside the p-value"
-  * "Run additional experiments with a larger sample to validate this claim"
-- is_fixable: true if you provided new_text, false if issue needs new data/experiments
+- type: "replace" for text rewrites, "suggestion" for strategic guidance
+- quoted_text: Copy the EXACT text from the issue
+- new_text: The replacement text (REQUIRED for type="replace", null for type="suggestion")
+- rationale: WHY this guidance is good
+- suggestion: WHAT the author should do (ALWAYS required)
+- is_fixable: true if type="replace", false if type="suggestion"
 
-Return a rewrite for EVERY issue."""
+Examples of SUGGESTED REWRITE (type="replace", new_text filled):
+- Adding a qualifier to an overclaim
+- Inserting sample size info
+- Clarifying ambiguous methodology
+
+Examples of SUGGESTION (type="suggestion", new_text=null):
+- "Run a power analysis to determine appropriate sample size"
+- "Consider alternative statistical approaches given the data distribution"
+- "Replicate with independent dataset to strengthen claims"
+
+Return ONE entry for EACH issue. Do NOT skip any."""
 
     # =========================================================================
     # DOMAIN PIPELINE
