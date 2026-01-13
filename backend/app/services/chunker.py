@@ -76,23 +76,32 @@ def chunk_for_clarity(
     Chunk document by word count for Clarity agent.
     Respects paragraph boundaries.
     Includes 3-sentence context overlap.
+    Excludes: references, authors, acknowledgments, appendix, abstract.
     """
     settings = get_settings()
     target = target_words or settings.DEFAULT_CHUNK_WORDS
     n_context = settings.CONTEXT_OVERLAP_SENTENCES
 
+    # Filter paragraphs: exclude meta sections + abstract
+    filtered_paras = [
+        p for p in doc.paragraphs
+        if p.section_id
+        and not doc.is_excluded_section(p.section_id)
+        and not doc.is_abstract_section(p.section_id)
+    ]
+
     chunks: list[ClarityChunk] = []
     current_paras: list[Paragraph] = []
     current_words = 0
 
-    for para in doc.paragraphs:
+    for para in filtered_paras:
         para_words = len(para.text.split())
 
         # If adding this paragraph exceeds target and we have content, finalize chunk
         if current_words + para_words > target and current_paras:
             chunks.append(_build_clarity_chunk(
                 paragraphs=current_paras,
-                all_paragraphs=doc.paragraphs,
+                all_paragraphs=filtered_paras,
                 chunk_index=len(chunks),
                 n_context=n_context,
             ))
@@ -106,7 +115,7 @@ def chunk_for_clarity(
     if current_paras:
         chunks.append(_build_clarity_chunk(
             paragraphs=current_paras,
-            all_paragraphs=doc.paragraphs,
+            all_paragraphs=filtered_paras,
             chunk_index=len(chunks),
             n_context=n_context,
         ))
@@ -116,7 +125,7 @@ def chunk_for_clarity(
         chunk.chunk_total = len(chunks)
 
     total_words = sum(c.word_count for c in chunks)
-    logger.info(f"[chunker] Clarity: {len(chunks)} chunks from {len(doc.paragraphs)} paragraphs ({total_words} words)")
+    logger.info(f"[chunker] Clarity: {len(chunks)} chunks from {len(filtered_paras)} paragraphs ({total_words} words)")
 
     return chunks
 
@@ -152,30 +161,41 @@ def chunk_for_rigor(doc: DocObj) -> list[RigorChunk]:
     """
     Chunk document by section for Rigor agent.
     Each section becomes one chunk with context overlap.
+    Excludes: references, authors, acknowledgments, appendix.
+    Abstract: included as context only (not critiqued).
     """
     settings = get_settings()
     n_context = settings.CONTEXT_OVERLAP_SENTENCES
 
+    # Extract abstract text for context (not critiqued)
+    abstract_paras = doc.get_abstract_paragraphs()
+    abstract_text = "\n\n".join(p.text for p in abstract_paras) if abstract_paras else None
+
+    # Filter sections: exclude meta sections + abstract
+    filtered_sections = [
+        s for s in doc.sections
+        if not doc.is_excluded_section(s.section_id)
+        and not doc.is_abstract_section(s.section_id)
+    ]
+
     chunks: list[RigorChunk] = []
 
-    for section in doc.sections:
+    for i, section in enumerate(filtered_sections):
         section_paras = doc.get_section_paragraphs(section.section_id)
 
         if not section_paras:
             continue
 
-        section_idx = doc.sections.index(section)
-
-        # Get context from adjacent sections
+        # Get context from adjacent filtered sections
         context_before = None
-        if section_idx > 0:
-            prev_section = doc.sections[section_idx - 1]
+        if i > 0:
+            prev_section = filtered_sections[i - 1]
             prev_paras = doc.get_section_paragraphs(prev_section.section_id)
             context_before = get_last_n_sentences(prev_paras, n=n_context)
 
         context_after = None
-        if section_idx < len(doc.sections) - 1:
-            next_section = doc.sections[section_idx + 1]
+        if i < len(filtered_sections) - 1:
+            next_section = filtered_sections[i + 1]
             next_paras = doc.get_section_paragraphs(next_section.section_id)
             context_after = get_first_n_sentences(next_paras, n=n_context)
 
@@ -187,12 +207,13 @@ def chunk_for_rigor(doc: DocObj) -> list[RigorChunk]:
             paragraph_ids=[p.paragraph_id for p in section_paras],
             context_before=context_before,
             context_after=context_after,
+            abstract_context=abstract_text,
         ))
 
     # Set total count
     for chunk in chunks:
         chunk.chunk_total = len(chunks)
 
-    logger.info(f"[chunker] Rigor: {len(chunks)} sections from {len(doc.sections)} total sections")
+    logger.info(f"[chunker] Rigor: {len(chunks)} sections from {len(doc.sections)} total (excluded meta sections)")
 
     return chunks

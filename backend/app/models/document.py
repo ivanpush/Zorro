@@ -3,10 +3,23 @@ Document structure models - immutable after parsing/loading.
 All agents reference this structure via paragraph_id, sentence_id.
 """
 
+import re
 from datetime import datetime
 from typing import Literal
 from pydantic import BaseModel, Field
 import uuid
+
+
+# Section patterns for filtering
+EXCLUDED_SECTIONS_PATTERN = re.compile(
+    r'^(References?|Bibliography|Works?\s+Cited|'
+    r'Authors?|Author\s+Information|Affiliations?|'
+    r'Acknowledgm?ents?|'
+    r'Appendi(x|ces))(\s|$)',
+    re.IGNORECASE
+)
+
+ABSTRACT_PATTERN = re.compile(r'^Abstract(\s|$)', re.IGNORECASE)
 
 
 class BoundingBox(BaseModel):
@@ -127,11 +140,43 @@ class DocObj(BaseModel):
     def get_full_text(self) -> str:
         return "\n\n".join(p.text for p in self.paragraphs)
 
+    def get_text_for_briefing(self) -> str:
+        """Get document text excluding reference sections (for briefing/domain)."""
+        excluded_section_ids = {
+            s.section_id for s in self.sections
+            if s.section_title and EXCLUDED_SECTIONS_PATTERN.match(s.section_title)
+        }
+        return "\n\n".join(
+            p.text for p in self.paragraphs
+            if p.section_id not in excluded_section_ids
+        )
+
     def get_text_with_ids(self) -> str:
         return "\n\n".join(f"[{p.paragraph_id}] {p.text}" for p in self.paragraphs)
 
     def get_section_paragraphs(self, section_id: str) -> list[Paragraph]:
         return [p for p in self.paragraphs if p.section_id == section_id]
+
+    def is_excluded_section(self, section_id: str) -> bool:
+        """Check if section should be excluded from agents (refs, authors, acks, appendix)."""
+        section = next((s for s in self.sections if s.section_id == section_id), None)
+        if not section or not section.section_title:
+            return False
+        return bool(EXCLUDED_SECTIONS_PATTERN.match(section.section_title))
+
+    def is_abstract_section(self, section_id: str) -> bool:
+        """Check if section is the abstract."""
+        section = next((s for s in self.sections if s.section_id == section_id), None)
+        if not section or not section.section_title:
+            return False
+        return bool(ABSTRACT_PATTERN.match(section.section_title))
+
+    def get_abstract_paragraphs(self) -> list[Paragraph]:
+        """Get paragraphs from abstract section (for context)."""
+        for section in self.sections:
+            if section.section_title and ABSTRACT_PATTERN.match(section.section_title):
+                return self.get_section_paragraphs(section.section_id)
+        return []
 
     def validate_anchor_text(self, paragraph_id: str, quoted_text: str) -> bool:
         text = self.get_paragraph_text(paragraph_id)

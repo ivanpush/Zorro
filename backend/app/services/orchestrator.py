@@ -463,6 +463,11 @@ class Orchestrator:
                     # Add merged findings with proposed_edit
                     all_findings.extend(rewritten)
 
+                # Log final state
+                with_edit = sum(1 for f in rewritten if f.proposed_edit)
+                without_edit = len(rewritten) - with_edit
+                logger.info(f"[rigor_rewrite] FINAL: {with_edit}/{len(rewritten)} have proposed_edit, {without_edit} MISSING")
+
                 await add_metrics(chunk_metrics)
 
                 elapsed = time.time() - agent_start

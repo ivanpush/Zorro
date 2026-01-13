@@ -44,7 +44,7 @@ class Composer:
         return (
             self.lib.BRIEFING_SYSTEM,
             self.lib.BRIEFING_USER.format(
-                document_text=doc.get_full_text(),
+                document_text=doc.get_text_for_briefing(),
                 steering_memo=self._steering(steering)
             )
         )
@@ -115,7 +115,7 @@ class Composer:
         return (
             self.lib.DOMAIN_TARGET_SYSTEM,
             self.lib.DOMAIN_TARGET_USER.format(
-                document_text=doc.get_full_text()
+                document_text=doc.get_text_for_briefing()
             )
         )
 

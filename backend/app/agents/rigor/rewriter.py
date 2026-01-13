@@ -112,6 +112,10 @@ class RigorRewriter(BaseAgent):
 
         logger.info(f"[rigor_rewrite] Processing {len(findings)} findings in {total_batches} section batches")
 
+        # Log input state - how many already have proposed_edit?
+        with_edit = sum(1 for f in findings if f.proposed_edit)
+        logger.info(f"[rigor_rewrite] Input state: {with_edit}/{len(findings)} already have proposed_edit")
+
         # Process all batches in parallel, yield as they complete
         async def process_with_index(batch_idx: int, batch: list[Finding]):
             """Wrapper to preserve batch_idx through as_completed."""
@@ -119,7 +123,8 @@ class RigorRewriter(BaseAgent):
                 merged, metrics = await self._process_batch(batch, batch_idx, total_batches, doc)
                 return (batch_idx, merged, metrics, None)
             except Exception as e:
-                logger.error(f"[rigor_rewrite] Batch {batch_idx} failed: {e}")
+                logger.error(f"[rigor_rewrite] Batch {batch_idx} FAILED: {e}")
+                logger.error(f"[rigor_rewrite] Batch {batch_idx}: Returning {len(batch)} findings WITHOUT proposed_edit!")
                 return (batch_idx, batch, None, str(e))
 
         tasks = [
@@ -154,10 +159,15 @@ class RigorRewriter(BaseAgent):
             chunk_total=total_batches,
         )
 
+        # Log LLM response
+        logger.info(f"[rigor_rewrite] Batch {batch_idx}: LLM returned {len(output.rewrites)} rewrites for {len(batch)} findings")
+
         # Merge rewrites into findings
         merged = self._merge_rewrites_into_findings(batch, output.rewrites)
 
-        logger.debug(f"[rigor_rewrite] Batch {batch_idx}/{total_batches} done: {len(merged)} findings")
+        # Log output state
+        with_edit = sum(1 for f in merged if f.proposed_edit)
+        logger.info(f"[rigor_rewrite] Batch {batch_idx}: Output {with_edit}/{len(merged)} have proposed_edit")
 
         return merged, metrics
 
@@ -259,7 +269,7 @@ class RigorRewriter(BaseAgent):
             else:
                 # No rewrite generated - create fallback suggestion
                 # This should NOT happen if LLM follows instructions, but we enforce it
-                logger.warning(f"[rigor_rewrite] Missing rewrite for finding {i}, creating fallback suggestion")
+                logger.warning(f"[rigor_rewrite] Missing rewrite for finding {i} (LLM skipped), creating fallback suggestion")
                 fallback_edit = ProposedEdit(
                     type="suggestion",
                     anchor=finding.anchors[0],

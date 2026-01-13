@@ -49,9 +49,15 @@ class RigorChunk(BaseModel):
     paragraph_ids: list[str]
     context_before: ContextOverlap | None = None
     context_after: ContextOverlap | None = None
+    abstract_context: str | None = None  # Abstract as context (not critiqued)
 
     def get_text_with_ids(self) -> str:
         parts = []
+
+        # Abstract context first (if present)
+        if self.abstract_context:
+            parts.append(f"[CONTEXT ONLY - DO NOT CRITIQUE]\n{self.abstract_context}\n[END CONTEXT]")
+
         if self.context_before:
             parts.append(self.context_before.format_for_prompt())
 

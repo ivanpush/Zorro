@@ -44,7 +44,8 @@
       "Bash(xargs:*)",
       "Bash(test:*)",
       "Bash(awk:*)",
-      "Bash(source .venv/bin/activate)"
+      "Bash(source .venv/bin/activate)",
+      "Bash(xxd:*)"
     ],
     "deny": [],
     "ask": []
