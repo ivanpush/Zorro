@@ -115,6 +115,13 @@ Do NOT flag:
 - Defensible methodological choices
 - Analyses beyond stated scope
 
+SPAN CONSOLIDATION:
+- If multiple issues exist in the SAME or OVERLAPPING text spans, combine them into ONE finding
+- If one span is nested inside another, combine into ONE finding covering the larger span
+- Use the most severe category/severity from the combined issues
+- Enumerate all problems in the description field
+- Example: A sentence with both weak evidence AND circular reasoning = ONE finding describing both
+
 Your job is to FIND issues. A separate agent will generate rewrites."""
 
     RIGOR_FIND_USER = """Review this section for methodological and logical rigor.
@@ -132,6 +139,10 @@ Your job is to FIND issues. A separate agent will generate rewrites."""
 IMPORTANT: Only critique text with [p_XXX] paragraph IDs.
 Text marked [CONTEXT ONLY] is just for reference.
 
+CRITICAL - Before returning findings, check for overlapping/nested spans:
+- If multiple issues share the same or overlapping text → consolidate into ONE finding
+- This prevents conflicting edits during the rewrite phase
+
 For each issue found:
 - title: Brief description (under 100 chars)
 - category: rigor_methodology, rigor_logic, rigor_evidence, or rigor_statistics
@@ -146,27 +157,30 @@ Do NOT include rewrites - just identify the issues."""
     # RIGOR-REWRITE AGENT
     # =========================================================================
 
-    RIGOR_REWRITE_SYSTEM = """You provide actionable guidance for rigor issues.
+    RIGOR_REWRITE_SYSTEM = """You provide actionable text fixes for rigor issues.
 
-For EACH issue, you MUST provide ONE of these:
-1. A SUGGESTED REWRITE: Concrete text replacement (type="replace", new_text filled in)
-2. A SUGGESTION: Strategic guidance when a text fix isn't appropriate (type="suggestion", new_text=null)
+DEFAULT TO REWRITES. Most issues CAN be fixed with text changes.
 
-Use SUGGESTED REWRITE when:
-- The fix is a clear text change (add a qualifier, clarify wording, etc.)
-- You can write the exact replacement text
+type="replace" (STRONGLY PREFERRED - use for 80%+ of issues):
+- Overclaims → add qualifiers ("proves" → "suggests", "definitely" → "may")
+- Missing caveats → insert hedging language
+- Unsupported claims → weaken or add "based on this sample"
+- Causal language from correlational data → change to correlational language
+- Overgeneralization → scope down ("all patients" → "patients in this study")
+- Missing limitations → acknowledge the limitation inline
+- Vague methods → make more specific using context from document
 
-Use SUGGESTION when:
-- The issue is strategic (needs new experiments, different analysis, etc.)
-- The fix requires author judgment or domain knowledge
-- Multiple valid approaches exist
+type="suggestion" (RARE - only when text change is truly impossible):
+- Requires collecting new data (can't be written)
+- Needs a completely different statistical approach (author must decide which)
+- Fundamental study redesign needed
 
-EVERY issue needs either a rewrite OR a suggestion - never neither, never skip.
+If you CAN write replacement text, use type="replace". Do NOT use "suggestion" just because the issue is complex - if you can write the fix, write it.
 
 RULES:
 - Both rationale and suggestion fields are ALWAYS required
-- Keep rewrites minimal - don't rewrite more than necessary
-- NEVER use placeholders like "[insert p-value here]" or "[add citation]"
+- Keep rewrites minimal - change only what's needed
+- NEVER use placeholders like "[insert X here]" or "[add citation]"
 - NEVER skip issues - every issue index must have an entry"""
 
     RIGOR_REWRITE_USER = """Provide guidance for these rigor issues.

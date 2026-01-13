@@ -267,27 +267,8 @@ class RigorRewriter(BaseAgent):
                     metadata=finding.metadata,
                 ))
             else:
-                # No rewrite generated - create fallback suggestion
-                # This should NOT happen if LLM follows instructions, but we enforce it
-                logger.warning(f"[rigor_rewrite] Missing rewrite for finding {i} (LLM skipped), creating fallback suggestion")
-                fallback_edit = ProposedEdit(
-                    type="suggestion",
-                    anchor=finding.anchors[0],
-                    new_text=None,
-                    rationale="This issue was identified but requires author judgment to address.",
-                    suggestion="Review this issue and determine the best way to address it based on your expertise and available data.",
-                )
-                merged.append(Finding(
-                    id=finding.id,
-                    agent_id="rigor_rewrite",
-                    category=finding.category,
-                    severity=finding.severity,
-                    confidence=finding.confidence,
-                    title=finding.title,
-                    description=finding.description,
-                    anchors=finding.anchors,
-                    proposed_edit=fallback_edit,
-                    metadata=finding.metadata,
-                ))
+                # LLM skipped this finding - keep it without proposed_edit
+                logger.warning(f"[rigor_rewrite] Missing rewrite for finding {i} (LLM skipped), keeping without suggestion")
+                merged.append(finding)
 
         return merged

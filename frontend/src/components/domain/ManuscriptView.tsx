@@ -310,18 +310,25 @@ export function ManuscriptView({
     };
 
     // Get displayed text based on state (diff is default, final on toggle)
+    // Priority: isEditing > isUserEdited > isRewritten > default
     const getDisplayedText = () => {
       if (isEditing) return null; // Edit mode shows textarea instead
+
       if (isUserEdited) {
-        // Diff is default, show final only when toggled
-        return isShowingFinal ? <span>{userEditedText}</span> : renderUserEditDiffView();
+        // User edits take precedence over AI rewrites
+        if (!isShowingFinal) return renderUserEditDiffView();
+        // Final view: apply highlighting if this paragraph has selected issue
+        return renderTextWithHighlight(userEditedText || '');
       }
+
       if (isRewritten) {
-        // Diff is default, show final only when toggled
+        // AI rewrites
         if (!isShowingFinal) return renderDiffView();
-        // rewrittenText is now the full paragraph text
-        return <span>{rewrittenText}</span>;
+        // Final view: apply highlighting if this paragraph has selected issue
+        return renderTextWithHighlight(rewrittenText || '');
       }
+
+      // Original text with highlighting
       return renderTextWithHighlight(paragraph.text);
     };
 
