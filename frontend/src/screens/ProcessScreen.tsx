@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check } from 'lucide-react';
 import { useAppStore } from '@/store';
@@ -15,80 +15,58 @@ import type {
 // API base URL
 const API_BASE = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_API_URL) || 'http://localhost:8000';
 
-// Agent categories with rotating status messages
+// Agent categories with detailed status
 const AGENT_CATEGORIES: Array<{
   match: (id: string) => boolean;
   title: string;
-  statuses: string[];
+  status: string;
 }> = [
   {
     match: (id) => id.includes('briefing'),
     title: 'Understanding your document',
-    statuses: [
-      'Parsing document structure and sections...',
-      'Identifying the abstract and introduction...',
-      'Mapping out the methodology section...',
-      'Building a mental model of your argument...',
-      'Extracting key claims and evidence...',
-    ],
+    status: 'Building a map of sections, claims, and evidence...',
   },
   {
     match: (id) => id.includes('clarity'),
-    title: 'Examining clarity and readability',
-    statuses: [
-      'Checking sentence complexity...',
-      'Looking for ambiguous references...',
-      'Evaluating paragraph flow and transitions...',
-      'Identifying jargon that may need explanation...',
-      'Scanning for passive voice overuse...',
-    ],
+    title: 'Reviewing multiple sections',
+    status: 'Checking clarity across all paragraphs...',
+  },
+  {
+    match: (id) => id.includes('rigor') && id.includes('find'),
+    title: 'Finding methodological issues',
+    status: 'Statistical methods, controls, and evidence...',
+  },
+  {
+    match: (id) => id.includes('rigor') && id.includes('rewrite'),
+    title: 'Drafting improvements',
+    status: 'Writing suggested corrections...',
   },
   {
     match: (id) => id.includes('rigor'),
-    title: 'Evaluating scientific rigor',
-    statuses: [
-      'Examining the experimental design...',
-      'Checking if controls are adequate...',
-      'Reviewing statistical methodology...',
-      'Looking for potential confounders...',
-      'Assessing sample size justification...',
-    ],
+    title: 'Examining methodology & evidence',
+    status: 'Statistical methods, controls, and reasoning...',
   },
   {
     match: (id) => id.includes('adversary'),
-    title: 'Stress-testing your arguments',
-    statuses: [
-      'Looking for alternative explanations...',
-      'Checking if counterarguments are addressed...',
-      'Testing the logical chain of reasoning...',
-      'Considering what a skeptical reviewer would ask...',
-    ],
+    title: 'Stress-testing arguments',
+    status: 'Looking for gaps and counterarguments...',
   },
   {
     match: (id) => id.includes('domain'),
-    title: 'Validating against the literature',
-    statuses: [
-      'Cross-referencing key claims...',
-      'Checking terminology conventions...',
-      'Comparing methodology to field standards...',
-      'Verifying cited facts and figures...',
-    ],
+    title: 'Validating claims',
+    status: 'Cross-referencing facts and citations...',
   },
   {
     match: (id) => id.includes('assembl') || id.includes('synth'),
-    title: 'Synthesizing all feedback',
-    statuses: [
-      'Merging overlapping suggestions...',
-      'Prioritizing by impact and severity...',
-      'Removing redundant findings...',
-    ],
+    title: 'Synthesizing feedback',
+    status: 'Merging and prioritizing suggestions...',
   },
 ];
 
 // Fallback for unknown agents
 const DEFAULT_AGENT = {
-  title: 'Analyzing your document',
-  statuses: ['Processing...', 'Evaluating content...', 'Reviewing sections...'],
+  title: 'Analyzing document',
+  status: 'Processing content...',
 };
 
 function getAgentConfig(agentId: string) {
@@ -100,28 +78,22 @@ function getAgentConfig(agentId: string) {
 function getFindingType(agentId: string, category?: string): string {
   const id = (agentId + ' ' + (category || '')).toLowerCase();
   if (id.includes('clarity') || id.includes('writing')) return 'writing';
-  if (id.includes('rigor') || id.includes('statistic') || id.includes('method')) return 'rigor';
-  if (id.includes('adversar') || id.includes('argument') || id.includes('alternative')) return 'argument';
-  if (id.includes('domain') || id.includes('literature')) return 'domain';
-  return 'review';
+  if (id.includes('adversar') || id.includes('rigor') || id.includes('argument')) return 'argument';
+  return 'writing';
 }
-
-// Sample document snippets for demo mode (simulate "reading" real text)
-const DEMO_SNIPPETS = [
-  '"...the proposed methodology enables..."',
-  '"...significant improvement over baseline..."',
-  '"...limitations of this approach include..."',
-  '"...our results demonstrate that..."',
-  '"...further research is needed to..."',
-  '"...we hypothesize that the mechanism..."',
-];
 
 interface AgentNode {
   id: string;
   title: string;
   status: 'pending' | 'active' | 'completed';
   liveStatus: string;
-  streamedText?: string;
+  chunksCompleted: number;
+  totalChunks: number;
+}
+
+interface VisibleFinding extends Finding {
+  isNew?: boolean;
+  isExiting?: boolean;
 }
 
 export function ProcessScreen() {
@@ -131,47 +103,16 @@ export function ProcessScreen() {
   const [_jobId, setJobId] = useState<string | null>(null);
   const [agentNodes, setAgentNodes] = useState<AgentNode[]>([]);
   const [discoveredFindings, setDiscoveredFindings] = useState<Finding[]>([]);
+  const [visibleFindings, setVisibleFindings] = useState<VisibleFinding[]>([]);
+  const [exitingIds, setExitingIds] = useState<Set<string>>(new Set());
   const [elapsedTime, setElapsedTime] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [flashingFindingId, setFlashingFindingId] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(true);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
   const hasStartedRef = useRef(false);
-  const statusIntervalsRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
-
-  // Cycle through status messages for an active agent
-  const startStatusCycling = useCallback((agentId: string) => {
-    const agentConfig = getAgentConfig(agentId);
-
-    let statusIndex = 0;
-    let snippetIndex = 0;
-
-    const interval = setInterval(() => {
-      statusIndex = (statusIndex + 1) % agentConfig.statuses.length;
-      snippetIndex = (snippetIndex + 1) % DEMO_SNIPPETS.length;
-
-      setAgentNodes(prev => prev.map(n =>
-        n.id === agentId && n.status === 'active'
-          ? {
-              ...n,
-              liveStatus: agentConfig.statuses[statusIndex],
-              streamedText: DEMO_SNIPPETS[snippetIndex],
-            }
-          : n
-      ));
-    }, 2200);
-
-    statusIntervalsRef.current.set(agentId, interval);
-  }, []);
-
-  const stopStatusCycling = useCallback((agentId: string) => {
-    const interval = statusIntervalsRef.current.get(agentId);
-    if (interval) {
-      clearInterval(interval);
-      statusIntervalsRef.current.delete(agentId);
-    }
-  }, []);
+  const prevFindingCountRef = useRef(0);
 
   // Start timer
   useEffect(() => {
@@ -181,20 +122,66 @@ export function ProcessScreen() {
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
-      // Clean up all status intervals
-      statusIntervalsRef.current.forEach(interval => clearInterval(interval));
     };
   }, []);
 
-  // Flash effect when new findings appear
+  // Manage visible findings with animated exits and auto-decay
+  const MAX_VISIBLE = 6;
+  const DECAY_TIME = 8000; // Auto-decay after 8 seconds
+
   useEffect(() => {
-    if (discoveredFindings.length > 0) {
-      const latestFinding = discoveredFindings[discoveredFindings.length - 1];
-      setFlashingFindingId(latestFinding.id);
-      const timer = setTimeout(() => setFlashingFindingId(null), 600);
-      return () => clearTimeout(timer);
+    if (discoveredFindings.length === 0) return;
+
+    const newFindings = discoveredFindings.map((f, i) => ({
+      ...f,
+      isNew: i === discoveredFindings.length - 1 && discoveredFindings.length > prevFindingCountRef.current,
+      isExiting: false,
+    }));
+
+    // If we have more than max, mark old ones for exit
+    if (newFindings.length > MAX_VISIBLE) {
+      const toExitCount = newFindings.length - MAX_VISIBLE;
+      const toExitIds = newFindings.slice(0, toExitCount).map(f => f.id);
+
+      setExitingIds(new Set(toExitIds));
+
+      setTimeout(() => {
+        setVisibleFindings(newFindings.slice(-MAX_VISIBLE).map(f => ({ ...f, isNew: false })));
+        setExitingIds(new Set());
+      }, 300);
+
+      setVisibleFindings(newFindings.map(f => ({
+        ...f,
+        isExiting: toExitIds.includes(f.id),
+      })));
+    } else {
+      setVisibleFindings(newFindings);
+      setTimeout(() => {
+        setVisibleFindings(prev => prev.map(f => ({ ...f, isNew: false })));
+      }, 500);
     }
-  }, [discoveredFindings.length]);
+
+    prevFindingCountRef.current = discoveredFindings.length;
+  }, [discoveredFindings]);
+
+  // Auto-decay: remove oldest finding periodically
+  useEffect(() => {
+    if (visibleFindings.length === 0 || !isProcessing) return;
+
+    const decayTimer = setTimeout(() => {
+      if (visibleFindings.length > 0) {
+        const oldestId = visibleFindings[0].id;
+        setExitingIds(new Set([oldestId]));
+
+        setTimeout(() => {
+          setVisibleFindings(prev => prev.slice(1));
+          setExitingIds(new Set());
+        }, 300);
+      }
+    }, DECAY_TIME);
+
+    return () => clearTimeout(decayTimer);
+  }, [visibleFindings, isProcessing]);
 
   // Start review
   useEffect(() => {
@@ -214,7 +201,7 @@ export function ProcessScreen() {
     };
   }, []);  // eslint-disable-line react-hooks/exhaustive-deps
 
-  const addAgent = (agentId: string) => {
+  const addAgent = (agentId: string, totalChunks: number = 0) => {
     const config = getAgentConfig(agentId);
     setAgentNodes(prev => [
       ...prev,
@@ -222,17 +209,16 @@ export function ProcessScreen() {
         id: agentId,
         title: config.title,
         status: 'active',
-        liveStatus: config.statuses[0],
-        streamedText: DEMO_SNIPPETS[0],
+        liveStatus: config.status,
+        chunksCompleted: 0,
+        totalChunks,
       }
     ]);
-    startStatusCycling(agentId);
   };
 
   const completeAgent = (agentId: string) => {
-    stopStatusCycling(agentId);
     setAgentNodes(prev => prev.map(n =>
-      n.id === agentId ? { ...n, status: 'completed', streamedText: undefined } : n
+      n.id === agentId ? { ...n, status: 'completed' } : n
     ));
   };
 
@@ -308,6 +294,7 @@ export function ProcessScreen() {
     await sleep(1800);
     completeAgent('assembler');
 
+    setIsProcessing(false);
     await sleep(600);
     navigate('/review');
   };
@@ -379,12 +366,9 @@ export function ProcessScreen() {
 
       case 'chunk_completed': {
         const e = event as ChunkCompletedEvent;
-        // Update with more specific status based on chunk
-        const agentConfig = getAgentConfig(e.agent_id);
-        const statusIndex = e.chunk_index % agentConfig.statuses.length;
         setAgentNodes(prev => prev.map(n =>
           n.id === e.agent_id
-            ? { ...n, liveStatus: agentConfig.statuses[statusIndex] }
+            ? { ...n, chunksCompleted: e.chunk_index + 1, totalChunks: e.total_chunks }
             : n
         ));
         break;
@@ -400,6 +384,7 @@ export function ProcessScreen() {
         const e = event as ReviewCompletedEvent;
         const finalFindings = e.findings && e.findings.length > 0 ? e.findings : discoveredFindings;
         setFindings(finalFindings);
+        setIsProcessing(false);
         if (e.metrics) {
           setReviewMetrics({
             total_time_ms: e.metrics.total_time_ms || 0,
@@ -428,12 +413,12 @@ export function ProcessScreen() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#0a0a0c] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-400 text-lg mb-4">Error: {error}</p>
           <button
             onClick={() => navigate('/upload')}
-            className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600"
+            className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700"
           >
             Back to Upload
           </button>
@@ -442,59 +427,54 @@ export function ProcessScreen() {
     );
   }
 
-  // Only show last 6 findings
-  const visibleFindings = discoveredFindings.slice(-6);
-
   return (
-    <div className="min-h-screen bg-black text-white p-8">
+    <div className="min-h-screen bg-background text-white p-8">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8 h-6">
+        <div className="flex items-center justify-between mb-10 h-6">
           <div className="flex items-center gap-2">
             {discoveredFindings.length > 0 && (
               <>
-                <div className="w-1.5 h-1.5 rounded-full bg-orange-400" />
-                <span className="text-orange-400/80 text-xs">
+                <div className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
+                <span className="text-orange-400/80 text-sm">
                   {discoveredFindings.length} {discoveredFindings.length === 1 ? 'finding' : 'findings'}
                 </span>
               </>
             )}
           </div>
-          <span className="text-gray-600 text-xs font-mono">
+          <span className="text-gray-600 text-sm font-mono">
             {formatTime(elapsedTime)}
           </span>
         </div>
 
-        {/* Agent Pipeline Box */}
-        <div className="bg-[#0d0d0d] rounded-lg border border-gray-800 p-6 mb-4">
+        {/* Agent Pipeline */}
+        <div className="mb-12">
           {agentNodes.length === 0 ? (
             <div className="flex items-center gap-3 text-gray-500 text-sm">
-              <div className="w-4 h-4 rounded-full border border-gray-600 animate-pulse" />
-              <span>Preparing analysis...</span>
+              <div className="w-3 h-3 rounded-full border border-gray-600 animate-pulse" />
+              <span className="animate-pulse">Preparing analysis...</span>
             </div>
           ) : (
             <div className="relative">
               {agentNodes.map((node, idx) => (
                 <div key={node.id} className="relative">
-                  {/* Connecting line - thin, stops at circle edge */}
+                  {/* Connecting line to next node */}
                   {idx < agentNodes.length - 1 && (
                     <div
-                      className="absolute left-[7px] top-[16px] w-px bg-gray-700"
-                      style={{ height: 'calc(100% - 12px)' }}
+                      className="absolute left-[5px] top-[14px] w-px bg-gray-800"
+                      style={{ height: 'calc(100% - 6px)' }}
                     />
                   )}
 
-                  <div className="flex items-start gap-3 pb-5 last:pb-0">
+                  <div className="flex items-start gap-4 pb-6 last:pb-0">
                     {/* Node indicator */}
-                    <div className="relative flex-shrink-0 mt-0.5">
+                    <div className="relative flex-shrink-0 mt-1">
                       {node.status === 'completed' ? (
-                        <div className="w-4 h-4 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                          <Check className="w-2.5 h-2.5 text-emerald-400" />
-                        </div>
+                        <div className="w-3 h-3 rounded-full bg-emerald-500/40" />
                       ) : (
                         <div className="relative">
-                          <div className="w-4 h-4 rounded-full border border-orange-400" />
-                          <div className="absolute inset-0 w-4 h-4 rounded-full border border-orange-400 animate-ping opacity-30" />
+                          <div className="w-3 h-3 rounded-full border border-orange-400/70" />
+                          <div className="absolute inset-0 w-3 h-3 rounded-full border border-orange-400/40 animate-ping" />
                         </div>
                       )}
                     </div>
@@ -506,20 +486,29 @@ export function ProcessScreen() {
                       }`}>
                         {node.title}
                       </div>
-
                       {node.status === 'active' && (
-                        <div className="mt-1 space-y-0.5">
-                          <div className="text-xs text-gray-500">
+                        <div className="mt-1.5">
+                          <span className="text-xs text-gray-600 breathing-text">
                             {node.liveStatus}
-                          </div>
-                          {node.streamedText && (
-                            <div className="text-xs text-gray-600 italic">
-                              {node.streamedText}
-                            </div>
-                          )}
+                          </span>
                         </div>
                       )}
                     </div>
+
+                    {/* Progress indicator */}
+                    {node.status === 'active' && node.totalChunks > 0 && (
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <div className="w-20 h-0.5 bg-gray-800 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-orange-400/80 rounded-full transition-all duration-300"
+                            style={{ width: `${(node.chunksCompleted / node.totalChunks) * 100}%` }}
+                          />
+                        </div>
+                        <span className="text-[10px] text-gray-600 font-mono">
+                          {node.chunksCompleted}/{node.totalChunks}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -527,28 +516,34 @@ export function ProcessScreen() {
           )}
         </div>
 
-        {/* Findings Box - only show last 6, no scroll */}
+        {/* Findings */}
         {visibleFindings.length > 0 && (
-          <div className="bg-[#111] rounded-lg border border-gray-800/50 p-5">
-            <div className="space-y-3">
+          <div className="border-t border-gray-800/50 pt-8">
+            <div className="space-y-5">
               {visibleFindings.map((finding) => (
                 <div
                   key={finding.id}
                   className={`
-                    relative pl-3 py-1.5 transition-all duration-300
-                    border-l border-orange-500/50
-                    ${flashingFindingId === finding.id ? 'bg-orange-500/5' : ''}
+                    relative transition-all duration-300
+                    ${finding.isExiting ? 'finding-exit' : ''}
+                    ${finding.isNew ? 'finding-enter' : ''}
                   `}
                 >
-                  {flashingFindingId === finding.id && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-transparent animate-sweep" />
+                  {/* Flash bar on new */}
+                  {finding.isNew && (
+                    <div className="absolute -left-4 top-0 bottom-0 w-1 bg-orange-400 rounded-full flash-bar" />
                   )}
 
                   <div className="relative">
-                    <div className="text-orange-400/90 text-sm">
-                      {finding.title}
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-[10px] text-gray-600 uppercase tracking-wide">
+                        {getFindingType(finding.agentId, finding.category)}
+                      </span>
+                      <span className="text-orange-400/90 text-sm">
+                        {finding.title}
+                      </span>
                     </div>
-                    <div className="text-gray-600 text-xs mt-0.5 line-clamp-1">
+                    <div className="text-orange-400/40 text-xs mt-1 line-clamp-1">
                       {finding.description}
                     </div>
                   </div>
@@ -560,13 +555,33 @@ export function ProcessScreen() {
       </div>
 
       <style>{`
-        @keyframes sweep {
-          0% { opacity: 1; transform: translateX(-100%); }
-          50% { opacity: 1; }
-          100% { opacity: 0; transform: translateX(100%); }
+        @keyframes breathing-text {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 0.9; }
         }
-        .animate-sweep {
-          animation: sweep 0.6s ease-out forwards;
+        @keyframes slide-in {
+          0% { opacity: 0; transform: translateX(-12px); }
+          100% { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes slide-out {
+          0% { opacity: 1; }
+          100% { opacity: 0; height: 0; margin: 0; overflow: hidden; }
+        }
+        @keyframes flash-glow {
+          0% { opacity: 1; box-shadow: 0 0 12px rgba(251, 146, 60, 0.9); }
+          100% { opacity: 0.5; box-shadow: none; }
+        }
+        .breathing-text {
+          animation: breathing-text 1.5s ease-in-out infinite;
+        }
+        .finding-enter {
+          animation: slide-in 0.35s ease-out forwards;
+        }
+        .finding-exit {
+          animation: slide-out 0.25s ease-out forwards;
+        }
+        .flash-bar {
+          animation: flash-glow 0.5s ease-out forwards;
         }
       `}</style>
     </div>
