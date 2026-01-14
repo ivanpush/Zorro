@@ -14,6 +14,13 @@ Generated: [timestamp]
 ## Task
 [1-2 sentences - what we're trying to accomplish]
 
+## Git
+Branch: [branch] | Commit: [short hash and subject]
+
+## To See It
+[One line: how to run and navigate to what we're working on]
+[Optional: where this fits in the app flow]
+
 ## Current State
 [Where we actually are - be honest if it's mid-debug, mid-refactor, broken, etc.]
 
@@ -44,5 +51,6 @@ Generated: [timestamp]
 - If mid-debug: say what's broken and what was tried
 - No fluff, no verbose explanations
 - Quote user preferences verbatim when relevant
+- Run `git branch --show-current` and `git log -1 --oneline` for Git section
 
 Confirm handoff is ready. User runs `/lho` in new session.
