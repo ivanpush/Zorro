@@ -43,9 +43,14 @@ FindingCategory = Literal[
     "domain_terminology",
     "domain_factual",
     # Adversarial
-    "adversarial_weakness",
-    "adversarial_gap",
-    "adversarial_alternative",
+    "overclaim",          # Conclusion too strong or too broad
+    "assumption",         # Unstated premise that could be wrong
+    "alternative",        # Other explanations not considered
+    "interpretation",     # Misreading own results
+    "methodology",        # Approach is flawed/outdated/wrong
+    "limitation",         # Constraint not acknowledged
+    "contradiction",      # Prior work or field disagrees
+    "feasibility",        # Practical barriers not addressed
 ]
 
 Severity = Literal["critical", "major", "minor", "suggestion"]
@@ -68,35 +73,6 @@ AGENT_TO_TRACK: dict[str, Track] = {
     "domain": "C",
 }
 
-# =============================================================================
-# Dimension: Summary charts (WQ=Writing Quality, CR=Claim Rigor, AS=Argument Strength)
-# =============================================================================
-Dimension = Literal["WQ", "CR", "AS"]
-
-CATEGORY_TO_DIMENSIONS: dict[str, list[Dimension]] = {
-    # Clarity -> Writing Quality
-    "clarity_sentence": ["WQ"],
-    "clarity_paragraph": ["WQ"],
-    "clarity_section": ["WQ"],
-    "clarity_flow": ["WQ"],
-    # Rigor -> Claim Rigor
-    "rigor_methodology": ["CR"],
-    "rigor_logic": ["CR"],
-    "rigor_evidence": ["CR"],
-    "rigor_statistics": ["CR"],
-    # Scope -> Argument Strength
-    "scope_overclaim": ["AS"],
-    "scope_underclaim": ["AS"],
-    "scope_missing": ["AS"],
-    # Domain -> both AS and CR
-    "domain_convention": ["AS", "CR"],
-    "domain_terminology": ["AS", "CR"],
-    "domain_factual": ["AS", "CR"],
-    # Adversarial -> Argument Strength
-    "adversarial_weakness": ["AS"],
-    "adversarial_gap": ["AS"],
-    "adversarial_alternative": ["AS"],
-}
 
 
 class Anchor(BaseModel):
@@ -142,9 +118,6 @@ class Finding(BaseModel):
     # Track for frontend tab routing (auto-derived from agent_id)
     track: Track = Field(default="A")
 
-    # Dimensions for summary charts (auto-derived from category)
-    dimensions: list[Dimension] = Field(default_factory=list)
-
     # Panel mode: how many models flagged this (1, 2, or 3)
     votes: int | None = Field(None, ge=1, le=3)
 
@@ -153,26 +126,14 @@ class Finding(BaseModel):
 
     @model_validator(mode="after")
     def auto_derive_fields(self) -> "Finding":
-        """Auto-derive track from agent_id and dimensions from category."""
-        # Derive track from agent_id
+        """Auto-derive track from agent_id."""
         self.track = AGENT_TO_TRACK.get(self.agent_id, "A")
-
-        # Derive dimensions from category (if not already set)
-        if not self.dimensions:
-            self.dimensions = CATEGORY_TO_DIMENSIONS.get(self.category, [])
-
         return self
 
     @property
     def sentence_ids(self) -> list[str]:
         """Extract sentence_ids from anchors for frontend highlighting."""
         return [a.sentence_id for a in self.anchors if a.sentence_id]
-
-    def merge_dimensions(self, other: "Finding") -> None:
-        """Merge dimensions from another finding (used in dedup)."""
-        for dim in other.dimensions:
-            if dim not in self.dimensions:
-                self.dimensions.append(dim)
 
     @model_serializer
     def serialize(self) -> dict[str, Any]:
@@ -194,7 +155,6 @@ class Finding(BaseModel):
                 for a in self.anchors
             ],
             "track": self.track,
-            "dimensions": self.dimensions,
             "sentenceIds": self.sentence_ids,
             "createdAt": self.created_at.isoformat(),
         }

@@ -20,12 +20,13 @@ logger = logging.getLogger("zorro.agents.adversary")
 
 class AdversaryFinding(BaseModel):
     """Single adversarial finding from LLM."""
-    category: str = Field(description="adversarial_weakness, adversarial_gap, or adversarial_alternative")
+    category: str = Field(description="overclaim, assumption, alternative, interpretation, methodology, limitation, contradiction, or feasibility")
     severity: str = Field(description="critical or major")
     title: str = Field(max_length=100)
     description: str
     paragraph_id: str
     quoted_text: str
+    new_text: str | None = Field(None, description="Concrete rewrite if simple fix, otherwise None")
     suggestion: str = Field(description="WHAT the author should do to address this")
     rationale: str = Field(description="WHY this suggestion would strengthen the argument")
 
@@ -118,6 +119,8 @@ class SingleAdversary(BaseAgent):
                 paragraph_id=f.paragraph_id,
                 quoted_text=f.quoted_text,
             )
+            # Use "replace" if concrete rewrite provided, otherwise "suggestion"
+            edit_type = "replace" if f.new_text else "suggestion"
             findings.append(Finding(
                 agent_id=self.agent_id,
                 category=f.category,
@@ -126,9 +129,9 @@ class SingleAdversary(BaseAgent):
                 description=f.description,
                 anchors=[anchor],
                 proposed_edit=ProposedEdit(
-                    type="suggestion",
+                    type=edit_type,
                     anchor=anchor,
-                    new_text=None,  # Adversary doesn't provide concrete rewrites
+                    new_text=f.new_text,
                     rationale=f.rationale,
                     suggestion=f.suggestion,
                 ),

@@ -9,8 +9,8 @@ Validation Rules:
 
 Dedup Rules:
 1. Track B (Rigor) - NEVER deduplicated, all kept
-2. Track A vs C overlap - Keep C (Adversary wins over Clarity), merge dimensions
-3. Same track conflicts - keep higher priority (adversary > rigor > domain > clarity)
+2. Track C (Adversary) - NEVER deduplicated, all kept
+3. Track A (Clarity) - deduplicated within track, higher priority wins
 
 Priority for dedup (lower number = higher priority = wins on overlap):
 - adversary, adversary_panel: 1
@@ -146,32 +146,31 @@ class Assembler:
     def _deduplicate(self, findings: list[Finding]) -> list[Finding]:
         """
         Deduplicate with track-aware rules:
-        1. Track B exempt from dedup (all Rigor findings kept)
-        2. Track C wins over Track A on overlap (merge dimensions)
-        3. Within same track, higher priority wins
+        1. Track B (Rigor) exempt from dedup
+        2. Track C (Adversary) exempt from dedup
+        3. Track A (Clarity) deduplicated within track
         """
-        # Separate Track B (exempt from dedup)
+        # Separate exempt tracks (B and C)
         track_b = [f for f in findings if f.track == "B"]
-        others = [f for f in findings if f.track != "B"]
+        track_c = [f for f in findings if f.track == "C"]
+        track_a = [f for f in findings if f.track == "A"]
 
-        logger.info(f"[assembler] Track B (exempt): {len(track_b)}, Others: {len(others)}")
+        logger.info(f"[assembler] Track A: {len(track_a)}, Track B (exempt): {len(track_b)}, Track C (exempt): {len(track_c)}")
 
-        # Dedup Track A and C with C > A priority
-        deduped_ac = self._dedup_with_track_priority(others)
+        # Only dedup Track A (Clarity)
+        deduped_a = self._dedup_track_a(track_a)
 
-        # Combine: Track B first, then deduped A/C
-        all_kept = track_b + deduped_ac
+        # Combine all tracks
+        all_kept = deduped_a + track_b + track_c
 
         # Sort by presentation order
         all_kept.sort(key=lambda f: PRESENTATION_ORDER.get(f.agent_id, 99))
 
         return all_kept
 
-    def _dedup_with_track_priority(self, findings: list[Finding]) -> list[Finding]:
+    def _dedup_track_a(self, findings: list[Finding]) -> list[Finding]:
         """
-        Deduplicate Track A and C findings:
-        - C wins over A on overlap (merge A's dimensions into C)
-        - Same track: higher priority wins
+        Deduplicate Track A (Clarity) findings by overlapping anchors.
         """
         if not findings:
             return []
@@ -183,7 +182,6 @@ class Assembler:
                 by_paragraph[anchor.paragraph_id].append(f)
 
         removed_ids: set[str] = set()
-        merged_dimensions: dict[str, list[str]] = {}  # finding_id -> merged dims
 
         for para_id, para_findings in by_paragraph.items():
             for i, f1 in enumerate(para_findings):
@@ -197,32 +195,18 @@ class Assembler:
                     # Check if anchors overlap
                     if self._findings_overlap(f1, f2, para_id):
                         winner, loser = self._resolve_conflict(f1, f2)
-
-                        # Track dimension merging
-                        if winner.id not in merged_dimensions:
-                            merged_dimensions[winner.id] = list(winner.dimensions)
-                        for dim in loser.dimensions:
-                            if dim not in merged_dimensions[winner.id]:
-                                merged_dimensions[winner.id].append(dim)
-
                         removed_ids.add(loser.id)
                         logger.info(
                             f"[assembler] Dedup: {loser.agent_id}:{loser.id[:8]} "
-                            f"replaced by {winner.agent_id}:{winner.id[:8]} "
-                            f"(merged dims: {merged_dimensions[winner.id]})"
+                            f"replaced by {winner.agent_id}:{winner.id[:8]}"
                         )
 
-        # Build result with merged dimensions
+        # Build result
         seen_ids: set[str] = set()
         kept: list[Finding] = []
 
         for f in findings:
             if f.id not in removed_ids and f.id not in seen_ids:
-                # Apply merged dimensions if any
-                if f.id in merged_dimensions:
-                    for dim in merged_dimensions[f.id]:
-                        if dim not in f.dimensions:
-                            f.dimensions.append(dim)
                 kept.append(f)
                 seen_ids.add(f.id)
 
@@ -231,19 +215,8 @@ class Assembler:
     def _resolve_conflict(self, f1: Finding, f2: Finding) -> tuple[Finding, Finding]:
         """
         Resolve conflict between two overlapping findings.
-        Returns (winner, loser).
-
-        Rules:
-        - Track C wins over Track A
-        - Same track: lower priority number wins
+        Returns (winner, loser). Uses agent priority (lower number wins).
         """
-        # Track C beats Track A
-        if f1.track == "C" and f2.track == "A":
-            return (f1, f2)
-        if f2.track == "C" and f1.track == "A":
-            return (f2, f1)
-
-        # Same track or both C: use agent priority
         p1 = AGENT_PRIORITY.get(f1.agent_id, 99)
         p2 = AGENT_PRIORITY.get(f2.agent_id, 99)
 

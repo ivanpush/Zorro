@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field, model_serializer
 from collections import Counter
 import uuid
 
-from app.models.finding import Finding, Track, Dimension
+from app.models.finding import Finding, Track
 from app.models.metrics import ReviewMetrics, AgentMetrics
 
 
@@ -43,20 +43,17 @@ class ReviewSummary(BaseModel):
     total_findings: int
     by_track: dict[str, int] = Field(default_factory=dict)  # {"A": 5, "B": 3, "C": 2}
     by_severity: dict[str, int] = Field(default_factory=dict)  # {"critical": 1, "major": 4, ...}
-    by_dimension: dict[str, int] = Field(default_factory=dict)  # {"WQ": 5, "AS": 3, "CR": 2}
 
     @classmethod
     def from_findings(cls, findings: list[Finding]) -> "ReviewSummary":
         """Build summary from list of findings."""
         by_track = Counter(f.track for f in findings)
         by_severity = Counter(f.severity for f in findings)
-        by_dimension = Counter(d for f in findings for d in f.dimensions)
 
         return cls(
             total_findings=len(findings),
             by_track=dict(by_track),
             by_severity=dict(by_severity),
-            by_dimension=dict(by_dimension),
         )
 
     @model_serializer
@@ -65,7 +62,6 @@ class ReviewSummary(BaseModel):
             "totalFindings": self.total_findings,
             "byTrack": self.by_track,
             "bySeverity": self.by_severity,
-            "byDimension": self.by_dimension,
         }
 
 

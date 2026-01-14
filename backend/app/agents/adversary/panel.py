@@ -11,19 +11,22 @@ from pydantic import BaseModel, Field, field_validator
 
 from app.agents.base import BaseAgent
 from app.models import (
-    DocObj, BriefingOutput, Finding, Anchor, EvidencePack, AgentMetrics
+    DocObj, BriefingOutput, Finding, Anchor, ProposedEdit, EvidencePack, AgentMetrics
 )
 from app.config import get_panel_models
 
 
 class AdversaryFinding(BaseModel):
     """Single adversarial finding from LLM."""
-    category: str = Field(description="adversarial_weakness, adversarial_gap, or adversarial_alternative")
+    category: str = Field(description="overclaim, assumption, alternative, interpretation, methodology, limitation, contradiction, or feasibility")
     severity: str = Field(description="critical or major")
     title: str = Field(max_length=100)
     description: str
     paragraph_id: str
     quoted_text: str
+    new_text: str | None = Field(None, description="Concrete rewrite if simple fix, otherwise None")
+    suggestion: str = Field(description="WHAT the author should do to address this")
+    rationale: str = Field(description="WHY this suggestion would strengthen the argument")
 
 
 class AdversaryOutput(BaseModel):
@@ -123,18 +126,26 @@ class PanelAdversary(BaseAgent):
 
         findings = []
         for f in output.findings:
+            anchor = Anchor(
+                paragraph_id=f.paragraph_id,
+                quoted_text=f.quoted_text,
+            )
+            # Use "replace" if concrete rewrite provided, otherwise "suggestion"
+            edit_type = "replace" if f.new_text else "suggestion"
             findings.append(Finding(
                 agent_id=agent_id,
                 category=f.category,
                 severity=f.severity,
                 title=f.title,
                 description=f.description,
-                anchors=[
-                    Anchor(
-                        paragraph_id=f.paragraph_id,
-                        quoted_text=f.quoted_text,
-                    )
-                ],
+                anchors=[anchor],
+                proposed_edit=ProposedEdit(
+                    type=edit_type,
+                    anchor=anchor,
+                    new_text=f.new_text,
+                    rationale=f.rationale,
+                    suggestion=f.suggestion,
+                ),
             ))
 
         return findings

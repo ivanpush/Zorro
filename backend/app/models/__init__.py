@@ -6,8 +6,7 @@ from .document import (
 )
 from .finding import (
     Finding, Anchor, ProposedEdit, AgentId, FindingCategory, Severity,
-    Track, Dimension, AGENT_TO_TRACK, CATEGORY_TO_DIMENSIONS,
-    AGENT_PRIORITY, PRESENTATION_ORDER
+    Track, AGENT_TO_TRACK, AGENT_PRIORITY, PRESENTATION_ORDER
 )
 from .briefing import BriefingOutput
 from .domain import (
@@ -32,8 +31,7 @@ __all__ = [
     "BoundingBox", "Figure", "Reference",
     # Finding
     "Finding", "Anchor", "ProposedEdit", "AgentId", "FindingCategory", "Severity",
-    "Track", "Dimension", "AGENT_TO_TRACK", "CATEGORY_TO_DIMENSIONS",
-    "AGENT_PRIORITY", "PRESENTATION_ORDER",
+    "Track", "AGENT_TO_TRACK", "AGENT_PRIORITY", "PRESENTATION_ORDER",
     # Briefing
     "BriefingOutput",
     # Domain
